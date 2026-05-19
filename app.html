@@ -249,33 +249,12 @@
 
             <!-- Education Tab -->
             <div id="educationTab" class="tab-content">
-                <div class="section">
-                    <h2>🎓 Education Expenses</h2>
-                    <div class="input-group">
-                        <div class="input-field">
-                            <label for="child1Tuition">Child 1 Tuition (Annual)</label>
-                            <input type="number" id="child1Tuition" placeholder="9386" step="0.01">
-                        </div>
-                        <div class="input-field">
-                            <label for="child1Lunch">Child 1 Lunch/Meals (Annual)</label>
-                            <input type="number" id="child1Lunch" placeholder="1235" step="0.01">
-                        </div>
-                        <div class="input-field">
-                            <label for="child2Tuition">Child 2 Tuition (Annual)</label>
-                            <input type="number" id="child2Tuition" placeholder="11621" step="0.01">
-                        </div>
-                        <div class="input-field">
-                            <label for="child2Lunch">Child 2 Lunch/Meals (Annual)</label>
-                            <input type="number" id="child2Lunch" placeholder="1853" step="0.01">
-                        </div>
-                        <div class="input-field">
-                            <label for="afterschool">Afterschool Program (Annual)</label>
-                            <input type="number" id="afterschool" placeholder="0" step="0.01">
-                        </div>
-                    </div>
-                    <div class="calc-result">
-                        Total Education Monthly: $<span id="educationResult">0.00</span>
-                    </div>
+                <div id="childrenContainer"></div>
+                <div style="text-align:center; margin: 20px 0;">
+                    <button class="btn btn-success" onclick="addChild()">+ Add Child</button>
+                </div>
+                <div class="calc-result">
+                    Combined Education Monthly: $<span id="educationResult">0.00</span>
                 </div>
             </div>
 
@@ -409,6 +388,7 @@
         var currentEditingBudget = null;
         var isEditMode = false;
         var incomeEarnerCount = 0;
+        var childCount = 0;
 
         // ── Helpers ──
 
@@ -670,6 +650,66 @@
             return indices;
         }
 
+        // ── Child Management ──
+
+        function addChild(name) {
+            var idx = childCount;
+            childCount++;
+            var container = document.getElementById('childrenContainer');
+            var block = document.createElement('div');
+            block.className = 'earner-block';
+            block.id = 'child_' + idx;
+            block.innerHTML =
+                '<div class="earner-header">' +
+                    '<h2>🎓</h2>' +
+                    '<input type="text" class="earner-name-input" id="childName_' + idx + '" placeholder="Child ' + (idx + 1) + ' name" value="' + (name || '') + '">' +
+                    '<button class="remove-earner-btn" onclick="removeChild(' + idx + ')">✕ Remove</button>' +
+                '</div>' +
+                '<div class="input-group">' +
+                    '<div class="input-field"><label for="tuition_' + idx + '">Tuition (Annual)</label>' +
+                    '<input type="number" id="tuition_' + idx + '" placeholder="9386" step="0.01"></div>' +
+                    '<div class="input-field"><label for="lunch_' + idx + '">Lunch/Meals (Annual)</label>' +
+                    '<input type="number" id="lunch_' + idx + '" placeholder="1235" step="0.01"></div>' +
+                    '<div class="input-field"><label for="afterschool_' + idx + '">Afterschool Program (Annual)</label>' +
+                    '<input type="number" id="afterschool_' + idx + '" placeholder="0" step="0.01"></div>' +
+                '</div>' +
+                '<div class="earner-subtotal">Monthly Cost: $<span id="childResult_' + idx + '">0.00</span></div>';
+            container.appendChild(block);
+
+            var inputs = block.querySelectorAll('input[type="number"]');
+            for (var i = 0; i < inputs.length; i++) {
+                inputs[i].addEventListener('input', calculateAll);
+            }
+
+            updateChildRemoveButtons();
+            return idx;
+        }
+
+        function removeChild(idx) {
+            var block = document.getElementById('child_' + idx);
+            if (block) block.remove();
+            updateChildRemoveButtons();
+            calculateAll();
+        }
+
+        function updateChildRemoveButtons() {
+            var blocks = document.querySelectorAll('#childrenContainer .earner-block');
+            var btns = document.querySelectorAll('#childrenContainer .remove-earner-btn');
+            for (var i = 0; i < btns.length; i++) {
+                btns[i].style.display = blocks.length > 1 ? 'inline-block' : 'none';
+            }
+        }
+
+        function getChildIndices() {
+            var blocks = document.querySelectorAll('#childrenContainer .earner-block');
+            var indices = [];
+            for (var i = 0; i < blocks.length; i++) {
+                var id = blocks[i].id.replace('child_', '');
+                indices.push(parseInt(id));
+            }
+            return indices;
+        }
+
         // ── Data Load/Save/Clear ──
 
         function loadBudgetDataIntoCalculator(budget) {
@@ -695,11 +735,32 @@
                 }
             }
 
+            // Restore children
+            var cCount = budget.data._childCount || 1;
+            for (var i = 0; i < cCount; i++) {
+                var savedCIdx = budget.data['_childIdx_' + i];
+                if (savedCIdx === undefined) savedCIdx = i;
+                savedCIdx = parseInt(savedCIdx);
+                var cName = budget.data['childName_' + savedCIdx] || '';
+                var newCIdx = addChild(cName);
+
+                var cFields = ['tuition', 'lunch', 'afterschool'];
+                for (var f = 0; f < cFields.length; f++) {
+                    var savedVal = budget.data[cFields[f] + '_' + savedCIdx];
+                    if (savedVal !== undefined) {
+                        var input = document.getElementById(cFields[f] + '_' + newCIdx);
+                        if (input) input.value = savedVal;
+                    }
+                }
+            }
+
             // Restore all other fields
             for (var fieldId in budget.data) {
                 if (fieldId.charAt(0) === '_') continue;
                 if (fieldId.indexOf('earnerName_') === 0) continue;
+                if (fieldId.indexOf('childName_') === 0) continue;
                 if (fieldId.match(/^(salary|retirement|hsa|taxRate|carAllowance)_\d+$/)) continue;
+                if (fieldId.match(/^(tuition|lunch|afterschool)_\d+$/)) continue;
                 var input = document.getElementById(fieldId);
                 if (input) input.value = budget.data[fieldId];
             }
@@ -711,8 +772,12 @@
             // Remove all earner blocks
             document.getElementById('incomeEarnersContainer').innerHTML = '';
             incomeEarnerCount = 0;
-            // Add one default earner
             addIncomeEarner('');
+
+            // Remove all child blocks
+            document.getElementById('childrenContainer').innerHTML = '';
+            childCount = 0;
+            addChild('');
 
             // Clear all other inputs
             var inputs = document.querySelectorAll('#calculatorScreen input[type="number"]');
@@ -740,11 +805,28 @@
                 }
             }
 
+            // Save child data with index mapping
+            var childIndices = getChildIndices();
+            data._childCount = childIndices.length;
+            for (var i = 0; i < childIndices.length; i++) {
+                var cIdx = childIndices[i];
+                data['_childIdx_' + i] = cIdx;
+                var cNameInput = document.getElementById('childName_' + cIdx);
+                if (cNameInput && cNameInput.value) data['childName_' + cIdx] = cNameInput.value;
+
+                var cFields = ['tuition', 'lunch', 'afterschool'];
+                for (var f = 0; f < cFields.length; f++) {
+                    var cInput = document.getElementById(cFields[f] + '_' + cIdx);
+                    if (cInput && cInput.value !== '') data[cFields[f] + '_' + cIdx] = cInput.value;
+                }
+            }
+
             // Save all other inputs
             var otherInputs = document.querySelectorAll('#calculatorScreen input[type="number"]');
             for (var i = 0; i < otherInputs.length; i++) {
                 var id = otherInputs[i].id;
                 if (id.match(/^(salary|retirement|hsa|taxRate|carAllowance)_\d+$/)) continue;
+                if (id.match(/^(tuition|lunch|afterschool)_\d+$/)) continue;
                 if (otherInputs[i].value !== '') data[id] = otherInputs[i].value;
             }
 
@@ -920,9 +1002,22 @@
         }
 
         function calculateEducation() {
-            var total = (val('child1Tuition') + val('child1Lunch') + val('child2Tuition') + val('child2Lunch') + val('afterschool')) / 12;
-            setText('educationResult', formatCurrency(total));
-            return total;
+            var indices = getChildIndices();
+            var totalAnnual = 0;
+
+            for (var i = 0; i < indices.length; i++) {
+                var idx = indices[i];
+                var tuition = val('tuition_' + idx);
+                var lunch = val('lunch_' + idx);
+                var afterschool = val('afterschool_' + idx);
+                var childAnnual = tuition + lunch + afterschool;
+                setText('childResult_' + idx, formatCurrency(childAnnual / 12));
+                totalAnnual += childAnnual;
+            }
+
+            var monthly = totalAnnual / 12;
+            setText('educationResult', formatCurrency(monthly));
+            return monthly;
         }
 
         function calculateUtilities() {
