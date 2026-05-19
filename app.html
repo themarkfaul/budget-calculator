@@ -804,35 +804,43 @@
             clearCalculatorFields();
             if (!budget.data) { calculateAll(); return; }
 
-            // Restore income earners
+            // Restore income earners — deduplicate by salary value
+            var earnerFields = ['salary', 'retirement', 'hsa', 'taxRate', 'carAllowance'];
             var earnerCount = budget.data._earnerCount || 1;
+            var seen = {};
             for (var i = 0; i < earnerCount; i++) {
                 var savedIdx = budget.data['_earnerIdx_' + i];
                 if (savedIdx === undefined) savedIdx = i;
                 savedIdx = parseInt(savedIdx);
                 var name = budget.data['earnerName_' + savedIdx] || '';
+                var salary = budget.data['salary_' + savedIdx] || '';
+                var key = name + '|' + salary;
+                if (seen[key] && i > 0) continue;
+                seen[key] = true;
                 var newIdx = addIncomeEarner(name);
-
-                var fields = ['salary', 'retirement', 'hsa', 'taxRate', 'carAllowance'];
-                for (var f = 0; f < fields.length; f++) {
-                    var savedVal = budget.data[fields[f] + '_' + savedIdx];
+                for (var f = 0; f < earnerFields.length; f++) {
+                    var savedVal = budget.data[earnerFields[f] + '_' + savedIdx];
                     if (savedVal !== undefined) {
-                        var input = document.getElementById(fields[f] + '_' + newIdx);
+                        var input = document.getElementById(earnerFields[f] + '_' + newIdx);
                         if (input) input.value = savedVal;
                     }
                 }
             }
 
-            // Restore children
+            // Restore children — deduplicate by tuition value
+            var cFields = ['tuition', 'lunch', 'afterschool'];
             var cCount = budget.data._childCount || 1;
+            var cSeen = {};
             for (var i = 0; i < cCount; i++) {
                 var savedCIdx = budget.data['_childIdx_' + i];
                 if (savedCIdx === undefined) savedCIdx = i;
                 savedCIdx = parseInt(savedCIdx);
                 var cName = budget.data['childName_' + savedCIdx] || '';
+                var tuition = budget.data['tuition_' + savedCIdx] || '';
+                var cKey = cName + '|' + tuition;
+                if (cSeen[cKey] && i > 0) continue;
+                cSeen[cKey] = true;
                 var newCIdx = addChild(cName);
-
-                var cFields = ['tuition', 'lunch', 'afterschool'];
                 for (var f = 0; f < cFields.length; f++) {
                     var savedVal = budget.data[cFields[f] + '_' + savedCIdx];
                     if (savedVal !== undefined) {
