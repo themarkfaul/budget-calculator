@@ -720,15 +720,15 @@
         }
 
         function updateRemoveButtons() {
-            var blocks = document.querySelectorAll('.earner-block');
-            var btns = document.querySelectorAll('.remove-earner-btn');
+            var blocks = document.querySelectorAll('#incomeEarnersContainer .earner-block');
+            var btns = document.querySelectorAll('#incomeEarnersContainer .remove-earner-btn');
             for (var i = 0; i < btns.length; i++) {
                 btns[i].style.display = blocks.length > 1 ? 'inline-block' : 'none';
             }
         }
 
         function getEarnerIndices() {
-            var blocks = document.querySelectorAll('.earner-block');
+            var blocks = document.querySelectorAll('#incomeEarnersContainer .earner-block');
             var indices = [];
             for (var i = 0; i < blocks.length; i++) {
                 var id = blocks[i].id.replace('earner_', '');
