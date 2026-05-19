@@ -234,8 +234,8 @@ body {
 
 .tab {
     flex: 1;
-    min-width: 110px;
-    padding: 15px 20px;
+    min-width: 90px;
+    padding: 12px 10px;
     background: transparent;
     border: none;
     cursor: pointer;
@@ -244,6 +244,19 @@ body {
     color: #6c757d;
     transition: all 0.3s ease;
     border-bottom: 3px solid transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.tab-icon {
+    font-size: 1.5em;
+    line-height: 1;
+}
+
+.tab-label {
+    font-size: 0.8em;
 }
 
 .tab:hover {
@@ -597,7 +610,9 @@ input:focus {
     .container { margin: 10px; }
     .home-container { padding: 20px; }
     .app-header { font-size: 1.8em; padding: 20px; }
-    .tab { min-width: 90px; padding: 12px 10px; font-size: 0.8em; }
+    .tab { min-width: 70px; padding: 10px 6px; }
+    .tab-icon { font-size: 1.3em; }
+    .tab-label { font-size: 0.7em; }
     .input-group { grid-template-columns: 1fr; }
     .budget-preview { grid-template-columns: repeat(2, 1fr); }
     .calculator-header { padding: 15px; }
