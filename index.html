@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Calculator - Sign In</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container" style="max-width: 480px;">
+        <div class="app-header">Budget Calculator</div>
+
+        <div style="padding: 40px;">
+            <div id="authMessage" class="auth-message" style="display:none;"></div>
+
+            <!-- Sign In Form -->
+            <div id="signInForm">
+                <h2 style="text-align:center; margin-bottom:25px; color:#495057;">Sign In</h2>
+                <div class="input-field" style="margin-bottom:15px;">
+                    <label for="signInEmail">Email</label>
+                    <input type="email" id="signInEmail" placeholder="you@example.com">
+                </div>
+                <div class="input-field" style="margin-bottom:25px;">
+                    <label for="signInPassword">Password</label>
+                    <input type="password" id="signInPassword" placeholder="Your password">
+                </div>
+                <button class="btn btn-primary" style="width:100%; padding:15px; font-size:1em;" onclick="handleSignIn()">Sign In</button>
+                <p style="text-align:center; margin-top:20px; color:#6c757d;">
+                    Don't have an account?
+                    <a href="#" onclick="toggleForm('signUp'); return false;" style="color:#667eea; font-weight:600;">Sign Up</a>
+                </p>
+            </div>
+
+            <!-- Sign Up Form -->
+            <div id="signUpForm" style="display:none;">
+                <h2 style="text-align:center; margin-bottom:25px; color:#495057;">Create Account</h2>
+                <div class="input-field" style="margin-bottom:15px;">
+                    <label for="signUpEmail">Email</label>
+                    <input type="email" id="signUpEmail" placeholder="you@example.com">
+                </div>
+                <div class="input-field" style="margin-bottom:15px;">
+                    <label for="signUpPassword">Password</label>
+                    <input type="password" id="signUpPassword" placeholder="Min 6 characters">
+                </div>
+                <div class="input-field" style="margin-bottom:25px;">
+                    <label for="signUpConfirm">Confirm Password</label>
+                    <input type="password" id="signUpConfirm" placeholder="Re-enter password">
+                </div>
+                <button class="btn btn-success" style="width:100%; padding:15px; font-size:1em;" onclick="handleSignUp()">Create Account</button>
+                <p style="text-align:center; margin-top:20px; color:#6c757d;">
+                    Already have an account?
+                    <a href="#" onclick="toggleForm('signIn'); return false;" style="color:#667eea; font-weight:600;">Sign In</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/config.js"></script>
+    <script src="/js/supabase-client.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        // If already signed in, go straight to app
+        (async function () {
+            var user = await getUser();
+            if (user) window.location.href = '/app.html';
+        })();
+
+        function toggleForm(form) {
+            hideMessage();
+            if (form === 'signUp') {
+                document.getElementById('signInForm').style.display = 'none';
+                document.getElementById('signUpForm').style.display = 'block';
+            } else {
+                document.getElementById('signInForm').style.display = 'block';
+                document.getElementById('signUpForm').style.display = 'none';
+            }
+        }
+
+        function showMessage(text, isError) {
+            var el = document.getElementById('authMessage');
+            el.textContent = text;
+            el.style.display = 'block';
+            el.className = 'auth-message ' + (isError ? 'auth-error' : 'auth-success');
+        }
+
+        function hideMessage() {
+            document.getElementById('authMessage').style.display = 'none';
+        }
+
+        async function handleSignIn() {
+            var email = document.getElementById('signInEmail').value.trim();
+            var password = document.getElementById('signInPassword').value;
+
+            if (!email || !password) {
+                showMessage('Please enter email and password.', true);
+                return;
+            }
+
+            try {
+                await signIn(email, password);
+                window.location.href = '/app.html';
+            } catch (err) {
+                showMessage(err.message, true);
+            }
+        }
+
+        async function handleSignUp() {
+            var email = document.getElementById('signUpEmail').value.trim();
+            var password = document.getElementById('signUpPassword').value;
+            var confirm = document.getElementById('signUpConfirm').value;
+
+            if (!email || !password) {
+                showMessage('Please fill in all fields.', true);
+                return;
+            }
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters.', true);
+                return;
+            }
+            if (password !== confirm) {
+                showMessage('Passwords do not match.', true);
+                return;
+            }
+
+            try {
+                await signUp(email, password);
+                showMessage('Account created! Check your email to confirm, then sign in.', false);
+                toggleForm('signIn');
+            } catch (err) {
+                showMessage(err.message, true);
+            }
+        }
+
+        // Allow Enter key to submit
+        document.getElementById('signInPassword').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') handleSignIn();
+        });
+        document.getElementById('signUpConfirm').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') handleSignUp();
+        });
+    </script>
+</body>
+</html>

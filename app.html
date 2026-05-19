@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Calculator</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="app-header">Budget Calculator</div>
+
+        <div class="user-bar">
+            <span class="user-email" id="userEmail"></span>
+            <button class="btn-logout" onclick="signOut()">Sign Out</button>
+        </div>
+
+        <!-- Loading -->
+        <div id="loadingScreen" class="screen active">
+            <div class="loading-overlay">Loading your budgets...</div>
+        </div>
+
+        <!-- Home Screen -->
+        <div id="homeScreen" class="screen">
+            <div class="home-container">
+                <div class="budget-list" id="budgetList"></div>
+
+                <div class="action-buttons" id="actionButtons">
+                    <button class="btn btn-primary" onclick="showSummary()">📊 Summary</button>
+                    <button class="btn btn-secondary" onclick="editBudget()">✏️ Edit</button>
+                    <button class="btn btn-success" onclick="evaluateBudget()">📋 Evaluate</button>
+                </div>
+
+                <div class="create-new-section">
+                    <h3>Create New Budget</h3>
+                    <p>Start fresh with a new budget plan</p>
+                    <button class="btn btn-success" onclick="createNewBudget()" style="margin-top:10px;">+ Create New Budget</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Screen -->
+        <div id="summaryScreen" class="screen">
+            <div style="padding: 40px;">
+                <h2 id="summaryTitle" style="text-align: center; margin-bottom: 30px;">Budget Summary</h2>
+                <div class="summary-grid" id="summaryGrid"></div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn btn-secondary" onclick="goHome()">← Back to Home</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evaluation Screen -->
+        <div id="evaluationScreen" class="screen">
+            <div style="padding: 40px;">
+                <h2 id="evaluationTitle" style="text-align: center; margin-bottom: 30px;">Financial Health Check</h2>
+
+                <div class="rule-section">
+                    <div class="rule-header">
+                        <span style="font-size: 2em;">🏠</span>
+                        <div class="rule-title">25% Housing Rule</div>
+                        <div class="rule-status" id="housingRuleStatus">Checking...</div>
+                    </div>
+                    <p>Your total housing costs should be less than 25% of your monthly take-home pay.</p>
+                    <div class="rule-details">
+                        <div class="rule-metric">
+                            <div class="metric-label">Housing Costs</div>
+                            <div class="metric-value" id="housingCosts">$0</div>
+                        </div>
+                        <div class="rule-metric">
+                            <div class="metric-label">25% of Income</div>
+                            <div class="metric-value" id="housingLimit">$0</div>
+                        </div>
+                        <div class="rule-metric">
+                            <div class="metric-label">Your Percentage</div>
+                            <div class="metric-value" id="housingPercent">0%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rule-section">
+                    <div class="rule-header">
+                        <span style="font-size: 2em;">⚖️</span>
+                        <div class="rule-title">50/30/20 Rule</div>
+                        <div class="rule-status" id="budgetRuleStatus">Checking...</div>
+                    </div>
+                    <p>Needs ≤ 50%, Wants ≤ 30%, Savings ≥ 20% of your take-home pay.</p>
+                    <div class="rule-details">
+                        <div class="rule-metric">
+                            <div class="metric-label">Needs (Fixed)</div>
+                            <div class="metric-value" id="needsAmount">$0 (0%)</div>
+                        </div>
+                        <div class="rule-metric">
+                            <div class="metric-label">Wants (Spending)</div>
+                            <div class="metric-value" id="wantsAmount">$0 (0%)</div>
+                        </div>
+                        <div class="rule-metric">
+                            <div class="metric-label">Savings</div>
+                            <div class="metric-value" id="savingsAmount">$0 (0%)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn btn-secondary" onclick="goHome()">← Back to Home</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calculator Screen -->
+        <div id="calculatorScreen" class="screen">
+            <div class="calculator-header">
+                <div class="calculator-title" id="calculatorTitle">Budget Calculator</div>
+                <div class="header-buttons">
+                    <button class="btn btn-success" id="saveBtn" onclick="handleSave()">💾 Save</button>
+                    <button class="btn btn-primary" onclick="handleSaveAs()">📄 Save As</button>
+                    <button class="btn btn-danger" onclick="closeBudget()">✖️ Close</button>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="showCalcTab(event, 'dashboardTab')">📊 Dashboard</button>
+                <button class="tab" onclick="showCalcTab(event, 'incomeTab')">💰 Income</button>
+                <button class="tab" onclick="showCalcTab(event, 'housingTab')">🏠 Housing</button>
+                <button class="tab" onclick="showCalcTab(event, 'transportationTab')">🚗 Transport</button>
+                <button class="tab" onclick="showCalcTab(event, 'educationTab')">🎓 Education</button>
+                <button class="tab" onclick="showCalcTab(event, 'utilitiesTab')">⚡ Utilities</button>
+                <button class="tab" onclick="showCalcTab(event, 'spendingTab')">🛒 Spending</button>
+                <button class="tab" onclick="showCalcTab(event, 'savingsTab')">🏦 Savings</button>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboardTab" class="tab-content active">
+                <div class="section">
+                    <h2>Budget Summary</h2>
+                    <div class="summary-grid">
+                        <div class="summary-item"><h3>Monthly Take Home</h3><div class="amount" id="dashTakeHome">$0.00</div></div>
+                        <div class="summary-item"><h3>Housing Total</h3><div class="amount" id="dashHousing">$0.00</div></div>
+                        <div class="summary-item"><h3>Transportation</h3><div class="amount" id="dashTransportation">$0.00</div></div>
+                        <div class="summary-item"><h3>Education</h3><div class="amount" id="dashEducation">$0.00</div></div>
+                        <div class="summary-item"><h3>Utilities</h3><div class="amount" id="dashUtilities">$0.00</div></div>
+                        <div class="summary-item"><h3>Spending</h3><div class="amount" id="dashSpending">$0.00</div></div>
+                        <div class="summary-item"><h3>Savings</h3><div class="amount" id="dashSavings">$0.00</div></div>
+                        <div class="summary-item"><h3>Remaining</h3><div class="amount" id="dashRemaining">$0.00</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Income Tab -->
+            <div id="incomeTab" class="tab-content">
+                <div class="section">
+                    <h2>💰 Income & Deductions</h2>
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label for="salary">Annual Salary ($)</label>
+                            <input type="number" id="salary" placeholder="75000" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="retirement">Retirement Contribution (%)</label>
+                            <input type="number" id="retirement" placeholder="10" step="0.1">
+                        </div>
+                        <div class="input-field">
+                            <label for="hsa">HSA Contribution ($ annually)</label>
+                            <input type="number" id="hsa" placeholder="3000" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="taxRate">Estimated Tax Rate (%)</label>
+                            <input type="number" id="taxRate" placeholder="22" step="0.1">
+                        </div>
+                        <div class="input-field">
+                            <label for="carAllowance">Monthly Car Allowance ($)</label>
+                            <input type="number" id="carAllowance" placeholder="500" step="0.01">
+                        </div>
+                    </div>
+                    <div class="calc-result">
+                        Monthly Take Home: $<span id="incomeResult">0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Housing Tab -->
+            <div id="housingTab" class="tab-content">
+                <div class="section">
+                    <h2>🏠 Housing Expenses</h2>
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label for="houseValue">House Value ($)</label>
+                            <input type="number" id="houseValue" placeholder="250000" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="mortgageRate">Mortgage Interest Rate (%)</label>
+                            <input type="number" id="mortgageRate" placeholder="5.92" step="0.001">
+                        </div>
+                        <div class="input-field">
+                            <label for="mortgageDownPayment">Down Payment ($)</label>
+                            <input type="number" id="mortgageDownPayment" placeholder="100000" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="mortgageTerm">Mortgage Term (Years)</label>
+                            <input type="number" id="mortgageTerm" placeholder="15" step="1">
+                        </div>
+                        <div class="input-field">
+                            <label for="homeInsurance">Home Insurance (Annual)</label>
+                            <input type="number" id="homeInsurance" placeholder="2084" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="propertyValue">Property Value for Tax ($)</label>
+                            <input type="number" id="propertyValue" placeholder="250000" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="stateTaxRate">State Tax Rate (%)</label>
+                            <input type="number" id="stateTaxRate" placeholder="1.039" step="0.001">
+                        </div>
+                        <div class="input-field">
+                            <label for="countyTaxRate">County Tax Rate (%)</label>
+                            <input type="number" id="countyTaxRate" placeholder="0.125" step="0.001">
+                        </div>
+                        <div class="input-field">
+                            <label for="localTaxRate">Local/City Tax Rate (%)</label>
+                            <input type="number" id="localTaxRate" placeholder="0.226" step="0.001">
+                        </div>
+                        <div class="input-field">
+                            <label for="waste">Waste Management (Annual)</label>
+                            <input type="number" id="waste" placeholder="342" step="0.01">
+                        </div>
+                    </div>
+                    <div class="calc-result">
+                        Mortgage Payment: $<span id="mortgagePaymentResult">0.00</span><br>
+                        Total Housing Monthly: $<span id="housingResult">0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transportation Tab -->
+            <div id="transportationTab" class="tab-content">
+                <div class="section">
+                    <h2>🚗 Transportation Expenses</h2>
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label for="carPrice">Vehicle Price ($)</label>
+                            <input type="number" id="carPrice" placeholder="27000" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="carRate">Interest Rate (%)</label>
+                            <input type="number" id="carRate" placeholder="6.875" step="0.001">
+                        </div>
+                        <div class="input-field">
+                            <label for="downPayment">Down Payment + Trade ($)</label>
+                            <input type="number" id="downPayment" placeholder="15000" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="loanTerm">Loan Term (Years)</label>
+                            <input type="number" id="loanTerm" placeholder="5" step="0.1">
+                        </div>
+                        <div class="input-field">
+                            <label for="carInsuranceAnnual">Vehicle Insurance (Annual)</label>
+                            <input type="number" id="carInsuranceAnnual" placeholder="1156" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="carTaxes">Vehicle Taxes (Annual)</label>
+                            <input type="number" id="carTaxes" placeholder="454" step="0.01">
+                        </div>
+                    </div>
+                    <div class="calc-result">
+                        Vehicle Payment: $<span id="carPaymentResult">0.00</span><br>
+                        Total Transportation Monthly: $<span id="transportationResult">0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Education Tab -->
+            <div id="educationTab" class="tab-content">
+                <div class="section">
+                    <h2>🎓 Education Expenses</h2>
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label for="child1Tuition">Child 1 Tuition (Annual)</label>
+                            <input type="number" id="child1Tuition" placeholder="9386" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="child1Lunch">Child 1 Lunch/Meals (Annual)</label>
+                            <input type="number" id="child1Lunch" placeholder="1235" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="child2Tuition">Child 2 Tuition (Annual)</label>
+                            <input type="number" id="child2Tuition" placeholder="11621" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="child2Lunch">Child 2 Lunch/Meals (Annual)</label>
+                            <input type="number" id="child2Lunch" placeholder="1853" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="afterschool">Afterschool Program (Annual)</label>
+                            <input type="number" id="afterschool" placeholder="0" step="0.01">
+                        </div>
+                    </div>
+                    <div class="calc-result">
+                        Total Education Monthly: $<span id="educationResult">0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Utilities Tab -->
+            <div id="utilitiesTab" class="tab-content">
+                <div class="section">
+                    <h2>⚡ Utilities & Services</h2>
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label for="internet">Internet (Monthly)</label>
+                            <input type="number" id="internet" placeholder="80" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="phone">Phone (Monthly)</label>
+                            <input type="number" id="phone" placeholder="100" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="tv">TV/Streaming (Monthly)</label>
+                            <input type="number" id="tv" placeholder="60" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="gas">Gas Utility (Monthly)</label>
+                            <input type="number" id="gas" placeholder="90" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="electric">Electric (Monthly)</label>
+                            <input type="number" id="electric" placeholder="120" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="water">Water (Monthly)</label>
+                            <input type="number" id="water" placeholder="45" step="0.01">
+                        </div>
+                    </div>
+                    <div class="calc-result">
+                        Total Utilities Monthly: $<span id="utilitiesResult">0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spending Tab -->
+            <div id="spendingTab" class="tab-content">
+                <div class="section">
+                    <h2>🛒 Monthly Spending (Wants)</h2>
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label for="gasoline">Gasoline (Monthly)</label>
+                            <input type="number" id="gasoline" placeholder="200" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="eatingOut">Eating Out (Monthly)</label>
+                            <input type="number" id="eatingOut" placeholder="300" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="groceries">Groceries (Monthly)</label>
+                            <input type="number" id="groceries" placeholder="600" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="entertainment">Entertainment (Monthly)</label>
+                            <input type="number" id="entertainment" placeholder="150" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="shopping">Shopping/Clothes (Monthly)</label>
+                            <input type="number" id="shopping" placeholder="200" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="hobbies">Hobbies (Monthly)</label>
+                            <input type="number" id="hobbies" placeholder="100" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="tools">Tools/Equipment (Monthly)</label>
+                            <input type="number" id="tools" placeholder="50" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="miscSpending">Miscellaneous (Monthly)</label>
+                            <input type="number" id="miscSpending" placeholder="100" step="0.01">
+                        </div>
+                    </div>
+                    <div class="calc-result">
+                        Total Monthly Spending: $<span id="spendingResult">0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Savings Tab -->
+            <div id="savingsTab" class="tab-content">
+                <div class="section">
+                    <h2>🏦 Monthly Savings</h2>
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label for="emergencyFund">Emergency Fund (Monthly)</label>
+                            <input type="number" id="emergencyFund" placeholder="500" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="retirement401k">401k/Retirement (Monthly)</label>
+                            <input type="number" id="retirement401k" placeholder="800" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="iraContribution">IRA Contribution (Monthly)</label>
+                            <input type="number" id="iraContribution" placeholder="500" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="investmentAccount">Investment Account (Monthly)</label>
+                            <input type="number" id="investmentAccount" placeholder="300" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="collegeFund">College Fund (Monthly)</label>
+                            <input type="number" id="collegeFund" placeholder="200" step="0.01">
+                        </div>
+                        <div class="input-field">
+                            <label for="cashSavings">Cash Savings (Monthly)</label>
+                            <input type="number" id="cashSavings" placeholder="300" step="0.01">
+                        </div>
+                    </div>
+                    <div class="calc-result">
+                        Total Monthly Savings: $<span id="savingsResult">0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/config.js"></script>
+    <script src="/js/supabase-client.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/db.js"></script>
+    <script>
+        var selectedBudgetIndex = -1;
+        var selectedBudget = null;
+        var budgets = [];
+        var currentEditingBudget = null;
+        var isEditMode = false;
+
+        // ── Helpers ──
+
+        function formatCurrency(amount) {
+            return amount.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function val(id) {
+            var el = document.getElementById(id);
+            return el ? (parseFloat(el.value) || 0) : 0;
+        }
+
+        function setText(id, text) {
+            var el = document.getElementById(id);
+            if (el) el.textContent = text;
+        }
+
+        function escapeHtml(str) {
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(str || ''));
+            return div.innerHTML;
+        }
+
+        // ── Screen Navigation ──
+
+        function showScreen(screenId) {
+            var screens = document.querySelectorAll('.screen');
+            for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active');
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        async function goHome() {
+            showScreen('loadingScreen');
+            selectedBudget = null;
+            selectedBudgetIndex = -1;
+            document.getElementById('actionButtons').classList.remove('show');
+            try {
+                budgets = await loadBudgets();
+            } catch (e) {
+                console.error('Error loading budgets:', e);
+                budgets = [];
+            }
+            displayBudgets();
+            showScreen('homeScreen');
+        }
+
+        function showCalcTab(evt, tabName) {
+            var contents = document.querySelectorAll('#calculatorScreen .tab-content');
+            for (var i = 0; i < contents.length; i++) contents[i].classList.remove('active');
+            var tabs = document.querySelectorAll('#calculatorScreen .tab');
+            for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+        }
+
+        // ── Home Screen ──
+
+        function displayBudgets() {
+            var container = document.getElementById('budgetList');
+
+            if (budgets.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#6c757d; padding:20px;">No budgets yet. Create your first one below!</p>';
+                return;
+            }
+
+            var html = '';
+            for (var i = 0; i < budgets.length; i++) {
+                var b = budgets[i];
+                var s = b.summary || {};
+                var date = b.updated_at ? new Date(b.updated_at).toLocaleDateString() : '';
+                html += '<div class="budget-item" onclick="selectBudget(' + i + ')">';
+                html += '<button class="delete-btn" onclick="handleDelete(event, ' + i + ')" title="Delete budget">✕</button>';
+                html += '<div class="budget-item-header">';
+                html += '<div class="budget-name">' + escapeHtml(b.name) + '</div>';
+                html += '<div class="budget-date">' + escapeHtml(date) + '</div>';
+                html += '</div>';
+                html += '<div class="budget-preview">';
+                html += '<div class="preview-item"><div class="preview-label">Take Home</div><div class="preview-value">' + escapeHtml(s.takeHome || '$0.00') + '</div></div>';
+                html += '<div class="preview-item"><div class="preview-label">Housing</div><div class="preview-value">' + escapeHtml(s.housing || '$0.00') + '</div></div>';
+                html += '<div class="preview-item"><div class="preview-label">Spending</div><div class="preview-value">' + escapeHtml(s.spending || '$0.00') + '</div></div>';
+                html += '<div class="preview-item"><div class="preview-label">Remaining</div><div class="preview-value">' + escapeHtml(s.remainingBalance || '$0.00') + '</div></div>';
+                html += '</div></div>';
+            }
+            container.innerHTML = html;
+        }
+
+        function selectBudget(index) {
+            var items = document.querySelectorAll('.budget-item');
+            for (var i = 0; i < items.length; i++) items[i].classList.remove('selected');
+            items[index].classList.add('selected');
+            selectedBudgetIndex = index;
+            selectedBudget = budgets[index];
+            document.getElementById('actionButtons').classList.add('show');
+        }
+
+        async function handleDelete(event, index) {
+            event.stopPropagation();
+            if (!confirm('Delete "' + budgets[index].name + '"?')) return;
+            try {
+                await deleteBudgetFromDb(budgets[index].id);
+                budgets.splice(index, 1);
+                selectedBudget = null;
+                selectedBudgetIndex = -1;
+                document.getElementById('actionButtons').classList.remove('show');
+                displayBudgets();
+            } catch (e) {
+                alert('Error deleting budget: ' + e.message);
+            }
+        }
+
+        // ── Summary Screen ──
+
+        function showSummary() {
+            if (!selectedBudget) { alert('Please select a budget first'); return; }
+            setText('summaryTitle', selectedBudget.name + ' - Summary');
+            var s = selectedBudget.summary || {};
+            var data = [
+                {label: 'Monthly Take Home', value: s.takeHome || '$0.00'},
+                {label: 'Housing Total', value: s.housing || '$0.00'},
+                {label: 'Transportation', value: s.transportation || '$0.00'},
+                {label: 'Education', value: s.education || '$0.00'},
+                {label: 'Utilities', value: s.utilities || '$0.00'},
+                {label: 'Spending', value: s.spending || '$0.00'},
+                {label: 'Savings', value: s.savings || '$0.00'},
+                {label: 'Remaining Balance', value: s.remainingBalance || '$0.00'}
+            ];
+            var html = '';
+            for (var i = 0; i < data.length; i++) {
+                html += '<div class="summary-item"><h3>' + data[i].label + '</h3>';
+                html += '<div class="amount">' + escapeHtml(data[i].value) + '</div></div>';
+            }
+            document.getElementById('summaryGrid').innerHTML = html;
+            showScreen('summaryScreen');
+        }
+
+        // ── Evaluation Screen ──
+
+        function evaluateBudget() {
+            if (!selectedBudget) { alert('Please select a budget first'); return; }
+            setText('evaluationTitle', selectedBudget.name + ' - Financial Health Check');
+
+            var s = selectedBudget.summary || {};
+            var takeHome = parseFloat((s.takeHome || '0').replace(/[$,]/g, '')) || 0;
+            var housing = parseFloat((s.housing || '0').replace(/[$,]/g, '')) || 0;
+            var spending = parseFloat((s.spending || '0').replace(/[$,]/g, '')) || 0;
+            var savings = parseFloat((s.savings || '0').replace(/[$,]/g, '')) || 0;
+            var totalExpenses = parseFloat((s.totalExpenses || '0').replace(/[$,]/g, '')) || 0;
+
+            var housingLimit = takeHome * 0.25;
+            var housingPercent = takeHome > 0 ? (housing / takeHome) * 100 : 0;
+            var housingPass = housing <= housingLimit;
+
+            setText('housingCosts', '$' + formatCurrency(housing));
+            setText('housingLimit', '$' + formatCurrency(housingLimit));
+            setText('housingPercent', housingPercent.toFixed(1) + '%');
+            var hStatus = document.getElementById('housingRuleStatus');
+            hStatus.textContent = housingPass ? '✅ PASS' : '❌ FAIL';
+            hStatus.className = 'rule-status ' + (housingPass ? 'status-pass' : 'status-fail');
+
+            var needs = totalExpenses - spending;
+            var needsPercent = takeHome > 0 ? (needs / takeHome) * 100 : 0;
+            var wantsPercent = takeHome > 0 ? (spending / takeHome) * 100 : 0;
+            var savingsPercent = takeHome > 0 ? (savings / takeHome) * 100 : 0;
+            var budgetPass = needsPercent <= 50 && wantsPercent <= 30 && savingsPercent >= 20;
+
+            setText('needsAmount', '$' + formatCurrency(needs) + ' (' + needsPercent.toFixed(1) + '%)');
+            setText('wantsAmount', '$' + formatCurrency(spending) + ' (' + wantsPercent.toFixed(1) + '%)');
+            setText('savingsAmount', '$' + formatCurrency(savings) + ' (' + savingsPercent.toFixed(1) + '%)');
+            var bStatus = document.getElementById('budgetRuleStatus');
+            bStatus.textContent = budgetPass ? '✅ PASS' : '❌ NEEDS WORK';
+            bStatus.className = 'rule-status ' + (budgetPass ? 'status-pass' : 'status-fail');
+
+            showScreen('evaluationScreen');
+        }
+
+        // ── Calculator ──
+
+        function editBudget() {
+            if (!selectedBudget) { alert('Please select a budget first'); return; }
+            currentEditingBudget = selectedBudget;
+            isEditMode = true;
+            setText('calculatorTitle', 'Editing: ' + selectedBudget.name);
+            loadBudgetDataIntoCalculator(selectedBudget);
+            showScreen('calculatorScreen');
+        }
+
+        function createNewBudget() {
+            currentEditingBudget = null;
+            isEditMode = false;
+            setText('calculatorTitle', 'Create New Budget');
+            clearCalculatorFields();
+            showScreen('calculatorScreen');
+        }
+
+        function loadBudgetDataIntoCalculator(budget) {
+            clearCalculatorFields();
+            if (budget.data) {
+                for (var fieldId in budget.data) {
+                    var input = document.getElementById(fieldId);
+                    if (input) input.value = budget.data[fieldId];
+                }
+            }
+            calculateAll();
+        }
+
+        function clearCalculatorFields() {
+            var inputs = document.querySelectorAll('#calculatorScreen input[type="number"]');
+            for (var i = 0; i < inputs.length; i++) inputs[i].value = '';
+            calculateAll();
+        }
+
+        function gatherCalculatorData() {
+            var data = {};
+            var inputs = document.querySelectorAll('#calculatorScreen input[type="number"]');
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].value !== '') data[inputs[i].id] = inputs[i].value;
+            }
+            return data;
+        }
+
+        function buildSummary() {
+            var takeHome = calculateIncome();
+            var housing = calculateHousing();
+            var transportation = calculateTransportation();
+            var education = calculateEducation();
+            var utilities = calculateUtilities();
+            var spending = calculateSpending();
+            var savings = calculateSavings();
+            var totalExpenses = housing + transportation + education + utilities + spending + savings;
+            var remaining = takeHome - totalExpenses;
+
+            return {
+                takeHome: '$' + formatCurrency(takeHome),
+                housing: '$' + formatCurrency(housing),
+                transportation: '$' + formatCurrency(transportation),
+                education: '$' + formatCurrency(education),
+                utilities: '$' + formatCurrency(utilities),
+                spending: '$' + formatCurrency(spending),
+                savings: '$' + formatCurrency(savings),
+                totalExpenses: '$' + formatCurrency(totalExpenses),
+                remainingBalance: '$' + formatCurrency(remaining)
+            };
+        }
+
+        async function handleSave() {
+            var saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+
+            try {
+                var budgetObj = {
+                    name: isEditMode && currentEditingBudget ? currentEditingBudget.name : null,
+                    id: isEditMode && currentEditingBudget ? currentEditingBudget.id : null,
+                    data: gatherCalculatorData(),
+                    summary: buildSummary()
+                };
+
+                if (!budgetObj.name) {
+                    var name = prompt('Enter a name for this budget:', 'My Budget');
+                    if (!name) { saveBtn.disabled = false; saveBtn.textContent = '💾 Save'; return; }
+                    budgetObj.name = name;
+                }
+
+                var saved = await saveBudgetToDb(budgetObj);
+                currentEditingBudget = saved;
+                isEditMode = true;
+                setText('calculatorTitle', 'Editing: ' + saved.name);
+                alert('Budget saved!');
+            } catch (e) {
+                alert('Error saving: ' + e.message);
+            }
+
+            saveBtn.disabled = false;
+            saveBtn.textContent = '💾 Save';
+        }
+
+        async function handleSaveAs() {
+            var name = prompt('Enter a name for this copy:', 'My Budget Copy');
+            if (!name) return;
+
+            try {
+                var budgetObj = {
+                    name: name,
+                    data: gatherCalculatorData(),
+                    summary: buildSummary()
+                };
+                var saved = await saveBudgetToDb(budgetObj);
+                currentEditingBudget = saved;
+                isEditMode = true;
+                setText('calculatorTitle', 'Editing: ' + saved.name);
+                alert('Budget saved as "' + name + '"!');
+            } catch (e) {
+                alert('Error saving: ' + e.message);
+            }
+        }
+
+        function closeBudget() {
+            if (confirm('Close without saving? Unsaved changes will be lost.')) {
+                goHome();
+            }
+        }
+
+        // ── Calculations ──
+
+        function calculateIncome() {
+            var salary = val('salary');
+            var retirementPercent = val('retirement');
+            var hsaAnnual = val('hsa');
+            var taxRate = val('taxRate');
+            var carAllowance = val('carAllowance');
+
+            var retirementAmount = salary * (retirementPercent / 100);
+            var taxableIncome = salary - retirementAmount - hsaAnnual;
+            var taxes = taxableIncome * (taxRate / 100);
+            var netIncome = taxableIncome - taxes;
+            var monthlyTakeHome = (netIncome / 12) + carAllowance;
+
+            setText('incomeResult', formatCurrency(monthlyTakeHome));
+            return monthlyTakeHome;
+        }
+
+        function calculateHousing() {
+            var houseValue = val('houseValue');
+            var mortgageRate = val('mortgageRate');
+            var mortgageDown = val('mortgageDownPayment');
+            var mortgageTerm = val('mortgageTerm');
+            var homeInsurance = val('homeInsurance');
+            var propertyValue = val('propertyValue');
+            var stateTaxRate = val('stateTaxRate');
+            var countyTaxRate = val('countyTaxRate');
+            var localTaxRate = val('localTaxRate');
+            var waste = val('waste');
+
+            var loanAmount = houseValue - mortgageDown;
+            var monthlyRate = (mortgageRate / 100) / 12;
+            var numPayments = mortgageTerm * 12;
+
+            var mortgagePayment = 0;
+            if (monthlyRate > 0 && numPayments > 0) {
+                mortgagePayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) /
+                    (Math.pow(1 + monthlyRate, numPayments) - 1);
+            } else if (numPayments > 0) {
+                mortgagePayment = loanAmount / numPayments;
+            }
+
+            var propertyTaxes = propertyValue * (stateTaxRate + countyTaxRate + localTaxRate) / 100;
+            var totalHousing = mortgagePayment + (homeInsurance / 12) + (propertyTaxes / 12) + (waste / 12);
+
+            setText('mortgagePaymentResult', formatCurrency(mortgagePayment));
+            setText('housingResult', formatCurrency(totalHousing));
+            return totalHousing;
+        }
+
+        function calculateTransportation() {
+            var carPrice = val('carPrice');
+            var rate = val('carRate');
+            var downPayment = val('downPayment');
+            var term = val('loanTerm');
+            var carInsurance = val('carInsuranceAnnual');
+            var carTaxes = val('carTaxes');
+
+            var loanAmount = carPrice - downPayment;
+            var monthlyRate = (rate / 100) / 12;
+            var numPayments = term * 12;
+
+            var carPayment = 0;
+            if (monthlyRate > 0 && numPayments > 0) {
+                carPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) /
+                    (Math.pow(1 + monthlyRate, numPayments) - 1);
+            } else if (numPayments > 0) {
+                carPayment = loanAmount / numPayments;
+            }
+
+            var totalTransportation = carPayment + (carInsurance / 12) + (carTaxes / 12);
+            setText('carPaymentResult', formatCurrency(carPayment));
+            setText('transportationResult', formatCurrency(totalTransportation));
+            return totalTransportation;
+        }
+
+        function calculateEducation() {
+            var total = (val('child1Tuition') + val('child1Lunch') + val('child2Tuition') + val('child2Lunch') + val('afterschool')) / 12;
+            setText('educationResult', formatCurrency(total));
+            return total;
+        }
+
+        function calculateUtilities() {
+            var ids = ['internet', 'phone', 'tv', 'gas', 'electric', 'water'];
+            var total = 0;
+            for (var i = 0; i < ids.length; i++) total += val(ids[i]);
+            setText('utilitiesResult', formatCurrency(total));
+            return total;
+        }
+
+        function calculateSpending() {
+            var ids = ['gasoline', 'eatingOut', 'groceries', 'entertainment', 'shopping', 'hobbies', 'tools', 'miscSpending'];
+            var total = 0;
+            for (var i = 0; i < ids.length; i++) total += val(ids[i]);
+            setText('spendingResult', formatCurrency(total));
+            return total;
+        }
+
+        function calculateSavings() {
+            var ids = ['emergencyFund', 'retirement401k', 'iraContribution', 'investmentAccount', 'collegeFund', 'cashSavings'];
+            var total = 0;
+            for (var i = 0; i < ids.length; i++) total += val(ids[i]);
+            setText('savingsResult', formatCurrency(total));
+            return total;
+        }
+
+        function calculateAll() {
+            var takeHome = calculateIncome();
+            var housing = calculateHousing();
+            var transportation = calculateTransportation();
+            var education = calculateEducation();
+            var utilities = calculateUtilities();
+            var spending = calculateSpending();
+            var savings = calculateSavings();
+
+            var totalExpenses = housing + transportation + education + utilities + spending + savings;
+            var remaining = takeHome - totalExpenses;
+
+            setText('dashTakeHome', '$' + formatCurrency(takeHome));
+            setText('dashHousing', '$' + formatCurrency(housing));
+            setText('dashTransportation', '$' + formatCurrency(transportation));
+            setText('dashEducation', '$' + formatCurrency(education));
+            setText('dashUtilities', '$' + formatCurrency(utilities));
+            setText('dashSpending', '$' + formatCurrency(spending));
+            setText('dashSavings', '$' + formatCurrency(savings));
+
+            var remainEl = document.getElementById('dashRemaining');
+            if (remainEl) {
+                remainEl.textContent = '$' + formatCurrency(remaining);
+                remainEl.className = 'amount ' + (remaining >= 0 ? 'result-positive' : 'result-negative');
+            }
+        }
+
+        // ── Init ──
+
+        (async function () {
+            var user = await requireAuth();
+            if (!user) return;
+
+            setText('userEmail', user.email);
+
+            var inputs = document.querySelectorAll('#calculatorScreen input[type="number"]');
+            for (var i = 0; i < inputs.length; i++) {
+                inputs[i].addEventListener('input', calculateAll);
+            }
+
+            try {
+                budgets = await loadBudgets();
+            } catch (e) {
+                console.error('Error loading budgets:', e);
+                budgets = [];
+            }
+
+            displayBudgets();
+            showScreen('homeScreen');
+        })();
+    </script>
+</body>
+</html>
