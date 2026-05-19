@@ -456,6 +456,82 @@ input:focus {
     color: white;
 }
 
+/* ── Income Earner Blocks ── */
+
+.earner-block {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    position: relative;
+}
+
+.earner-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.earner-header h2 {
+    margin: 0;
+    color: #495057;
+    font-size: 1.4em;
+    white-space: nowrap;
+}
+
+.earner-name-input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.earner-name-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.earner-name-input::placeholder {
+    color: #adb5bd;
+    font-weight: 400;
+}
+
+.remove-earner-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.85em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.remove-earner-btn:hover {
+    background: #c82333;
+}
+
+.earner-subtotal {
+    background: #e8f0fe;
+    border: 1px solid #667eea;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 15px;
+    text-align: center;
+    font-weight: 600;
+    color: #495057;
+}
+
 /* ── Loading Spinner ── */
 
 .loading-overlay {

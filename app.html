@@ -148,33 +148,12 @@
 
             <!-- Income Tab -->
             <div id="incomeTab" class="tab-content">
-                <div class="section">
-                    <h2>💰 Income & Deductions</h2>
-                    <div class="input-group">
-                        <div class="input-field">
-                            <label for="salary">Annual Salary ($)</label>
-                            <input type="number" id="salary" placeholder="75000" step="0.01">
-                        </div>
-                        <div class="input-field">
-                            <label for="retirement">Retirement Contribution (%)</label>
-                            <input type="number" id="retirement" placeholder="10" step="0.1">
-                        </div>
-                        <div class="input-field">
-                            <label for="hsa">HSA Contribution ($ annually)</label>
-                            <input type="number" id="hsa" placeholder="3000" step="0.01">
-                        </div>
-                        <div class="input-field">
-                            <label for="taxRate">Estimated Tax Rate (%)</label>
-                            <input type="number" id="taxRate" placeholder="22" step="0.1">
-                        </div>
-                        <div class="input-field">
-                            <label for="carAllowance">Monthly Car Allowance ($)</label>
-                            <input type="number" id="carAllowance" placeholder="500" step="0.01">
-                        </div>
-                    </div>
-                    <div class="calc-result">
-                        Monthly Take Home: $<span id="incomeResult">0.00</span>
-                    </div>
+                <div id="incomeEarnersContainer"></div>
+                <div style="text-align:center; margin: 20px 0;">
+                    <button class="btn btn-success" onclick="addIncomeEarner()">+ Add Person</button>
+                </div>
+                <div class="calc-result">
+                    Combined Monthly Take Home: $<span id="incomeResult">0.00</span>
                 </div>
             </div>
 
@@ -429,6 +408,7 @@
         var budgets = [];
         var currentEditingBudget = null;
         var isEditMode = false;
+        var incomeEarnerCount = 0;
 
         // ── Helpers ──
 
@@ -626,29 +606,148 @@
             showScreen('calculatorScreen');
         }
 
+        // ── Income Earner Management ──
+
+        function addIncomeEarner(name) {
+            var idx = incomeEarnerCount;
+            incomeEarnerCount++;
+            var container = document.getElementById('incomeEarnersContainer');
+            var block = document.createElement('div');
+            block.className = 'earner-block';
+            block.id = 'earner_' + idx;
+            block.innerHTML =
+                '<div class="earner-header">' +
+                    '<h2>💰</h2>' +
+                    '<input type="text" class="earner-name-input" id="earnerName_' + idx + '" placeholder="Person ' + (idx + 1) + ' name" value="' + (name || '') + '">' +
+                    '<button class="remove-earner-btn" onclick="removeIncomeEarner(' + idx + ')">✕ Remove</button>' +
+                '</div>' +
+                '<div class="input-group">' +
+                    '<div class="input-field"><label for="salary_' + idx + '">Annual Salary ($)</label>' +
+                    '<input type="number" id="salary_' + idx + '" placeholder="75000" step="0.01"></div>' +
+                    '<div class="input-field"><label for="retirement_' + idx + '">Retirement Contribution (%)</label>' +
+                    '<input type="number" id="retirement_' + idx + '" placeholder="10" step="0.1"></div>' +
+                    '<div class="input-field"><label for="hsa_' + idx + '">HSA Contribution ($ annually)</label>' +
+                    '<input type="number" id="hsa_' + idx + '" placeholder="3000" step="0.01"></div>' +
+                    '<div class="input-field"><label for="taxRate_' + idx + '">Estimated Tax Rate (%)</label>' +
+                    '<input type="number" id="taxRate_' + idx + '" placeholder="22" step="0.1"></div>' +
+                    '<div class="input-field"><label for="carAllowance_' + idx + '">Monthly Car Allowance ($)</label>' +
+                    '<input type="number" id="carAllowance_' + idx + '" placeholder="500" step="0.01"></div>' +
+                '</div>' +
+                '<div class="earner-subtotal">Monthly Take Home: $<span id="earnerResult_' + idx + '">0.00</span></div>';
+            container.appendChild(block);
+
+            var inputs = block.querySelectorAll('input[type="number"]');
+            for (var i = 0; i < inputs.length; i++) {
+                inputs[i].addEventListener('input', calculateAll);
+            }
+
+            updateRemoveButtons();
+            return idx;
+        }
+
+        function removeIncomeEarner(idx) {
+            var block = document.getElementById('earner_' + idx);
+            if (block) block.remove();
+            updateRemoveButtons();
+            calculateAll();
+        }
+
+        function updateRemoveButtons() {
+            var blocks = document.querySelectorAll('.earner-block');
+            var btns = document.querySelectorAll('.remove-earner-btn');
+            for (var i = 0; i < btns.length; i++) {
+                btns[i].style.display = blocks.length > 1 ? 'inline-block' : 'none';
+            }
+        }
+
+        function getEarnerIndices() {
+            var blocks = document.querySelectorAll('.earner-block');
+            var indices = [];
+            for (var i = 0; i < blocks.length; i++) {
+                var id = blocks[i].id.replace('earner_', '');
+                indices.push(parseInt(id));
+            }
+            return indices;
+        }
+
+        // ── Data Load/Save/Clear ──
+
         function loadBudgetDataIntoCalculator(budget) {
             clearCalculatorFields();
-            if (budget.data) {
-                for (var fieldId in budget.data) {
-                    var input = document.getElementById(fieldId);
-                    if (input) input.value = budget.data[fieldId];
+            if (!budget.data) { calculateAll(); return; }
+
+            // Restore income earners
+            var earnerCount = budget.data._earnerCount || 1;
+            for (var i = 0; i < earnerCount; i++) {
+                var savedIdx = budget.data['_earnerIdx_' + i];
+                if (savedIdx === undefined) savedIdx = i;
+                savedIdx = parseInt(savedIdx);
+                var name = budget.data['earnerName_' + savedIdx] || '';
+                var newIdx = addIncomeEarner(name);
+
+                var fields = ['salary', 'retirement', 'hsa', 'taxRate', 'carAllowance'];
+                for (var f = 0; f < fields.length; f++) {
+                    var savedVal = budget.data[fields[f] + '_' + savedIdx];
+                    if (savedVal !== undefined) {
+                        var input = document.getElementById(fields[f] + '_' + newIdx);
+                        if (input) input.value = savedVal;
+                    }
                 }
             }
+
+            // Restore all other fields
+            for (var fieldId in budget.data) {
+                if (fieldId.charAt(0) === '_') continue;
+                if (fieldId.indexOf('earnerName_') === 0) continue;
+                if (fieldId.match(/^(salary|retirement|hsa|taxRate|carAllowance)_\d+$/)) continue;
+                var input = document.getElementById(fieldId);
+                if (input) input.value = budget.data[fieldId];
+            }
+
             calculateAll();
         }
 
         function clearCalculatorFields() {
+            // Remove all earner blocks
+            document.getElementById('incomeEarnersContainer').innerHTML = '';
+            incomeEarnerCount = 0;
+            // Add one default earner
+            addIncomeEarner('');
+
+            // Clear all other inputs
             var inputs = document.querySelectorAll('#calculatorScreen input[type="number"]');
             for (var i = 0; i < inputs.length; i++) inputs[i].value = '';
-            calculateAll();
+            var nameInputs = document.querySelectorAll('.earner-name-input');
+            for (var i = 0; i < nameInputs.length; i++) nameInputs[i].value = '';
         }
 
         function gatherCalculatorData() {
             var data = {};
-            var inputs = document.querySelectorAll('#calculatorScreen input[type="number"]');
-            for (var i = 0; i < inputs.length; i++) {
-                if (inputs[i].value !== '') data[inputs[i].id] = inputs[i].value;
+
+            // Save earner data with index mapping
+            var indices = getEarnerIndices();
+            data._earnerCount = indices.length;
+            for (var i = 0; i < indices.length; i++) {
+                var idx = indices[i];
+                data['_earnerIdx_' + i] = idx;
+                var nameInput = document.getElementById('earnerName_' + idx);
+                if (nameInput && nameInput.value) data['earnerName_' + idx] = nameInput.value;
+
+                var fields = ['salary', 'retirement', 'hsa', 'taxRate', 'carAllowance'];
+                for (var f = 0; f < fields.length; f++) {
+                    var input = document.getElementById(fields[f] + '_' + idx);
+                    if (input && input.value !== '') data[fields[f] + '_' + idx] = input.value;
+                }
             }
+
+            // Save all other inputs
+            var otherInputs = document.querySelectorAll('#calculatorScreen input[type="number"]');
+            for (var i = 0; i < otherInputs.length; i++) {
+                var id = otherInputs[i].id;
+                if (id.match(/^(salary|retirement|hsa|taxRate|carAllowance)_\d+$/)) continue;
+                if (otherInputs[i].value !== '') data[id] = otherInputs[i].value;
+            }
+
             return data;
         }
 
@@ -737,20 +836,29 @@
         // ── Calculations ──
 
         function calculateIncome() {
-            var salary = val('salary');
-            var retirementPercent = val('retirement');
-            var hsaAnnual = val('hsa');
-            var taxRate = val('taxRate');
-            var carAllowance = val('carAllowance');
+            var indices = getEarnerIndices();
+            var totalTakeHome = 0;
 
-            var retirementAmount = salary * (retirementPercent / 100);
-            var taxableIncome = salary - retirementAmount - hsaAnnual;
-            var taxes = taxableIncome * (taxRate / 100);
-            var netIncome = taxableIncome - taxes;
-            var monthlyTakeHome = (netIncome / 12) + carAllowance;
+            for (var i = 0; i < indices.length; i++) {
+                var idx = indices[i];
+                var salary = val('salary_' + idx);
+                var retirementPercent = val('retirement_' + idx);
+                var hsaAnnual = val('hsa_' + idx);
+                var taxRate = val('taxRate_' + idx);
+                var carAllowance = val('carAllowance_' + idx);
 
-            setText('incomeResult', formatCurrency(monthlyTakeHome));
-            return monthlyTakeHome;
+                var retirementAmount = salary * (retirementPercent / 100);
+                var taxableIncome = salary - retirementAmount - hsaAnnual;
+                var taxes = taxableIncome * (taxRate / 100);
+                var netIncome = taxableIncome - taxes;
+                var monthlyTakeHome = (netIncome / 12) + carAllowance;
+
+                setText('earnerResult_' + idx, formatCurrency(monthlyTakeHome));
+                totalTakeHome += monthlyTakeHome;
+            }
+
+            setText('incomeResult', formatCurrency(totalTakeHome));
+            return totalTakeHome;
         }
 
         function calculateHousing() {
