@@ -953,7 +953,7 @@
                 education: '$' + formatCurrency(education),
                 utilities: '$' + formatCurrency(utilities),
                 spending: '$' + formatCurrency(spending),
-                savings: '$' + formatCurrency(savings),
+                savings: '$' + formatCurrency(savings + (remaining > 0 ? remaining : 0)),
                 totalExpenses: '$' + formatCurrency(totalExpenses),
                 remainingBalance: '$' + formatCurrency(remaining)
             };
@@ -1164,7 +1164,8 @@
             setText('dashEducation', '$' + formatCurrency(education));
             setText('dashUtilities', '$' + formatCurrency(utilities));
             setText('dashSpending', '$' + formatCurrency(spending));
-            setText('dashSavings', '$' + formatCurrency(savings));
+            var effectiveSavings = savings + (remaining > 0 ? remaining : 0);
+            setText('dashSavings', '$' + formatCurrency(effectiveSavings));
 
             var remainEl = document.getElementById('dashRemaining');
             if (remainEl) {
