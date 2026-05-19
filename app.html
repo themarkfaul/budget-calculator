@@ -107,6 +107,27 @@
             </div>
         </div>
 
+        <!-- New Budget Screen -->
+        <div id="newBudgetScreen" class="screen">
+            <div style="padding: 40px;">
+                <h2 style="text-align: center; margin-bottom: 30px;">Create New Budget</h2>
+
+                <div class="new-budget-option" onclick="startBlankBudget()">
+                    <div class="new-budget-icon">📝</div>
+                    <div>
+                        <div class="new-budget-option-title">Blank Budget</div>
+                        <div class="new-budget-option-desc">Start from scratch with empty fields</div>
+                    </div>
+                </div>
+
+                <div id="copyFromList"></div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn btn-secondary" onclick="goHome()">← Back to Home</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Calculator Screen -->
         <div id="calculatorScreen" class="screen">
             <div class="calculator-header">
@@ -579,10 +600,37 @@
         }
 
         function createNewBudget() {
+            var listHtml = '';
+            if (budgets.length > 0) {
+                listHtml = '<div class="copy-from-header">Or copy from existing budget</div>';
+                for (var i = 0; i < budgets.length; i++) {
+                    var b = budgets[i];
+                    var s = b.summary || {};
+                    listHtml += '<div class="new-budget-option" onclick="startFromExisting(' + i + ')">';
+                    listHtml += '<div class="new-budget-icon">📋</div>';
+                    listHtml += '<div><div class="new-budget-option-title">' + escapeHtml(b.name) + '</div>';
+                    listHtml += '<div class="new-budget-option-desc">Take home: ' + escapeHtml(s.takeHome || '$0.00') + ' · Remaining: ' + escapeHtml(s.remainingBalance || '$0.00') + '</div>';
+                    listHtml += '</div></div>';
+                }
+            }
+            document.getElementById('copyFromList').innerHTML = listHtml;
+            showScreen('newBudgetScreen');
+        }
+
+        function startBlankBudget() {
             currentEditingBudget = null;
             isEditMode = false;
             setText('calculatorTitle', 'Create New Budget');
             clearCalculatorFields();
+            showScreen('calculatorScreen');
+        }
+
+        function startFromExisting(index) {
+            var source = budgets[index];
+            currentEditingBudget = null;
+            isEditMode = false;
+            setText('calculatorTitle', 'New Budget (from ' + source.name + ')');
+            loadBudgetDataIntoCalculator(source);
             showScreen('calculatorScreen');
         }
 
