@@ -750,7 +750,7 @@
                 '<div class="earner-header">' +
                     '<h2>🎓</h2>' +
                     '<input type="text" class="earner-name-input" id="childName_' + idx + '" placeholder="Child ' + (idx + 1) + ' name" value="' + (name || '') + '">' +
-                    '<button class="remove-earner-btn" onclick="removeChild(' + idx + ')">✕ Remove</button>' +
+                    '<button class="remove-earner-btn" onclick="removeChildBlock(' + idx + ')">✕ Remove</button>' +
                 '</div>' +
                 '<div class="input-group">' +
                     '<div class="input-field"><label for="tuition_' + idx + '">Tuition (Annual)</label>' +
@@ -773,7 +773,7 @@
             return idx;
         }
 
-        function removeChild(idx) {
+        function removeChildBlock(idx) {
             var block = document.getElementById('child_' + idx);
             if (block) block.remove();
             updateChildRemoveButtons();
