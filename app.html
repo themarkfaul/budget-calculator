@@ -449,6 +449,16 @@
                     this.value = formatMoneyValue(this.value);
                 });
             }
+
+            var pctInputs = (container || document).querySelectorAll('input[data-percent]');
+            for (var j = 0; j < pctInputs.length; j++) {
+                if (pctInputs[j].dataset.percentBound) continue;
+                pctInputs[j].dataset.percentBound = '1';
+                pctInputs[j].addEventListener('blur', function () {
+                    var v = parseFloat(this.value);
+                    if (!isNaN(v) && v > 100) this.value = '100';
+                });
+            }
         }
 
         function setText(id, text) {
