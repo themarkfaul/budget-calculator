@@ -658,6 +658,8 @@
             isEditMode = false;
             setText('calculatorTitle', 'Create New Budget');
             clearCalculatorFields();
+            addIncomeEarner('');
+            addChild('');
             showScreen('calculatorScreen');
         }
 
@@ -866,12 +868,10 @@
             // Remove all earner blocks
             document.getElementById('incomeEarnersContainer').innerHTML = '';
             incomeEarnerCount = 0;
-            addIncomeEarner('');
 
             // Remove all child blocks
             document.getElementById('childrenContainer').innerHTML = '';
             childCount = 0;
-            addChild('');
 
             // Clear all other inputs
             var inputs = document.querySelectorAll('#calculatorScreen input[inputmode="decimal"]');
