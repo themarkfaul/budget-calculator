@@ -189,7 +189,7 @@
                         </div>
                         <div class="input-field">
                             <label for="mortgageRate">Mortgage Interest Rate (%)</label>
-                            <input type="text" inputmode="decimal" id="mortgageRate" placeholder="5.92" step="0.001">
+                            <input type="text" inputmode="decimal" id="mortgageRate" placeholder="5.92" step="0.001" data-percent>
                         </div>
                         <div class="input-field">
                             <label for="mortgageDownPayment">Down Payment ($)</label>
@@ -209,15 +209,15 @@
                         </div>
                         <div class="input-field">
                             <label for="stateTaxRate">State Tax Rate (%)</label>
-                            <input type="text" inputmode="decimal" id="stateTaxRate" placeholder="1.039" step="0.001">
+                            <input type="text" inputmode="decimal" id="stateTaxRate" placeholder="1.039" step="0.001" data-percent>
                         </div>
                         <div class="input-field">
                             <label for="countyTaxRate">County Tax Rate (%)</label>
-                            <input type="text" inputmode="decimal" id="countyTaxRate" placeholder="0.125" step="0.001">
+                            <input type="text" inputmode="decimal" id="countyTaxRate" placeholder="0.125" step="0.001" data-percent>
                         </div>
                         <div class="input-field">
                             <label for="localTaxRate">Local/City Tax Rate (%)</label>
-                            <input type="text" inputmode="decimal" id="localTaxRate" placeholder="0.226" step="0.001">
+                            <input type="text" inputmode="decimal" id="localTaxRate" placeholder="0.226" step="0.001" data-percent>
                         </div>
                         <div class="input-field">
                             <label for="waste">Waste Management (Annual)</label>
@@ -242,7 +242,7 @@
                         </div>
                         <div class="input-field">
                             <label for="carRate">Interest Rate (%)</label>
-                            <input type="text" inputmode="decimal" id="carRate" placeholder="6.875" step="0.001">
+                            <input type="text" inputmode="decimal" id="carRate" placeholder="6.875" step="0.001" data-percent>
                         </div>
                         <div class="input-field">
                             <label for="downPayment">Down Payment + Trade ($)</label>
@@ -437,7 +437,7 @@
         }
 
         function setupMoneyFormatting(container) {
-            var inputs = (container || document).querySelectorAll('input[inputmode="decimal"]');
+            var inputs = (container || document).querySelectorAll('input[inputmode="decimal"]:not([data-percent])');
             for (var i = 0; i < inputs.length; i++) {
                 if (inputs[i].dataset.moneyBound) continue;
                 inputs[i].dataset.moneyBound = '1';
@@ -679,11 +679,11 @@
                     '<div class="input-field"><label for="salary_' + idx + '">Annual Salary ($)</label>' +
                     '<input type="text" inputmode="decimal" id="salary_' + idx + '" placeholder="75000" step="0.01"></div>' +
                     '<div class="input-field"><label for="retirement_' + idx + '">Retirement Contribution (%)</label>' +
-                    '<input type="text" inputmode="decimal" id="retirement_' + idx + '" placeholder="10" step="0.1"></div>' +
+                    '<input type="text" inputmode="decimal" id="retirement_' + idx + '" placeholder="10" step="0.1" data-percent></div>' +
                     '<div class="input-field"><label for="hsa_' + idx + '">HSA Contribution ($ annually)</label>' +
                     '<input type="text" inputmode="decimal" id="hsa_' + idx + '" placeholder="3000" step="0.01"></div>' +
                     '<div class="input-field"><label for="taxRate_' + idx + '">Estimated Tax Rate (%)</label>' +
-                    '<input type="text" inputmode="decimal" id="taxRate_' + idx + '" placeholder="22" step="0.1"></div>' +
+                    '<input type="text" inputmode="decimal" id="taxRate_' + idx + '" placeholder="22" step="0.1" data-percent></div>' +
                     '<div class="input-field"><label for="carAllowance_' + idx + '">Monthly Car Allowance ($)</label>' +
                     '<input type="text" inputmode="decimal" id="carAllowance_' + idx + '" placeholder="500" step="0.01"></div>' +
                 '</div>' +
@@ -846,7 +846,7 @@
         }
 
         function formatAllInputs() {
-            var inputs = document.querySelectorAll('#calculatorScreen input[inputmode="decimal"]');
+            var inputs = document.querySelectorAll('#calculatorScreen input[inputmode="decimal"]:not([data-percent])');
             for (var i = 0; i < inputs.length; i++) {
                 inputs[i].value = formatMoneyValue(inputs[i].value);
             }
