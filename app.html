@@ -92,11 +92,11 @@
                     <p>Needs ≤ 50%, Wants ≤ 30%, Savings ≥ 20% of your take-home pay (plus retirement taken from your paycheck, which counts as savings).</p>
                     <div class="rule-details">
                         <div class="rule-metric">
-                            <div class="metric-label">Needs (Fixed)</div>
+                            <div class="metric-label">Needs (Bills + Essentials)</div>
                             <div class="metric-value" id="needsAmount">$0 (0%)</div>
                         </div>
                         <div class="rule-metric">
-                            <div class="metric-label">Wants (Spending)</div>
+                            <div class="metric-label">Wants</div>
                             <div class="metric-value" id="wantsAmount">$0 (0%)</div>
                         </div>
                         <div class="rule-metric">
@@ -323,19 +323,24 @@
             <!-- Spending Tab -->
             <div id="spendingTab" class="tab-content">
                 <div class="section">
-                    <h2>🛒 Monthly Spending (Wants)</h2>
+                    <h2>🛒 Monthly Spending</h2>
+                    <h3 class="spending-group-title">Essentials (count as Needs)</h3>
                     <div class="input-group">
+                        <div class="input-field">
+                            <label for="groceries">Groceries (Monthly)</label>
+                            <input type="text" inputmode="decimal" id="groceries" placeholder="600">
+                        </div>
                         <div class="input-field">
                             <label for="gasoline">Gasoline (Monthly)</label>
                             <input type="text" inputmode="decimal" id="gasoline" placeholder="200">
                         </div>
+                    </div>
+                    <div class="earner-subtotal" style="margin: 0 0 20px;">Essentials: $<span id="essentialSpendingResult">0.00</span></div>
+                    <h3 class="spending-group-title">Wants</h3>
+                    <div class="input-group">
                         <div class="input-field">
                             <label for="eatingOut">Eating Out (Monthly)</label>
                             <input type="text" inputmode="decimal" id="eatingOut" placeholder="300">
-                        </div>
-                        <div class="input-field">
-                            <label for="groceries">Groceries (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="groceries" placeholder="600">
                         </div>
                         <div class="input-field">
                             <label for="entertainment">Entertainment (Monthly)</label>
@@ -358,6 +363,7 @@
                             <input type="text" inputmode="decimal" id="miscSpending" placeholder="100">
                         </div>
                     </div>
+                    <div class="earner-subtotal">Wants: $<span id="wantsSpendingResult">0.00</span></div>
                     <div class="calc-result">
                         Total Monthly Spending: $<span id="spendingResult">0.00</span>
                     </div>
@@ -626,18 +632,22 @@
             hStatus.textContent = housingPass ? '✅ PASS' : '❌ FAIL';
             hStatus.className = 'rule-status ' + (housingPass ? 'status-pass' : 'status-fail');
 
-            var needs = housing + parseMoney(s.transportation) + parseMoney(s.education) + parseMoney(s.utilities);
+            // Groceries and gasoline sit on the Spending tab but are needs; read them from the saved inputs
+            var data = selectedBudget.data || {};
+            var essentials = calculateEssentialSpending(function (id) { return parseMoney(data[id]); });
+            var wants = spending - essentials;
+            var needs = housing + parseMoney(s.transportation) + parseMoney(s.education) + parseMoney(s.utilities) + essentials;
             // Paycheck retirement is real savings that never reaches take-home, so add it to both sides
             var paycheckRetirement = parseMoney(s.paycheckRetirement);
             savings += paycheckRetirement;
             var income = takeHome + paycheckRetirement;
             var needsPercent = income > 0 ? (needs / income) * 100 : 0;
-            var wantsPercent = income > 0 ? (spending / income) * 100 : 0;
+            var wantsPercent = income > 0 ? (wants / income) * 100 : 0;
             var savingsPercent = income > 0 ? (savings / income) * 100 : 0;
             var budgetPass = needsPercent <= 50 && wantsPercent <= 30 && savingsPercent >= 20;
 
             setText('needsAmount', '$' + formatCurrency(needs) + ' (' + needsPercent.toFixed(1) + '%)');
-            setText('wantsAmount', '$' + formatCurrency(spending) + ' (' + wantsPercent.toFixed(1) + '%)');
+            setText('wantsAmount', '$' + formatCurrency(wants) + ' (' + wantsPercent.toFixed(1) + '%)');
             setText('savingsAmount', '$' + formatCurrency(savings) + ' (' + savingsPercent.toFixed(1) + '%)');
             var bStatus = document.getElementById('budgetRuleStatus');
             bStatus.textContent = budgetPass ? '✅ PASS' : '❌ NEEDS WORK';
@@ -1181,10 +1191,22 @@
         }
 
         function calculateSpending() {
-            var ids = ['gasoline', 'eatingOut', 'groceries', 'entertainment', 'shopping', 'hobbies', 'tools', 'miscSpending'];
+            var ids = ['eatingOut', 'entertainment', 'shopping', 'hobbies', 'tools', 'miscSpending'];
+            var wants = 0;
+            for (var i = 0; i < ids.length; i++) wants += val(ids[i]);
+            var essentials = calculateEssentialSpending(val);
+            setText('essentialSpendingResult', formatCurrency(essentials));
+            setText('wantsSpendingResult', formatCurrency(wants));
+            setText('spendingResult', formatCurrency(essentials + wants));
+            return essentials + wants;
+        }
+
+        // Spending-tab items that are needs, not wants; getValue reads a field by id
+        var ESSENTIAL_SPENDING_IDS = ['groceries', 'gasoline'];
+
+        function calculateEssentialSpending(getValue) {
             var total = 0;
-            for (var i = 0; i < ids.length; i++) total += val(ids[i]);
-            setText('spendingResult', formatCurrency(total));
+            for (var i = 0; i < ESSENTIAL_SPENDING_IDS.length; i++) total += getValue(ESSENTIAL_SPENDING_IDS[i]);
             return total;
         }
 

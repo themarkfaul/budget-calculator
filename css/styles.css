@@ -367,6 +367,12 @@ input:focus {
     color: #155724;
 }
 
+.spending-group-title {
+    font-size: 1em;
+    color: #495057;
+    margin: 0 0 10px;
+}
+
 .retirement-hint {
     font-weight: normal;
     font-size: 0.9em;
