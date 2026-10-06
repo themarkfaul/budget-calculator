@@ -134,7 +134,7 @@
                 <div class="calculator-title" id="calculatorTitle">Budget Calculator</div>
                 <div class="header-buttons">
                     <button class="btn btn-success" id="saveBtn" onclick="handleSave()">💾 Save</button>
-                    <button class="btn btn-primary" onclick="handleSaveAs()">📄 Save As</button>
+                    <button class="btn btn-primary" id="saveAsBtn" onclick="handleSaveAs()">📄 Save As</button>
                     <button class="btn btn-danger" onclick="closeBudget()">✖️ Close</button>
                 </div>
             </div>
@@ -185,43 +185,43 @@
                     <div class="input-group">
                         <div class="input-field">
                             <label for="houseValue">House Value ($)</label>
-                            <input type="text" inputmode="decimal" id="houseValue" placeholder="250000" step="0.01">
+                            <input type="text" inputmode="decimal" id="houseValue" placeholder="250000">
                         </div>
                         <div class="input-field">
                             <label for="mortgageRate">Mortgage Interest Rate (%)</label>
-                            <input type="text" inputmode="decimal" id="mortgageRate" placeholder="5.92" step="0.001" data-percent>
+                            <input type="text" inputmode="decimal" id="mortgageRate" placeholder="5.92" data-percent>
                         </div>
                         <div class="input-field">
                             <label for="mortgageDownPayment">Down Payment ($)</label>
-                            <input type="text" inputmode="decimal" id="mortgageDownPayment" placeholder="100000" step="0.01">
+                            <input type="text" inputmode="decimal" id="mortgageDownPayment" placeholder="100000">
                         </div>
                         <div class="input-field">
                             <label for="mortgageTerm">Mortgage Term (Years)</label>
-                            <input type="text" inputmode="decimal" id="mortgageTerm" placeholder="15" step="1">
+                            <input type="text" inputmode="decimal" id="mortgageTerm" placeholder="15">
                         </div>
                         <div class="input-field">
                             <label for="homeInsurance">Home Insurance (Annual)</label>
-                            <input type="text" inputmode="decimal" id="homeInsurance" placeholder="2084" step="0.01">
+                            <input type="text" inputmode="decimal" id="homeInsurance" placeholder="2084">
                         </div>
                         <div class="input-field">
                             <label for="propertyValue">Property Value for Tax ($)</label>
-                            <input type="text" inputmode="decimal" id="propertyValue" placeholder="250000" step="0.01">
+                            <input type="text" inputmode="decimal" id="propertyValue" placeholder="250000">
                         </div>
                         <div class="input-field">
                             <label for="stateTaxRate">State Tax Rate (%)</label>
-                            <input type="text" inputmode="decimal" id="stateTaxRate" placeholder="1.039" step="0.001" data-percent>
+                            <input type="text" inputmode="decimal" id="stateTaxRate" placeholder="1.039" data-percent>
                         </div>
                         <div class="input-field">
                             <label for="countyTaxRate">County Tax Rate (%)</label>
-                            <input type="text" inputmode="decimal" id="countyTaxRate" placeholder="0.125" step="0.001" data-percent>
+                            <input type="text" inputmode="decimal" id="countyTaxRate" placeholder="0.125" data-percent>
                         </div>
                         <div class="input-field">
                             <label for="localTaxRate">Local/City Tax Rate (%)</label>
-                            <input type="text" inputmode="decimal" id="localTaxRate" placeholder="0.226" step="0.001" data-percent>
+                            <input type="text" inputmode="decimal" id="localTaxRate" placeholder="0.226" data-percent>
                         </div>
                         <div class="input-field">
                             <label for="waste">Waste Management (Annual)</label>
-                            <input type="text" inputmode="decimal" id="waste" placeholder="342" step="0.01">
+                            <input type="text" inputmode="decimal" id="waste" placeholder="342">
                         </div>
                     </div>
                     <div class="calc-result">
@@ -238,27 +238,27 @@
                     <div class="input-group">
                         <div class="input-field">
                             <label for="carPrice">Vehicle Price ($)</label>
-                            <input type="text" inputmode="decimal" id="carPrice" placeholder="27000" step="0.01">
+                            <input type="text" inputmode="decimal" id="carPrice" placeholder="27000">
                         </div>
                         <div class="input-field">
                             <label for="carRate">Interest Rate (%)</label>
-                            <input type="text" inputmode="decimal" id="carRate" placeholder="6.875" step="0.001" data-percent>
+                            <input type="text" inputmode="decimal" id="carRate" placeholder="6.875" data-percent>
                         </div>
                         <div class="input-field">
                             <label for="downPayment">Down Payment + Trade ($)</label>
-                            <input type="text" inputmode="decimal" id="downPayment" placeholder="15000" step="0.01">
+                            <input type="text" inputmode="decimal" id="downPayment" placeholder="15000">
                         </div>
                         <div class="input-field">
                             <label for="loanTerm">Loan Term (Years)</label>
-                            <input type="text" inputmode="decimal" id="loanTerm" placeholder="5" step="0.1">
+                            <input type="text" inputmode="decimal" id="loanTerm" placeholder="5">
                         </div>
                         <div class="input-field">
                             <label for="carInsuranceAnnual">Vehicle Insurance (Annual)</label>
-                            <input type="text" inputmode="decimal" id="carInsuranceAnnual" placeholder="1156" step="0.01">
+                            <input type="text" inputmode="decimal" id="carInsuranceAnnual" placeholder="1156">
                         </div>
                         <div class="input-field">
                             <label for="carTaxes">Vehicle Taxes (Annual)</label>
-                            <input type="text" inputmode="decimal" id="carTaxes" placeholder="454" step="0.01">
+                            <input type="text" inputmode="decimal" id="carTaxes" placeholder="454">
                         </div>
                     </div>
                     <div class="calc-result">
@@ -286,27 +286,27 @@
                     <div class="input-group">
                         <div class="input-field">
                             <label for="internet">Internet (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="internet" placeholder="80" step="0.01">
+                            <input type="text" inputmode="decimal" id="internet" placeholder="80">
                         </div>
                         <div class="input-field">
                             <label for="phone">Phone (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="phone" placeholder="100" step="0.01">
+                            <input type="text" inputmode="decimal" id="phone" placeholder="100">
                         </div>
                         <div class="input-field">
                             <label for="tv">TV/Streaming (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="tv" placeholder="60" step="0.01">
+                            <input type="text" inputmode="decimal" id="tv" placeholder="60">
                         </div>
                         <div class="input-field">
                             <label for="gas">Gas Utility (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="gas" placeholder="90" step="0.01">
+                            <input type="text" inputmode="decimal" id="gas" placeholder="90">
                         </div>
                         <div class="input-field">
                             <label for="electric">Electric (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="electric" placeholder="120" step="0.01">
+                            <input type="text" inputmode="decimal" id="electric" placeholder="120">
                         </div>
                         <div class="input-field">
                             <label for="water">Water (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="water" placeholder="45" step="0.01">
+                            <input type="text" inputmode="decimal" id="water" placeholder="45">
                         </div>
                     </div>
                     <div class="calc-result">
@@ -322,35 +322,35 @@
                     <div class="input-group">
                         <div class="input-field">
                             <label for="gasoline">Gasoline (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="gasoline" placeholder="200" step="0.01">
+                            <input type="text" inputmode="decimal" id="gasoline" placeholder="200">
                         </div>
                         <div class="input-field">
                             <label for="eatingOut">Eating Out (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="eatingOut" placeholder="300" step="0.01">
+                            <input type="text" inputmode="decimal" id="eatingOut" placeholder="300">
                         </div>
                         <div class="input-field">
                             <label for="groceries">Groceries (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="groceries" placeholder="600" step="0.01">
+                            <input type="text" inputmode="decimal" id="groceries" placeholder="600">
                         </div>
                         <div class="input-field">
                             <label for="entertainment">Entertainment (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="entertainment" placeholder="150" step="0.01">
+                            <input type="text" inputmode="decimal" id="entertainment" placeholder="150">
                         </div>
                         <div class="input-field">
                             <label for="shopping">Shopping/Clothes (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="shopping" placeholder="200" step="0.01">
+                            <input type="text" inputmode="decimal" id="shopping" placeholder="200">
                         </div>
                         <div class="input-field">
                             <label for="hobbies">Hobbies (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="hobbies" placeholder="100" step="0.01">
+                            <input type="text" inputmode="decimal" id="hobbies" placeholder="100">
                         </div>
                         <div class="input-field">
                             <label for="tools">Tools/Equipment (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="tools" placeholder="50" step="0.01">
+                            <input type="text" inputmode="decimal" id="tools" placeholder="50">
                         </div>
                         <div class="input-field">
                             <label for="miscSpending">Miscellaneous (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="miscSpending" placeholder="100" step="0.01">
+                            <input type="text" inputmode="decimal" id="miscSpending" placeholder="100">
                         </div>
                     </div>
                     <div class="calc-result">
@@ -366,27 +366,27 @@
                     <div class="input-group">
                         <div class="input-field">
                             <label for="emergencyFund">Emergency Fund (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="emergencyFund" placeholder="500" step="0.01">
+                            <input type="text" inputmode="decimal" id="emergencyFund" placeholder="500">
                         </div>
                         <div class="input-field">
                             <label for="retirement401k">401k/Retirement (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="retirement401k" placeholder="800" step="0.01">
+                            <input type="text" inputmode="decimal" id="retirement401k" placeholder="800">
                         </div>
                         <div class="input-field">
                             <label for="iraContribution">IRA Contribution (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="iraContribution" placeholder="500" step="0.01">
+                            <input type="text" inputmode="decimal" id="iraContribution" placeholder="500">
                         </div>
                         <div class="input-field">
                             <label for="investmentAccount">Investment Account (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="investmentAccount" placeholder="300" step="0.01">
+                            <input type="text" inputmode="decimal" id="investmentAccount" placeholder="300">
                         </div>
                         <div class="input-field">
                             <label for="collegeFund">College Fund (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="collegeFund" placeholder="200" step="0.01">
+                            <input type="text" inputmode="decimal" id="collegeFund" placeholder="200">
                         </div>
                         <div class="input-field">
                             <label for="cashSavings">Cash Savings (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="cashSavings" placeholder="300" step="0.01">
+                            <input type="text" inputmode="decimal" id="cashSavings" placeholder="300">
                         </div>
                     </div>
                     <div class="calc-result">
@@ -410,6 +410,7 @@
         var isEditMode = false;
         var incomeEarnerCount = 0;
         var childCount = 0;
+        var isDirty = false;
 
         // ── Helpers ──
 
@@ -425,6 +426,10 @@
             if (!el) return 0;
             var raw = el.value.replace(/,/g, '');
             return parseFloat(raw) || 0;
+        }
+
+        function parseMoney(str) {
+            return parseFloat(String(str || '0').replace(/[$,]/g, '')) || 0;
         }
 
         function formatMoneyValue(value) {
@@ -591,11 +596,12 @@
             setText('evaluationTitle', selectedBudget.name + ' - Financial Health Check');
 
             var s = selectedBudget.summary || {};
-            var takeHome = parseFloat((s.takeHome || '0').replace(/[$,]/g, '')) || 0;
-            var housing = parseFloat((s.housing || '0').replace(/[$,]/g, '')) || 0;
-            var spending = parseFloat((s.spending || '0').replace(/[$,]/g, '')) || 0;
-            var savings = parseFloat((s.savings || '0').replace(/[$,]/g, '')) || 0;
-            var totalExpenses = parseFloat((s.totalExpenses || '0').replace(/[$,]/g, '')) || 0;
+            var takeHome = parseMoney(s.takeHome);
+            var housing = parseMoney(s.housing);
+            var spending = parseMoney(s.spending);
+            // Summary savings includes any leftover balance; judge the rule on what was actually budgeted
+            var remaining = parseMoney(s.remainingBalance);
+            var savings = parseMoney(s.savings) - (remaining > 0 ? remaining : 0);
 
             var housingLimit = takeHome * 0.25;
             var housingPercent = takeHome > 0 ? (housing / takeHome) * 100 : 0;
@@ -608,7 +614,7 @@
             hStatus.textContent = housingPass ? '✅ PASS' : '❌ FAIL';
             hStatus.className = 'rule-status ' + (housingPass ? 'status-pass' : 'status-fail');
 
-            var needs = totalExpenses - spending;
+            var needs = housing + parseMoney(s.transportation) + parseMoney(s.education) + parseMoney(s.utilities);
             var needsPercent = takeHome > 0 ? (needs / takeHome) * 100 : 0;
             var wantsPercent = takeHome > 0 ? (spending / takeHome) * 100 : 0;
             var savingsPercent = takeHome > 0 ? (savings / takeHome) * 100 : 0;
@@ -632,6 +638,7 @@
             isEditMode = true;
             setText('calculatorTitle', 'Editing: ' + selectedBudget.name);
             loadBudgetDataIntoCalculator(selectedBudget);
+            isDirty = false;
             showScreen('calculatorScreen');
         }
 
@@ -660,6 +667,7 @@
             clearCalculatorFields();
             addIncomeEarner('');
             addChild('');
+            isDirty = false;
             showScreen('calculatorScreen');
         }
 
@@ -669,6 +677,7 @@
             isEditMode = false;
             setText('calculatorTitle', 'New Budget (from ' + source.name + ')');
             loadBudgetDataIntoCalculator(source);
+            isDirty = false;
             showScreen('calculatorScreen');
         }
 
@@ -684,23 +693,24 @@
             block.innerHTML =
                 '<div class="earner-header">' +
                     '<h2>💰</h2>' +
-                    '<input type="text" class="earner-name-input" id="earnerName_' + idx + '" placeholder="Person ' + (idx + 1) + ' name" value="' + (name || '') + '">' +
+                    '<input type="text" class="earner-name-input" id="earnerName_' + idx + '" placeholder="Person ' + (idx + 1) + ' name">' +
                     '<button class="remove-earner-btn" onclick="removeIncomeEarner(' + idx + ')">✕ Remove</button>' +
                 '</div>' +
                 '<div class="input-group">' +
                     '<div class="input-field"><label for="salary_' + idx + '">Annual Salary ($)</label>' +
-                    '<input type="text" inputmode="decimal" id="salary_' + idx + '" placeholder="75000" step="0.01"></div>' +
+                    '<input type="text" inputmode="decimal" id="salary_' + idx + '" placeholder="75000"></div>' +
                     '<div class="input-field"><label for="retirement_' + idx + '">Retirement Contribution (%)</label>' +
-                    '<input type="text" inputmode="decimal" id="retirement_' + idx + '" placeholder="10" step="0.1" data-percent></div>' +
+                    '<input type="text" inputmode="decimal" id="retirement_' + idx + '" placeholder="10" data-percent></div>' +
                     '<div class="input-field"><label for="hsa_' + idx + '">HSA Contribution ($ annually)</label>' +
-                    '<input type="text" inputmode="decimal" id="hsa_' + idx + '" placeholder="3000" step="0.01"></div>' +
+                    '<input type="text" inputmode="decimal" id="hsa_' + idx + '" placeholder="3000"></div>' +
                     '<div class="input-field"><label for="taxRate_' + idx + '">Estimated Tax Rate (%)</label>' +
-                    '<input type="text" inputmode="decimal" id="taxRate_' + idx + '" placeholder="22" step="0.1" data-percent></div>' +
+                    '<input type="text" inputmode="decimal" id="taxRate_' + idx + '" placeholder="22" data-percent></div>' +
                     '<div class="input-field"><label for="carAllowance_' + idx + '">Monthly Car Allowance ($)</label>' +
-                    '<input type="text" inputmode="decimal" id="carAllowance_' + idx + '" placeholder="500" step="0.01"></div>' +
+                    '<input type="text" inputmode="decimal" id="carAllowance_' + idx + '" placeholder="500"></div>' +
                 '</div>' +
                 '<div class="earner-subtotal">Monthly Take Home: $<span id="earnerResult_' + idx + '">0.00</span></div>';
             container.appendChild(block);
+            document.getElementById('earnerName_' + idx).value = name || '';
 
             var inputs = block.querySelectorAll('input[inputmode="decimal"]');
             for (var i = 0; i < inputs.length; i++) {
@@ -709,6 +719,7 @@
             setupMoneyFormatting(block);
 
             updateRemoveButtons();
+            isDirty = true;
             return idx;
         }
 
@@ -716,6 +727,7 @@
             var block = document.getElementById('earner_' + idx);
             if (block) block.remove();
             updateRemoveButtons();
+            isDirty = true;
             calculateAll();
         }
 
@@ -749,19 +761,20 @@
             block.innerHTML =
                 '<div class="earner-header">' +
                     '<h2>🎓</h2>' +
-                    '<input type="text" class="earner-name-input" id="childName_' + idx + '" placeholder="Person ' + (idx + 1) + ' name" value="' + (name || '') + '">' +
+                    '<input type="text" class="earner-name-input" id="childName_' + idx + '" placeholder="Person ' + (idx + 1) + ' name">' +
                     '<button class="remove-earner-btn" onclick="removeChildBlock(' + idx + ')">✕ Remove</button>' +
                 '</div>' +
                 '<div class="input-group">' +
                     '<div class="input-field"><label for="tuition_' + idx + '">Tuition (Annual)</label>' +
-                    '<input type="text" inputmode="decimal" id="tuition_' + idx + '" placeholder="9386" step="0.01"></div>' +
+                    '<input type="text" inputmode="decimal" id="tuition_' + idx + '" placeholder="9386"></div>' +
                     '<div class="input-field"><label for="lunch_' + idx + '">Lunch/Meals (Annual)</label>' +
-                    '<input type="text" inputmode="decimal" id="lunch_' + idx + '" placeholder="1235" step="0.01"></div>' +
+                    '<input type="text" inputmode="decimal" id="lunch_' + idx + '" placeholder="1235"></div>' +
                     '<div class="input-field"><label for="afterschool_' + idx + '">Afterschool Program (Annual)</label>' +
-                    '<input type="text" inputmode="decimal" id="afterschool_' + idx + '" placeholder="0" step="0.01"></div>' +
+                    '<input type="text" inputmode="decimal" id="afterschool_' + idx + '" placeholder="0"></div>' +
                 '</div>' +
                 '<div class="earner-subtotal">Monthly Cost: $<span id="childResult_' + idx + '">0.00</span></div>';
             container.appendChild(block);
+            document.getElementById('childName_' + idx).value = name || '';
 
             var inputs = block.querySelectorAll('input[inputmode="decimal"]');
             for (var i = 0; i < inputs.length; i++) {
@@ -770,6 +783,7 @@
             setupMoneyFormatting(block);
 
             updateChildRemoveButtons();
+            isDirty = true;
             return idx;
         }
 
@@ -777,6 +791,7 @@
             var block = document.getElementById('child_' + idx);
             if (block) block.remove();
             updateChildRemoveButtons();
+            isDirty = true;
             calculateAll();
         }
 
@@ -804,7 +819,7 @@
             clearCalculatorFields();
             if (!budget.data) { calculateAll(); return; }
 
-            // Restore income earners — deduplicate by salary value
+            // Restore income earners — skip repeated or invalid saved slots (left by older versions)
             var earnerFields = ['salary', 'retirement', 'hsa', 'taxRate', 'carAllowance'];
             var earnerCount = budget.data._earnerCount || 1;
             var seen = {};
@@ -812,11 +827,9 @@
                 var savedIdx = budget.data['_earnerIdx_' + i];
                 if (savedIdx === undefined) savedIdx = i;
                 savedIdx = parseInt(savedIdx);
+                if (isNaN(savedIdx) || seen[savedIdx]) continue;
+                seen[savedIdx] = true;
                 var name = budget.data['earnerName_' + savedIdx] || '';
-                var salary = budget.data['salary_' + savedIdx] || '';
-                var key = name + '|' + salary;
-                if (seen[key] && i > 0) continue;
-                seen[key] = true;
                 var newIdx = addIncomeEarner(name);
                 for (var f = 0; f < earnerFields.length; f++) {
                     var savedVal = budget.data[earnerFields[f] + '_' + savedIdx];
@@ -827,7 +840,7 @@
                 }
             }
 
-            // Restore children — deduplicate by tuition value
+            // Restore children — skip repeated or invalid saved slots (left by older versions)
             var cFields = ['tuition', 'lunch', 'afterschool'];
             var cCount = budget.data._childCount || 1;
             var cSeen = {};
@@ -835,11 +848,9 @@
                 var savedCIdx = budget.data['_childIdx_' + i];
                 if (savedCIdx === undefined) savedCIdx = i;
                 savedCIdx = parseInt(savedCIdx);
+                if (isNaN(savedCIdx) || cSeen[savedCIdx]) continue;
+                cSeen[savedCIdx] = true;
                 var cName = budget.data['childName_' + savedCIdx] || '';
-                var tuition = budget.data['tuition_' + savedCIdx] || '';
-                var cKey = cName + '|' + tuition;
-                if (cSeen[cKey] && i > 0) continue;
-                cSeen[cKey] = true;
                 var newCIdx = addChild(cName);
                 for (var f = 0; f < cFields.length; f++) {
                     var savedVal = budget.data[cFields[f] + '_' + savedCIdx];
@@ -982,6 +993,7 @@
                 currentEditingBudget = saved;
                 isEditMode = true;
                 setText('calculatorTitle', 'Editing: ' + saved.name);
+                isDirty = false;
                 alert('Budget saved!');
             } catch (e) {
                 alert('Error saving: ' + e.message);
@@ -995,6 +1007,10 @@
             var name = prompt('Enter a name for this copy:', 'My Budget Copy');
             if (!name) return;
 
+            var saveAsBtn = document.getElementById('saveAsBtn');
+            saveAsBtn.disabled = true;
+            saveAsBtn.textContent = 'Saving...';
+
             try {
                 var budgetObj = {
                     name: name,
@@ -1005,14 +1021,18 @@
                 currentEditingBudget = saved;
                 isEditMode = true;
                 setText('calculatorTitle', 'Editing: ' + saved.name);
+                isDirty = false;
                 alert('Budget saved as "' + name + '"!');
             } catch (e) {
                 alert('Error saving: ' + e.message);
             }
+
+            saveAsBtn.disabled = false;
+            saveAsBtn.textContent = '📄 Save As';
         }
 
         function closeBudget() {
-            if (confirm('Close without saving? Unsaved changes will be lost.')) {
+            if (!isDirty || confirm('Close without saving? Unsaved changes will be lost.')) {
                 goHome();
             }
         }
@@ -1057,7 +1077,7 @@
             var localTaxRate = val('localTaxRate');
             var waste = val('waste');
 
-            var loanAmount = houseValue - mortgageDown;
+            var loanAmount = Math.max(0, houseValue - mortgageDown);
             var monthlyRate = (mortgageRate / 100) / 12;
             var numPayments = mortgageTerm * 12;
 
@@ -1085,7 +1105,7 @@
             var carInsurance = val('carInsuranceAnnual');
             var carTaxes = val('carTaxes');
 
-            var loanAmount = carPrice - downPayment;
+            var loanAmount = Math.max(0, carPrice - downPayment);
             var monthlyRate = (rate / 100) / 12;
             var numPayments = term * 12;
 
@@ -1187,6 +1207,7 @@
                 inputs[i].addEventListener('input', calculateAll);
             }
             setupMoneyFormatting();
+            document.getElementById('calculatorScreen').addEventListener('input', function () { isDirty = true; });
 
             try {
                 budgets = await loadBudgets();
