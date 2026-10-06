@@ -322,6 +322,16 @@ input {
     background: white;
 }
 
+select {
+    padding: 12px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 16px;
+    background: white;
+    color: #495057;
+}
+
+select:focus,
 input:focus {
     outline: none;
     border-color: #667eea;
@@ -365,6 +375,63 @@ input:focus {
     text-align: center;
     font-weight: bold;
     color: #155724;
+}
+
+/* ── Income Modes ── */
+
+.earner-block[data-mode="net"] .mode-estimate,
+.earner-block[data-mode="estimate"] .mode-net,
+.earner-block[data-pay-type="salary"] .pay-hourly,
+.earner-block[data-pay-type="hourly"] .pay-salary {
+    display: none;
+}
+
+.pay-salary,
+.pay-hourly {
+    display: flex;
+    flex-direction: column;
+}
+
+.pay-salary > .input-field,
+.pay-hourly > .input-field {
+    flex: 1;
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: normal;
+    margin: 0 0 15px;
+    cursor: pointer;
+}
+
+.checkbox-row input {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+}
+
+.earner-breakdown:not(:empty) {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    font-size: 0.9em;
+}
+
+.breakdown-title {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 6px;
+}
+
+.breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+    color: #6c757d;
 }
 
 .spending-group-title {
