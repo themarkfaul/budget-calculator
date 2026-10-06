@@ -133,6 +133,41 @@
             </div>
         </div>
 
+        <!-- CSV Import Review Screen -->
+        <div id="importScreen" class="screen">
+            <div class="import-body">
+                <h2 style="text-align: center; margin-bottom: 10px;">Import Transactions</h2>
+                <p class="import-privacy">Your file stays on this device. It's read in your browser and never uploaded.</p>
+                <p class="import-info" id="importFileInfo"></p>
+
+                <div class="input-group">
+                    <div class="input-field">
+                        <label for="importMonths">Months Covered</label>
+                        <input type="text" inputmode="decimal" id="importMonths" data-plain oninput="renderImportTotals()">
+                    </div>
+                    <div class="input-field">
+                        <label for="importApplyMode">When Applying</label>
+                        <select id="importApplyMode">
+                            <option value="replace">Replace current amounts</option>
+                            <option value="add">Add to current amounts</option>
+                        </select>
+                    </div>
+                </div>
+
+                <h3 class="spending-group-title">Monthly averages</h3>
+                <div class="import-totals" id="importTotals"></div>
+
+                <h3 class="spending-group-title">Merchants</h3>
+                <p class="import-hint">Change a category to fix how a merchant is sorted. Your changes are remembered next time.</p>
+                <div id="importMerchants"></div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn btn-secondary" onclick="cancelImport()">Cancel</button>
+                    <button class="btn btn-success" onclick="applyImport()">Apply to Budget</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Calculator Screen -->
         <div id="calculatorScreen" class="screen">
             <div class="calculator-header">
@@ -288,6 +323,7 @@
             <div id="utilitiesTab" class="tab-content">
                 <div class="section">
                     <h2>⚡ Utilities & Services</h2>
+                    <button class="btn btn-secondary import-btn" onclick="openCsvImport()">📄 Import from bank or card CSV</button>
                     <div class="input-group">
                         <div class="input-field">
                             <label for="internet">Internet (Monthly)</label>
@@ -324,6 +360,7 @@
             <div id="spendingTab" class="tab-content">
                 <div class="section">
                     <h2>🛒 Monthly Spending</h2>
+                    <button class="btn btn-secondary import-btn" onclick="openCsvImport()">📄 Import from bank or card CSV</button>
                     <h3 class="spending-group-title">Essentials (count as Needs)</h3>
                     <div class="input-group">
                         <div class="input-field">
@@ -421,6 +458,8 @@
     <script src="/js/auth.js"></script>
     <script src="/js/db.js"></script>
     <script src="/js/tax-limits.js"></script>
+    <script src="/js/csv-import.js"></script>
+    <input type="file" id="csvFileInput" accept=".csv,text/csv" style="display:none" onchange="handleCsvFile(this.files[0])">
     <script>
         var selectedBudgetIndex = -1;
         var selectedBudget = null;
