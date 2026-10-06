@@ -41,6 +41,11 @@
                     <p>Start fresh with a new budget plan</p>
                     <button class="btn btn-success" onclick="createNewBudget()" style="margin-top:10px;">+ Create New Budget</button>
                 </div>
+
+                <div class="tools-section">
+                    <h3>Tools</h3>
+                    <a class="btn btn-secondary" href="/mortgage.html">🧮 Mortgage Calculator</a>
+                </div>
             </div>
         </div>
 
@@ -222,6 +227,9 @@
             <div id="housingTab" class="tab-content">
                 <div class="section">
                     <h2>🏠 Housing Expenses</h2>
+                    <div class="housing-tools">
+                        <a class="btn btn-secondary" href="/mortgage.html" target="_blank" rel="noopener">🧮 Open Mortgage Calculator</a>
+                    </div>
                     <div class="input-group">
                         <div class="input-field">
                             <label for="houseValue">House Value ($)</label>
@@ -230,6 +238,7 @@
                         <div class="input-field">
                             <label for="mortgageRate">Mortgage Interest Rate (%)</label>
                             <input type="text" inputmode="decimal" id="mortgageRate" placeholder="5.92" data-percent>
+                            <div class="rate-check" id="housingRateCheck"></div>
                         </div>
                         <div class="input-field">
                             <label for="mortgageDownPayment">Down Payment ($)</label>
@@ -458,6 +467,8 @@
     <script src="/js/auth.js"></script>
     <script src="/js/db.js"></script>
     <script src="/js/tax-limits.js"></script>
+    <script src="/js/mortgage-rates.js"></script>
+    <script src="/js/mortgage-market.js"></script>
     <script src="/js/csv-import.js"></script>
     <input type="file" id="csvFileInput" accept=".csv,text/csv" style="display:none" onchange="handleCsvFile(this.files[0])">
     <script src="/js/state.js"></script>

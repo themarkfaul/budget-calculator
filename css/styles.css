@@ -177,6 +177,21 @@ body {
     margin-top: 20px;
 }
 
+.tools-section {
+    text-align: center;
+    margin-top: 25px;
+}
+
+.tools-section h3 {
+    color: #495057;
+    margin-bottom: 10px;
+}
+
+a.btn {
+    display: inline-block;
+    text-decoration: none;
+}
+
 .delete-btn {
     position: absolute;
     top: 10px;
@@ -432,6 +447,146 @@ input:focus {
     justify-content: space-between;
     padding: 2px 0;
     color: #6c757d;
+}
+
+/* ── Mortgage Calculator ── */
+
+.mc-body {
+    padding: 30px 40px 40px;
+}
+
+.mc-back {
+    color: #667eea;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.mc-title {
+    text-align: center;
+    margin: 15px 0 25px;
+    color: #495057;
+}
+
+.field-hint {
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-top: 4px;
+    min-height: 1.2em;
+}
+
+.rate-check {
+    font-size: 0.85em;
+    margin-top: 4px;
+    min-height: 1.2em;
+}
+
+.rate-check-ok { color: #28a745; }
+.rate-check-info { color: #495057; }
+.rate-check-warn { color: #b45309; font-weight: 600; }
+
+.market-rate {
+    background: #e8f0fe;
+    border: 1px solid #667eea;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 5px 0 20px;
+    text-align: center;
+}
+
+.market-rate-value {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.market-rate-label {
+    color: #495057;
+    font-weight: 600;
+}
+
+.market-rate-source,
+.market-rate-stale {
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-top: 4px;
+}
+
+.market-rate-source a {
+    color: #667eea;
+}
+
+.market-rate-stale {
+    color: #b45309;
+}
+
+.market-rate-btn {
+    margin-top: 10px;
+    padding: 8px 16px;
+}
+
+.mc-extras summary {
+    cursor: pointer;
+    color: #667eea;
+    font-weight: 600;
+}
+
+.mc-result {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 15px;
+    padding: 25px;
+    text-align: center;
+    margin: 25px 0 15px;
+}
+
+.mc-result-label {
+    font-weight: 600;
+    opacity: 0.9;
+}
+
+.mc-result-amount {
+    font-size: 2.6em;
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+.mc-result-sub {
+    font-size: 0.9em;
+    opacity: 0.85;
+}
+
+.mc-result-total {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.mc-details {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+}
+
+.mc-note {
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+.housing-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 20px;
+}
+
+@media (max-width: 600px) {
+    .mc-body {
+        padding: 20px 16px 30px;
+    }
 }
 
 /* ── CSV Import ── */

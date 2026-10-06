@@ -14,17 +14,13 @@ function calculateHousing() {
     var localTaxRate = val('localTaxRate');
     var waste = val('waste');
 
-    var loanAmount = Math.max(0, houseValue - mortgageDown);
-    var monthlyRate = (mortgageRate / 100) / 12;
-    var numPayments = mortgageTerm * 12;
+    var mortgagePayment = loanPayment(Math.max(0, houseValue - mortgageDown), mortgageRate, mortgageTerm);
 
-    var mortgagePayment = 0;
-    if (monthlyRate > 0 && numPayments > 0) {
-        mortgagePayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) /
-            (Math.pow(1 + monthlyRate, numPayments) - 1);
-    } else if (numPayments > 0) {
-        mortgagePayment = loanAmount / numPayments;
-    }
+    // Compare the entered rate with Freddie Mac's current average for this term (30-year if blank)
+    var rateCheckEl = document.getElementById('housingRateCheck');
+    var check = checkRateAgainstMarket(mortgageRate, mortgageTerm || 30);
+    rateCheckEl.className = 'rate-check' + (check ? ' rate-check-' + check.level : '');
+    rateCheckEl.textContent = check ? check.text : '';
 
     var propertyTaxes = propertyValue * (stateTaxRate + countyTaxRate + localTaxRate) / 100;
     var totalHousing = mortgagePayment + (homeInsurance / 12) + (propertyTaxes / 12) + (waste / 12);
@@ -42,17 +38,7 @@ function calculateTransportation() {
     var carInsurance = val('carInsuranceAnnual');
     var carTaxes = val('carTaxes');
 
-    var loanAmount = Math.max(0, carPrice - downPayment);
-    var monthlyRate = (rate / 100) / 12;
-    var numPayments = term * 12;
-
-    var carPayment = 0;
-    if (monthlyRate > 0 && numPayments > 0) {
-        carPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) /
-            (Math.pow(1 + monthlyRate, numPayments) - 1);
-    } else if (numPayments > 0) {
-        carPayment = loanAmount / numPayments;
-    }
+    var carPayment = loanPayment(Math.max(0, carPrice - downPayment), rate, term);
 
     var totalTransportation = carPayment + (carInsurance / 12) + (carTaxes / 12);
     setText('carPaymentResult', formatCurrency(carPayment));

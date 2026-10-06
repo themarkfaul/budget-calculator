@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mortgage Calculator - My Budget AI</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+    <link rel="icon" href="/icons/favicon-32.png" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#667eea">
+</head>
+<body>
+    <div class="container">
+        <div class="app-header">My Budget AI</div>
+
+        <div class="mc-body">
+            <a class="mc-back" href="/app.html">← Back to My Budget AI</a>
+            <h2 class="mc-title">🧮 Mortgage Calculator</h2>
+
+            <div class="section">
+                <div class="input-group">
+                    <div class="input-field">
+                        <label for="mcPrice">Home Price ($)</label>
+                        <input type="text" inputmode="decimal" id="mcPrice" placeholder="350,000">
+                    </div>
+                    <div class="input-field">
+                        <label for="mcDown">Down Payment ($)</label>
+                        <input type="text" inputmode="decimal" id="mcDown" placeholder="70,000">
+                        <div class="field-hint" id="mcDownPercent"></div>
+                    </div>
+                    <div class="input-field">
+                        <label for="mcTerm">Loan Term</label>
+                        <select id="mcTerm">
+                            <option value="30">30 years</option>
+                            <option value="20">20 years</option>
+                            <option value="15">15 years</option>
+                            <option value="10">10 years</option>
+                        </select>
+                    </div>
+                    <div class="input-field">
+                        <label for="mcRate">Interest Rate (%)</label>
+                        <input type="text" inputmode="decimal" id="mcRate" placeholder="6.50" data-percent>
+                        <div class="rate-check" id="mcRateCheck"></div>
+                    </div>
+                </div>
+
+                <div class="market-rate" id="mcMarket"></div>
+
+                <details class="mc-extras">
+                    <summary>Add property tax, insurance and HOA (optional)</summary>
+                    <div class="input-group" style="margin-top: 15px;">
+                        <div class="input-field">
+                            <label for="mcTax">Property Tax ($ per year)</label>
+                            <input type="text" inputmode="decimal" id="mcTax" placeholder="3,500">
+                        </div>
+                        <div class="input-field">
+                            <label for="mcInsurance">Home Insurance ($ per year)</label>
+                            <input type="text" inputmode="decimal" id="mcInsurance" placeholder="2,000">
+                        </div>
+                        <div class="input-field">
+                            <label for="mcHoa">HOA Dues ($ per month)</label>
+                            <input type="text" inputmode="decimal" id="mcHoa" placeholder="0">
+                        </div>
+                    </div>
+                </details>
+            </div>
+
+            <div class="mc-result">
+                <div class="mc-result-label">Monthly Mortgage Payment</div>
+                <div class="mc-result-amount" id="mcPayment">$0.00</div>
+                <div class="mc-result-sub">Principal and interest</div>
+                <div id="mcTotalRow" style="display:none;">
+                    <div class="mc-result-total">With taxes, insurance and HOA: <strong id="mcTotal">$0.00</strong> per month</div>
+                </div>
+            </div>
+
+            <div class="mc-details">
+                <div class="breakdown-row"><span>Loan amount</span><span id="mcLoan">$0.00</span></div>
+                <div class="breakdown-row"><span>Total interest over <span id="mcTermLabel">30 years</span></span><span id="mcInterest">$0.00</span></div>
+                <div class="breakdown-row"><span>Total of all payments</span><span id="mcTotalPaid">$0.00</span></div>
+            </div>
+
+            <p class="mc-note" id="mcPmiNote" style="display:none;">
+                With less than 20% down, lenders usually add private mortgage insurance (PMI) to the monthly
+                payment until you reach 20% equity. It isn't included above.
+            </p>
+            <p class="mc-note">
+                Rates shown are national weekly averages for borrowers with strong credit. Your actual rate
+                depends on your credit, down payment, points and lender.
+            </p>
+        </div>
+    </div>
+
+    <script src="/js/helpers.js"></script>
+    <script src="/js/mortgage-rates.js"></script>
+    <script src="/js/mortgage-market.js"></script>
+    <script src="/js/mortgage-calculator.js"></script>
+</body>
+</html>

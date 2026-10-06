@@ -57,6 +57,16 @@ function setText(id, text) {
     if (el) el.textContent = text;
 }
 
+// Monthly payment on a fixed-rate loan; annualRate in percent, years may be fractional
+function loanPayment(principal, annualRate, years) {
+    var monthlyRate = (annualRate / 100) / 12;
+    var numPayments = years * 12;
+    if (numPayments <= 0) return 0;
+    if (monthlyRate <= 0) return principal / numPayments;
+    var growth = Math.pow(1 + monthlyRate, numPayments);
+    return principal * monthlyRate * growth / (growth - 1);
+}
+
 function escapeHtml(str) {
     var div = document.createElement('div');
     div.appendChild(document.createTextNode(str || ''));

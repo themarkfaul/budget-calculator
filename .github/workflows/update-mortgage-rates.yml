@@ -1,0 +1,32 @@
+# Keeps js/mortgage-rates.js current with Freddie Mac's weekly average rates.
+# Freddie Mac publishes on Thursdays (earlier in holiday weeks). This checks daily
+# and only commits when the numbers change, which happens about once a week.
+# If Freddie Mac changes its file format, the run fails and GitHub emails you.
+name: Update mortgage rates
+on:
+  schedule:
+    - cron: '37 15 * * *'   # 15:37 UTC daily
+  workflow_dispatch:         # adds a "Run workflow" button for a manual check
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Fetch the latest Freddie Mac rates
+        run: node .github/scripts/update-mortgage-rates.js
+      - name: Commit if the rates changed
+        run: |
+          if git diff --quiet -- js/mortgage-rates.js; then
+            echo "No change."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898333+github-actions[bot]@users.noreply.github.com"
+          git add js/mortgage-rates.js
+          git commit -m "Update mortgage rates from Freddie Mac"
+          git push
