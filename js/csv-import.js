@@ -1,7 +1,7 @@
 // Bank / card CSV import. Runs entirely in the browser: the file is read locally,
 // sorted into budget categories with keyword rules, reviewed, then applied.
-// Relies on app.html globals: showScreen, calculateAll, formatAllInputs, escapeHtml,
-// formatCurrency, val, isDirty.
+// Uses globals from the other js/ files: showScreen, calculateAll, formatAllInputs,
+// escapeHtml, formatCurrency, val, isDirty.
 
 var IMPORT_CATEGORIES = [
     { group: 'Spending', options: [
