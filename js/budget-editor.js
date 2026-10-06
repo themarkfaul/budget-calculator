@@ -112,7 +112,7 @@ function loadBudgetDataIntoCalculator(budget) {
         if (EARNER_FIELD_PATTERN.test(fieldId)) continue;
         if (fieldId.match(/^(tuition|lunch|afterschool)_\d+$/)) continue;
         var input = document.getElementById(fieldId);
-        if (input) input.value = budget.data[fieldId];
+        if (input) setFieldValue(input, budget.data[fieldId]);
     }
 
     calculateAll();
@@ -140,6 +140,9 @@ function clearCalculatorFields() {
     for (var i = 0; i < inputs.length; i++) inputs[i].value = '';
     var nameInputs = document.querySelectorAll('.earner-name-input');
     for (var i = 0; i < nameInputs.length; i++) nameInputs[i].value = '';
+
+    document.getElementById('leftoverSplitOn').checked = false;
+    document.getElementById('leftoverSavingsPercent').value = '100';
 }
 
 function gatherCalculatorData() {
@@ -186,6 +189,12 @@ function gatherCalculatorData() {
         if (otherInputs[i].value !== '') data[id] = otherInputs[i].value;
     }
 
+    // Left-over split (dashboard)
+    if (document.getElementById('leftoverSplitOn').checked) {
+        data.leftoverSplitOn = 'true';
+        data.leftoverSavingsPercent = document.getElementById('leftoverSavingsPercent').value;
+    }
+
     return data;
 }
 
@@ -211,6 +220,8 @@ function buildSummary() {
         leftoverInSavings: false,
         totalExpenses: '$' + formatCurrency(totalExpenses),
         remainingBalance: formatSignedMoney(remaining),
+        leftoverToSavings: '$' + formatCurrency(leftoverAllocation(remaining).toSavings),
+        leftoverToSpending: '$' + formatCurrency(leftoverAllocation(remaining).toSpending),
         paycheckRetirement: '$' + formatCurrency(calculatePaycheckRetirement())
     };
 }

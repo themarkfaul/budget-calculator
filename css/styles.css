@@ -405,6 +405,48 @@ input:focus {
     color: #495057;
 }
 
+.leftover-plan {
+    background: white;
+    border: 1px solid #28a745;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.leftover-plan .checkbox-row {
+    font-weight: 600;
+    color: #155724;
+    margin-bottom: 0;
+}
+
+#leftoverSplitControls {
+    margin-top: 12px;
+}
+
+input.leftover-slider {
+    width: 100%;
+    padding: 0;
+    border: none;
+    accent-color: #28a745;
+    margin-bottom: 10px;
+}
+
+.leftover-split-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-weight: 600;
+}
+
+.leftover-split-savings { color: #155724; }
+.leftover-split-spending { color: #495057; }
+
+.leftover-hint {
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-top: 6px;
+}
+
 .preview-value.preview-left { color: #28a745; }
 .preview-value.preview-over { color: #dc3545; }
 

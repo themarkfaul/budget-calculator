@@ -117,6 +117,8 @@ function renderBalance(takeHome, remaining, costs, savings) {
     setText('dashRemainingLabel', labels[status]);
     setText('dashRemaining', formatSignedMoney(remaining));
 
+    renderLeftoverPlan(remaining);
+
     var message = document.getElementById('dashBalanceMessage');
     var totalCosts = takeHome - remaining;
     if (takeHome <= 0 && totalCosts <= 0) {
@@ -136,10 +138,48 @@ function renderBalance(takeHome, remaining, costs, savings) {
         if (savings > 0) text += ' Planned savings are $' + formatCurrency(savings) + '.';
         message.textContent = text;
     } else if (status === 'left') {
-        message.textContent = 'You have $' + formatCurrency(remaining) +
-            " a month that isn't assigned yet. Consider putting it toward savings or another goal.";
+        var split = leftoverAllocation(remaining);
+        message.textContent = split.assigned
+            ? 'Your $' + formatCurrency(remaining) + ' left over each month is planned: $' +
+                formatCurrency(split.toSavings) + ' to savings and $' + formatCurrency(split.toSpending) + ' to spending.'
+            : 'You have $' + formatCurrency(remaining) +
+                " a month that isn't assigned yet. Use the split below to plan it for savings or spending.";
     } else {
         message.textContent = 'Every dollar is assigned: your costs and savings match your take-home pay.';
     }
 }
 
+
+// ── Left-over split ──
+
+// How this month's left-over money is planned. Nothing is assigned until the user turns the
+// split on; when over budget there's nothing to split, but the chosen percent is kept.
+function leftoverAllocation(remaining) {
+    var on = document.getElementById('leftoverSplitOn').checked;
+    if (!on || remaining <= 0) return { assigned: false, toSavings: 0, toSpending: 0, percent: 0 };
+    var percent = parseInt(document.getElementById('leftoverSavingsPercent').value, 10);
+    var toSavings = Math.round(remaining * percent) / 100;
+    var toSpending = Math.max(0, Math.round((remaining - toSavings) * 100) / 100);
+    return { assigned: true, toSavings: toSavings, toSpending: toSpending, percent: percent };
+}
+
+function renderLeftoverPlan(remaining) {
+    var plan = document.getElementById('leftoverPlan');
+    if (balanceStatus(remaining) !== 'left') {
+        plan.style.display = 'none';
+        return;
+    }
+    plan.style.display = 'block';
+    var on = document.getElementById('leftoverSplitOn').checked;
+    document.getElementById('leftoverSplitControls').style.display = on ? 'block' : 'none';
+    if (!on) return;
+
+    var split = leftoverAllocation(remaining);
+    setText('leftoverToSavings', '$' + formatCurrency(split.toSavings) + ' (' + split.percent + '%)');
+    setText('leftoverToSpending', '$' + formatCurrency(split.toSpending) + ' (' + (100 - split.percent) + '%)');
+}
+
+function onLeftoverSplitToggle() {
+    isDirty = true;
+    calculateAll();
+}

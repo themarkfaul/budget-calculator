@@ -115,6 +115,11 @@ function showSummary() {
     html += '<div class="summary-item balance-' + status + '"><h3>' +
         { left: 'Left Over', over: 'Over Budget', even: 'Remaining' }[status] + '</h3>' +
         '<div class="amount">' + formatSignedMoney(remaining) + '</div></div>';
+    var toSavings = parseMoney(s.leftoverToSavings), toSpending = parseMoney(s.leftoverToSpending);
+    if (status === 'left' && toSavings + toSpending > 0) {
+        html += '<div class="summary-item balance-left"><h3>Remaining for Savings</h3><div class="amount">$' + formatCurrency(toSavings) + '</div></div>';
+        html += '<div class="summary-item balance-left"><h3>Remaining for Spending</h3><div class="amount">$' + formatCurrency(toSpending) + '</div></div>';
+    }
     document.getElementById('summaryGrid').innerHTML = html;
     showScreen('summaryScreen');
 }
@@ -156,7 +161,9 @@ function evaluateBudget() {
     // Groceries and gasoline sit on the Spending tab but are needs; read them from the saved inputs
     var data = selectedBudget.data || {};
     var essentials = calculateEssentialSpending(function (id) { return parseMoney(data[id]); });
-    var wants = spending - essentials;
+    // Left-over money the user planned via the dashboard split counts toward wants and savings
+    var wants = spending - essentials + parseMoney(s.leftoverToSpending);
+    savings += parseMoney(s.leftoverToSavings);
     var needs = housing + parseMoney(s.transportation) + parseMoney(s.education) + parseMoney(s.utilities) + essentials;
     // Paycheck retirement is real savings that never reaches take-home, so add it to both sides
     var paycheckRetirement = parseMoney(s.paycheckRetirement);

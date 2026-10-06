@@ -255,6 +255,23 @@
                         <div class="summary-item balance-even" id="dashRemainingCard"><h3 id="dashRemainingLabel">Remaining</h3><div class="amount" id="dashRemaining">$0.00</div></div>
                     </div>
                     <div class="balance-message" id="dashBalanceMessage" style="display:none;"></div>
+
+                    <div class="leftover-plan" id="leftoverPlan" style="display:none;">
+                        <label class="checkbox-row">
+                            <input type="checkbox" id="leftoverSplitOn" onchange="onLeftoverSplitToggle()">
+                            Split what's left over between savings and spending
+                        </label>
+                        <div id="leftoverSplitControls">
+                            <input type="range" class="leftover-slider" id="leftoverSavingsPercent" min="0" max="100" step="5" value="100" aria-label="Percent of left-over money for savings" oninput="calculateAll()">
+                            <div class="leftover-split-row leftover-split-savings">
+                                <span>Remaining for Savings</span><span id="leftoverToSavings">$0.00</span>
+                            </div>
+                            <div class="leftover-split-row leftover-split-spending">
+                                <span>Remaining for Spending</span><span id="leftoverToSpending">$0.00</span>
+                            </div>
+                            <div class="leftover-hint">Drag to choose how much of each month's leftover goes to savings. The split adjusts automatically when your budget changes.</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
