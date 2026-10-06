@@ -42,6 +42,16 @@
                     <button class="btn btn-success" onclick="createNewBudget()" style="margin-top:10px;">+ Create New Budget</button>
                 </div>
 
+                <div class="handoff-banner" id="mortgageHandoffHome" style="display:none;">
+                    <div class="handoff-text">
+                        <strong>🧮 Your mortgage numbers are ready.</strong>
+                        <span>Open or create a budget to apply them to its Housing tab.</span>
+                    </div>
+                    <div class="handoff-buttons">
+                        <button class="btn btn-secondary" onclick="dismissPendingMortgage()">Dismiss</button>
+                    </div>
+                </div>
+
                 <div class="tools-section">
                     <h3>Tools</h3>
                     <a class="btn btn-secondary" href="/mortgage.html">🧮 Mortgage Calculator</a>
@@ -184,6 +194,18 @@
                 </div>
             </div>
 
+            <div class="handoff-banner" id="mortgageHandoff" style="display:none;">
+                <div class="handoff-text">
+                    <strong>🧮 Use the mortgage calculator's numbers?</strong>
+                    <span id="mortgageHandoffSummary"></span>
+                    <span class="handoff-note">This replaces the Housing tab's price, down payment, rate and term. Property tax still comes from the property value and tax rates there.</span>
+                </div>
+                <div class="handoff-buttons">
+                    <button class="btn btn-success" onclick="applyPendingMortgage()">Apply</button>
+                    <button class="btn btn-secondary" onclick="dismissPendingMortgage()">Dismiss</button>
+                </div>
+            </div>
+
             <div class="tabs">
                 <button class="tab active" onclick="showCalcTab(event, 'dashboardTab')"><span class="tab-icon">📊</span><span class="tab-label">Dashboard</span></button>
                 <button class="tab" onclick="showCalcTab(event, 'incomeTab')"><span class="tab-icon">💰</span><span class="tab-label">Income</span></button>
@@ -228,7 +250,7 @@
                 <div class="section">
                     <h2>🏠 Housing Expenses</h2>
                     <div class="housing-tools">
-                        <a class="btn btn-secondary" href="/mortgage.html" target="_blank" rel="noopener">🧮 Open Mortgage Calculator</a>
+                        <button class="btn btn-secondary" onclick="openMortgageCalculator()">🧮 Open Mortgage Calculator</button>
                     </div>
                     <div class="input-group">
                         <div class="input-field">
@@ -469,6 +491,7 @@
     <script src="/js/tax-limits.js"></script>
     <script src="/js/mortgage-rates.js"></script>
     <script src="/js/mortgage-market.js"></script>
+    <script src="/js/mortgage-handoff.js"></script>
     <script src="/js/csv-import.js"></script>
     <input type="file" id="csvFileInput" accept=".csv,text/csv" style="display:none" onchange="handleCsvFile(this.files[0])">
     <script src="/js/state.js"></script>

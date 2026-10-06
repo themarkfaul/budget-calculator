@@ -561,6 +561,52 @@ input:focus {
     border-top: 1px solid rgba(255, 255, 255, 0.3);
 }
 
+.mc-use {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.mc-use-message {
+    font-size: 0.9em;
+    margin-top: 8px;
+    min-height: 1.2em;
+}
+
+.handoff-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 10px;
+    padding: 12px 15px;
+    margin: 15px 20px;
+}
+
+.home-container .handoff-banner {
+    margin: 20px 0 0;
+}
+
+.handoff-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    color: #856404;
+    min-width: 220px;
+    flex: 1;
+}
+
+.handoff-note {
+    font-size: 0.85em;
+}
+
+.handoff-buttons {
+    display: flex;
+    gap: 8px;
+}
+
 .mc-details {
     background: white;
     border: 1px solid #e9ecef;

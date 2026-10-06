@@ -2,6 +2,24 @@
 // Freddie Mac only publishes 30- and 15-year averages, so 10- and 20-year terms get a
 // clearly labelled guide instead.
 
+// localStorage key the calculator uses to hand its numbers to an open budget
+var PENDING_MORTGAGE_KEY = 'pendingMortgageNumbers';
+var PENDING_MORTGAGE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+function readPendingMortgage() {
+    try {
+        var pending = JSON.parse(localStorage.getItem(PENDING_MORTGAGE_KEY));
+        if (!pending || Date.now() - pending.savedAt > PENDING_MORTGAGE_MAX_AGE_MS) return null;
+        return pending;
+    } catch (e) {
+        return null;
+    }
+}
+
+function clearPendingMortgage() {
+    try { localStorage.removeItem(PENDING_MORTGAGE_KEY); } catch (e) { /* storage unavailable */ }
+}
+
 function roundRate(rate) {
     return Math.round(rate * 100) / 100;
 }

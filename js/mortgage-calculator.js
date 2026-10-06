@@ -72,6 +72,41 @@ function calculateMortgage() {
     document.getElementById('mcPmiNote').style.display = loan > 0 && downPercent < 20 ? 'block' : 'none';
 }
 
+// Hands the numbers to the budget through localStorage (see js/mortgage-handoff.js).
+// Opened from a budget's Housing tab: close this tab so the user lands back on the budget,
+// where a banner offers to apply them. Otherwise go to the app's home screen.
+function useInBudget() {
+    var message = document.getElementById('mcUseMessage');
+    var pending = {
+        price: val('mcPrice'),
+        down: val('mcDown'),
+        rate: val('mcRate'),
+        term: selectedTerm(),
+        insurance: val('mcInsurance'),
+        savedAt: Date.now()
+    };
+    if (!(pending.price > 0) || !(pending.rate > 0)) {
+        message.className = 'mc-use-message rate-check-warn';
+        message.textContent = 'Enter a home price and interest rate first.';
+        return;
+    }
+    try {
+        localStorage.setItem(PENDING_MORTGAGE_KEY, JSON.stringify(pending));
+    } catch (e) {
+        message.className = 'mc-use-message rate-check-warn';
+        message.textContent = "Your browser blocked saving these numbers. Copy them into the budget's Housing tab instead.";
+        return;
+    }
+
+    if (window.opener && !window.opener.closed) {
+        message.className = 'mc-use-message rate-check-ok';
+        message.textContent = 'Sent. Switch back to your budget tab and tap Apply.';
+        window.close();
+    } else {
+        window.location.href = '/app.html';
+    }
+}
+
 (function () {
     document.getElementById('mcTerm').addEventListener('change', onTermChange);
     document.getElementById('mcRate').addEventListener('input', function () { rateIsAutoFilled = false; });
