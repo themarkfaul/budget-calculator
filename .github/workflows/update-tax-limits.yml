@@ -1,0 +1,33 @@
+# Keeps the Social Security wage base in js/tax-limits.js current.
+# SSA announces next year's limit each October or November, so this checks
+# weekly from October through December and once more on January 2. When a
+# new limit is found it commits the change, and Vercel deploys it.
+# If the new year starts without one, the January run fails and GitHub emails you.
+name: Update tax limits
+on:
+  schedule:
+    - cron: '23 14 * 10-12 1'  # 14:23 UTC every Monday, October to December
+    - cron: '23 14 2 1 *'      # 14:23 UTC on January 2
+  workflow_dispatch:           # adds a "Run workflow" button for a manual check
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check the Federal Register for a new Social Security wage base
+        run: node .github/scripts/update-tax-limits.js
+      - name: Commit if the limit changed
+        run: |
+          if git diff --quiet js/tax-limits.js; then
+            echo "No change."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898333+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Update Social Security wage base from SSA notice"
+          git push

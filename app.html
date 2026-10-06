@@ -420,6 +420,7 @@
     <script src="/js/supabase-client.js"></script>
     <script src="/js/auth.js"></script>
     <script src="/js/db.js"></script>
+    <script src="/js/tax-limits.js"></script>
     <script>
         var selectedBudgetIndex = -1;
         var selectedBudget = null;
@@ -774,8 +775,8 @@
             'stateIncomeTax', 'ficaIncluded', 'carAllowance'];
         var EARNER_FIELD_PATTERN = new RegExp('^(' + EARNER_FIELDS.join('|') + ')_\\d+$');
 
-        // 2026 Social Security wage base; update each year when SSA announces the new limit
-        var SOCIAL_SECURITY_WAGE_BASE = 184500;
+        // Yearly limit lives in js/tax-limits.js, which a GitHub workflow keeps current
+        var SOCIAL_SECURITY_WAGE_BASE = getSocialSecurityWageBase(new Date().getFullYear());
         var SOCIAL_SECURITY_RATE = 0.062;
         var MEDICARE_RATE = 0.0145;
         var ADDITIONAL_MEDICARE_RATE = 0.009;
