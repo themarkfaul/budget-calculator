@@ -367,6 +367,22 @@ input:focus {
     color: #155724;
 }
 
+.retirement-hint {
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #6c757d;
+    margin-top: 4px;
+}
+
+.retirement-warning {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin: 15px 0 0;
+    color: #856404;
+}
+
 .result-positive { color: #28a745; }
 .result-negative { color: #dc3545; }
 

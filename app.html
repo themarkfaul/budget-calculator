@@ -89,7 +89,7 @@
                         <div class="rule-title">50/30/20 Rule</div>
                         <div class="rule-status" id="budgetRuleStatus">Checking...</div>
                     </div>
-                    <p>Needs ≤ 50%, Wants ≤ 30%, Savings ≥ 20% of your take-home pay.</p>
+                    <p>Needs ≤ 50%, Wants ≤ 30%, Savings ≥ 20% of your take-home pay (plus retirement taken from your paycheck, which counts as savings).</p>
                     <div class="rule-details">
                         <div class="rule-metric">
                             <div class="metric-label">Needs (Fixed)</div>
@@ -368,14 +368,18 @@
             <div id="savingsTab" class="tab-content">
                 <div class="section">
                     <h2>🏦 Monthly Savings</h2>
+                    <div class="earner-subtotal" style="margin: 0 0 20px;">
+                        Retirement from paychecks (Income tab): $<span id="paycheckRetirementResult">0.00</span>/mo
+                        <div class="retirement-hint">Already taken out of take-home pay. Only use "Other Retirement" below for saving outside your paycheck.</div>
+                    </div>
                     <div class="input-group">
                         <div class="input-field">
                             <label for="emergencyFund">Emergency Fund (Monthly)</label>
                             <input type="text" inputmode="decimal" id="emergencyFund" placeholder="500">
                         </div>
                         <div class="input-field">
-                            <label for="retirement401k">401k/Retirement (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="retirement401k" placeholder="800">
+                            <label for="retirement401k">Other Retirement (Monthly)</label>
+                            <input type="text" inputmode="decimal" id="retirement401k" placeholder="0">
                         </div>
                         <div class="input-field">
                             <label for="iraContribution">IRA Contribution (Monthly)</label>
@@ -393,6 +397,9 @@
                             <label for="cashSavings">Cash Savings (Monthly)</label>
                             <input type="text" inputmode="decimal" id="cashSavings" placeholder="300">
                         </div>
+                    </div>
+                    <div class="retirement-warning" id="retirementWarning" style="display:none;">
+                        ⚠️ Retirement is entered on both the Income tab and here. Only use "Other Retirement" for saving outside your paycheck, or it gets counted twice.
                     </div>
                     <div class="calc-result">
                         Total Monthly Savings: $<span id="savingsResult">0.00</span>
@@ -620,9 +627,13 @@
             hStatus.className = 'rule-status ' + (housingPass ? 'status-pass' : 'status-fail');
 
             var needs = housing + parseMoney(s.transportation) + parseMoney(s.education) + parseMoney(s.utilities);
-            var needsPercent = takeHome > 0 ? (needs / takeHome) * 100 : 0;
-            var wantsPercent = takeHome > 0 ? (spending / takeHome) * 100 : 0;
-            var savingsPercent = takeHome > 0 ? (savings / takeHome) * 100 : 0;
+            // Paycheck retirement is real savings that never reaches take-home, so add it to both sides
+            var paycheckRetirement = parseMoney(s.paycheckRetirement);
+            savings += paycheckRetirement;
+            var income = takeHome + paycheckRetirement;
+            var needsPercent = income > 0 ? (needs / income) * 100 : 0;
+            var wantsPercent = income > 0 ? (spending / income) * 100 : 0;
+            var savingsPercent = income > 0 ? (savings / income) * 100 : 0;
             var budgetPass = needsPercent <= 50 && wantsPercent <= 30 && savingsPercent >= 20;
 
             setText('needsAmount', '$' + formatCurrency(needs) + ' (' + needsPercent.toFixed(1) + '%)');
@@ -971,7 +982,8 @@
                 spending: '$' + formatCurrency(spending),
                 savings: '$' + formatCurrency(savings + (remaining > 0 ? remaining : 0)),
                 totalExpenses: '$' + formatCurrency(totalExpenses),
-                remainingBalance: '$' + formatCurrency(remaining)
+                remainingBalance: '$' + formatCurrency(remaining),
+                paycheckRetirement: '$' + formatCurrency(calculatePaycheckRetirement())
             };
         }
 
@@ -1068,6 +1080,19 @@
 
             setText('incomeResult', formatCurrency(totalTakeHome));
             return totalTakeHome;
+        }
+
+        // Monthly retirement taken out of paychecks (already excluded from take-home)
+        function calculatePaycheckRetirement() {
+            var indices = getEarnerIndices();
+            var total = 0;
+            for (var i = 0; i < indices.length; i++) {
+                total += val('salary_' + indices[i]) * (val('retirement_' + indices[i]) / 100) / 12;
+            }
+            setText('paycheckRetirementResult', formatCurrency(total));
+            document.getElementById('retirementWarning').style.display =
+                total > 0 && val('retirement401k') > 0 ? 'block' : 'none';
+            return total;
         }
 
         function calculateHousing() {
@@ -1179,6 +1204,7 @@
             var utilities = calculateUtilities();
             var spending = calculateSpending();
             var savings = calculateSavings();
+            calculatePaycheckRetirement();
 
             var totalExpenses = housing + transportation + education + utilities + spending + savings;
             var remaining = takeHome - totalExpenses;
