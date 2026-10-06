@@ -57,6 +57,27 @@ function setText(id, text) {
     if (el) el.textContent = text;
 }
 
+// "$1,234.56" or "-$1,234.56"
+function formatSignedMoney(amount) {
+    if (Math.abs(amount) < 0.005) return '$0.00';
+    return (amount < 0 ? '-$' : '$') + formatCurrency(Math.abs(amount));
+}
+
+// 'left' (money left over), 'over' (spending more than take-home), or 'even'
+function balanceStatus(remaining) {
+    if (remaining >= 0.005) return 'left';
+    if (remaining <= -0.005) return 'over';
+    return 'even';
+}
+
+// Savings the user actually planned. Budgets saved before leftover money stopped being
+// counted as savings have summary.savings = planned + leftover, so take the leftover back out.
+function plannedSavings(summary) {
+    var savings = parseMoney(summary.savings);
+    if (summary.leftoverInSavings === false) return savings;
+    return savings - Math.max(0, parseMoney(summary.remainingBalance));
+}
+
 // Monthly payment on a fixed-rate loan; annualRate in percent, years may be fractional
 function loanPayment(principal, annualRate, years) {
     var monthlyRate = (annualRate / 100) / 12;

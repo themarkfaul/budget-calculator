@@ -77,6 +77,29 @@
 
                 <div class="rule-section">
                     <div class="rule-header">
+                        <span style="font-size: 2em;">💵</span>
+                        <div class="rule-title">Balanced Budget</div>
+                        <div class="rule-status" id="balanceRuleStatus">Checking...</div>
+                    </div>
+                    <p>Your costs and planned savings should fit within your monthly take-home pay.</p>
+                    <div class="rule-details">
+                        <div class="rule-metric">
+                            <div class="metric-label">Take-Home Pay</div>
+                            <div class="metric-value" id="balanceTakeHome">$0</div>
+                        </div>
+                        <div class="rule-metric">
+                            <div class="metric-label">Costs + Savings</div>
+                            <div class="metric-value" id="balanceCosts">$0</div>
+                        </div>
+                        <div class="rule-metric">
+                            <div class="metric-label" id="balanceRemainingLabel">Left Over</div>
+                            <div class="metric-value" id="balanceRemaining">$0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rule-section">
+                    <div class="rule-header">
                         <span style="font-size: 2em;">🏠</span>
                         <div class="rule-title">25% Housing Rule</div>
                         <div class="rule-status" id="housingRuleStatus">Checking...</div>
@@ -229,8 +252,9 @@
                         <div class="summary-item"><h3>Utilities</h3><div class="amount" id="dashUtilities">$0.00</div></div>
                         <div class="summary-item"><h3>Spending</h3><div class="amount" id="dashSpending">$0.00</div></div>
                         <div class="summary-item"><h3>Savings</h3><div class="amount" id="dashSavings">$0.00</div></div>
-                        <div class="summary-item"><h3>Remaining</h3><div class="amount" id="dashRemaining">$0.00</div></div>
+                        <div class="summary-item balance-even" id="dashRemainingCard"><h3 id="dashRemainingLabel">Remaining</h3><div class="amount" id="dashRemaining">$0.00</div></div>
                     </div>
+                    <div class="balance-message" id="dashBalanceMessage" style="display:none;"></div>
                 </div>
             </div>
 

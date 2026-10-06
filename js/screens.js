@@ -58,7 +58,9 @@ function displayBudgets() {
         html += '<div class="preview-item"><div class="preview-label">Take Home</div><div class="preview-value">' + escapeHtml(s.takeHome || '$0.00') + '</div></div>';
         html += '<div class="preview-item"><div class="preview-label">Housing</div><div class="preview-value">' + escapeHtml(s.housing || '$0.00') + '</div></div>';
         html += '<div class="preview-item"><div class="preview-label">Spending</div><div class="preview-value">' + escapeHtml(s.spending || '$0.00') + '</div></div>';
-        html += '<div class="preview-item"><div class="preview-label">Remaining</div><div class="preview-value">' + escapeHtml(s.remainingBalance || '$0.00') + '</div></div>';
+        var remaining = parseMoney(s.remainingBalance);
+        html += '<div class="preview-item"><div class="preview-label">Remaining</div><div class="preview-value preview-' +
+            balanceStatus(remaining) + '">' + formatSignedMoney(remaining) + '</div></div>';
         html += '</div></div>';
     }
     container.innerHTML = html;
@@ -101,14 +103,18 @@ function showSummary() {
         {label: 'Education', value: s.education || '$0.00'},
         {label: 'Utilities', value: s.utilities || '$0.00'},
         {label: 'Spending', value: s.spending || '$0.00'},
-        {label: 'Savings', value: s.savings || '$0.00'},
-        {label: 'Remaining Balance', value: s.remainingBalance || '$0.00'}
+        {label: 'Savings', value: '$' + formatCurrency(plannedSavings(s))}
     ];
+    var remaining = parseMoney(s.remainingBalance);
+    var status = balanceStatus(remaining);
     var html = '';
     for (var i = 0; i < data.length; i++) {
         html += '<div class="summary-item"><h3>' + data[i].label + '</h3>';
         html += '<div class="amount">' + escapeHtml(data[i].value) + '</div></div>';
     }
+    html += '<div class="summary-item balance-' + status + '"><h3>' +
+        { left: 'Left Over', over: 'Over Budget', even: 'Remaining' }[status] + '</h3>' +
+        '<div class="amount">' + formatSignedMoney(remaining) + '</div></div>';
     document.getElementById('summaryGrid').innerHTML = html;
     showScreen('summaryScreen');
 }
@@ -123,9 +129,18 @@ function evaluateBudget() {
     var takeHome = parseMoney(s.takeHome);
     var housing = parseMoney(s.housing);
     var spending = parseMoney(s.spending);
-    // Summary savings includes any leftover balance; judge the rule on what was actually budgeted
     var remaining = parseMoney(s.remainingBalance);
-    var savings = parseMoney(s.savings) - (remaining > 0 ? remaining : 0);
+    var savings = plannedSavings(s);
+
+    // Balanced budget: costs plus planned savings fit within take-home pay
+    var balance = balanceStatus(remaining);
+    setText('balanceTakeHome', '$' + formatCurrency(takeHome));
+    setText('balanceCosts', '$' + formatCurrency(takeHome - remaining));
+    setText('balanceRemainingLabel', balance === 'over' ? 'Short Each Month' : 'Left Over');
+    setText('balanceRemaining', '$' + formatCurrency(Math.abs(remaining)));
+    var balanceEl = document.getElementById('balanceRuleStatus');
+    balanceEl.textContent = balance === 'over' ? '❌ OVER BUDGET' : '✅ PASS';
+    balanceEl.className = 'rule-status ' + (balance === 'over' ? 'status-fail' : 'status-pass');
 
     var housingLimit = takeHome * 0.25;
     var housingPercent = takeHome > 0 ? (housing / takeHome) * 100 : 0;

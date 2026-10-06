@@ -22,7 +22,7 @@ function createNewBudget() {
             listHtml += '<div class="new-budget-option" onclick="startFromExisting(' + i + ')">';
             listHtml += '<div class="new-budget-icon">📋</div>';
             listHtml += '<div><div class="new-budget-option-title">' + escapeHtml(b.name) + '</div>';
-            listHtml += '<div class="new-budget-option-desc">Take home: ' + escapeHtml(s.takeHome || '$0.00') + ' · Remaining: ' + escapeHtml(s.remainingBalance || '$0.00') + '</div>';
+            listHtml += '<div class="new-budget-option-desc">Take home: ' + escapeHtml(s.takeHome || '$0.00') + ' · Remaining: ' + formatSignedMoney(parseMoney(s.remainingBalance)) + '</div>';
             listHtml += '</div></div>';
         }
     }
@@ -207,9 +207,10 @@ function buildSummary() {
         education: '$' + formatCurrency(education),
         utilities: '$' + formatCurrency(utilities),
         spending: '$' + formatCurrency(spending),
-        savings: '$' + formatCurrency(savings + (remaining > 0 ? remaining : 0)),
+        savings: '$' + formatCurrency(savings),
+        leftoverInSavings: false,
         totalExpenses: '$' + formatCurrency(totalExpenses),
-        remainingBalance: '$' + formatCurrency(remaining),
+        remainingBalance: formatSignedMoney(remaining),
         paycheckRetirement: '$' + formatCurrency(calculatePaycheckRetirement())
     };
 }

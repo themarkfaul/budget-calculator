@@ -101,13 +101,45 @@ function calculateAll() {
     setText('dashEducation', '$' + formatCurrency(education));
     setText('dashUtilities', '$' + formatCurrency(utilities));
     setText('dashSpending', '$' + formatCurrency(spending));
-    var effectiveSavings = savings + (remaining > 0 ? remaining : 0);
-    setText('dashSavings', '$' + formatCurrency(effectiveSavings));
+    setText('dashSavings', '$' + formatCurrency(savings));
 
-    var remainEl = document.getElementById('dashRemaining');
-    if (remainEl) {
-        remainEl.textContent = '$' + formatCurrency(remaining);
-        remainEl.className = 'amount ' + (remaining >= 0 ? 'result-positive' : 'result-negative');
+    renderBalance(takeHome, remaining, [
+        ['Housing', housing], ['Transportation', transportation], ['Education', education],
+        ['Utilities', utilities], ['Spending', spending]
+    ], savings);
+}
+
+// Remaining card and the message under the dashboard: left over, over budget, or even
+function renderBalance(takeHome, remaining, costs, savings) {
+    var status = balanceStatus(remaining);
+    var labels = { left: 'Left Over', over: 'Over Budget', even: 'Remaining' };
+    document.getElementById('dashRemainingCard').className = 'summary-item balance-' + status;
+    setText('dashRemainingLabel', labels[status]);
+    setText('dashRemaining', formatSignedMoney(remaining));
+
+    var message = document.getElementById('dashBalanceMessage');
+    var totalCosts = takeHome - remaining;
+    if (takeHome <= 0 && totalCosts <= 0) {
+        message.style.display = 'none';
+        return;
+    }
+    message.style.display = 'block';
+    message.className = 'balance-message balance-message-' + status;
+
+    if (status === 'over') {
+        var biggest = costs.filter(function (c) { return c[1] > 0; })
+            .sort(function (a, b) { return b[1] - a[1]; })
+            .slice(0, 3)
+            .map(function (c) { return c[0] + ' ($' + formatCurrency(c[1]) + ')'; });
+        var text = "You're spending $" + formatCurrency(-remaining) + ' more than you bring home each month.';
+        if (biggest.length) text += ' Your biggest costs are ' + biggest.join(', ') + '.';
+        if (savings > 0) text += ' Planned savings are $' + formatCurrency(savings) + '.';
+        message.textContent = text;
+    } else if (status === 'left') {
+        message.textContent = 'You have $' + formatCurrency(remaining) +
+            " a month that isn't assigned yet. Consider putting it toward savings or another goal.";
+    } else {
+        message.textContent = 'Every dollar is assigned: your costs and savings match your take-home pay.';
     }
 }
 
