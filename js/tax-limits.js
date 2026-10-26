@@ -3,7 +3,8 @@
 // Social Security Administration's yearly notice in the Federal Register.
 var SOCIAL_SECURITY_WAGE_BASES = {
     "2025": 176100,
-    "2026": 184500
+    "2026": 184500,
+    "2027": 192300
 };
 
 // The current year's wage base, or the latest known year if this year isn't published yet
