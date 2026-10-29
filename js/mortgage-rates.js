@@ -3,7 +3,7 @@
 var MORTGAGE_RATES = {
     "source": "Freddie Mac Primary Mortgage Market Survey",
     "sourceUrl": "https://www.freddiemac.com/pmms",
-    "asOf": "2026-10-22",
-    "rate30": 7.32,
-    "rate15": 6.68
+    "asOf": "2026-10-29",
+    "rate30": 7.24,
+    "rate15": 6.6
 };
