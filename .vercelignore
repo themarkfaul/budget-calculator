@@ -1,0 +1,3 @@
+# Not part of the website: keep these out of what Vercel publishes
+tests/
+.github/

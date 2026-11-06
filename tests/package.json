@@ -1,0 +1,11 @@
+{
+  "name": "mybudget-ai-tests",
+  "private": true,
+  "description": "Automated checks for the budget math. Run with: npm test (from this folder).",
+  "scripts": {
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "jsdom": "^31.0.0"
+  }
+}
