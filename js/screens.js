@@ -13,7 +13,7 @@ async function goHome() {
     showScreen('loadingScreen');
     selectedBudget = null;
     selectedBudgetIndex = -1;
-    document.getElementById('actionButtons').classList.remove('show');
+    hideBudgetActions();
     try {
         budgets = await loadBudgets();
     } catch (e) {
@@ -37,6 +37,7 @@ function showCalcTab(evt, tabName) {
 
 function displayBudgets() {
     var container = document.getElementById('budgetList');
+    hideBudgetActions();
 
     if (budgets.length === 0) {
         container.innerHTML = '<p style="text-align:center; color:#6c757d; padding:20px;">No budgets yet. Create your first one below!</p>';
@@ -72,7 +73,18 @@ function selectBudget(index) {
     items[index].classList.add('selected');
     selectedBudgetIndex = index;
     selectedBudget = budgets[index];
-    document.getElementById('actionButtons').classList.add('show');
+
+    // Show Summary / Edit / Evaluate directly under the selected budget
+    var actions = document.getElementById('actionButtons');
+    items[index].after(actions);
+    actions.classList.add('show');
+}
+
+// Hide the budget buttons and park them outside the list, so redrawing the list can't remove them
+function hideBudgetActions() {
+    var actions = document.getElementById('actionButtons');
+    actions.classList.remove('show');
+    document.getElementById('budgetList').after(actions);
 }
 
 async function handleDelete(event, index) {
@@ -83,7 +95,7 @@ async function handleDelete(event, index) {
         budgets.splice(index, 1);
         selectedBudget = null;
         selectedBudgetIndex = -1;
-        document.getElementById('actionButtons').classList.remove('show');
+        hideBudgetActions();
         displayBudgets();
     } catch (e) {
         alert('Error deleting budget: ' + e.message);
