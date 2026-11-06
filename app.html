@@ -236,6 +236,7 @@
                 <button class="tab" onclick="showCalcTab(event, 'educationTab')"><span class="tab-icon">🎓</span><span class="tab-label">Education</span></button>
                 <button class="tab" onclick="showCalcTab(event, 'utilitiesTab')"><span class="tab-icon">⚡</span><span class="tab-label">Utilities</span></button>
                 <button class="tab" onclick="showCalcTab(event, 'spendingTab')"><span class="tab-icon">🛒</span><span class="tab-label">Spending</span></button>
+                <button class="tab" onclick="showCalcTab(event, 'otherTab')"><span class="tab-icon">📋</span><span class="tab-label">Other</span></button>
                 <button class="tab" onclick="showCalcTab(event, 'savingsTab')"><span class="tab-icon">🏦</span><span class="tab-label">Savings</span></button>
             </div>
 
@@ -250,6 +251,7 @@
                         <div class="summary-item"><h3>Education</h3><div class="amount" id="dashEducation">$0.00</div></div>
                         <div class="summary-item"><h3>Utilities</h3><div class="amount" id="dashUtilities">$0.00</div></div>
                         <div class="summary-item"><h3>Spending</h3><div class="amount" id="dashSpending">$0.00</div></div>
+                        <div class="summary-item"><h3>Other</h3><div class="amount" id="dashOther">$0.00</div></div>
                         <div class="summary-item"><h3>Savings</h3><div class="amount" id="dashSavings">$0.00</div></div>
                         <div class="summary-item balance-even" id="dashRemainingCard"><h3 id="dashRemainingLabel">Remaining</h3><div class="amount" id="dashRemaining">$0.00</div></div>
                     </div>
@@ -289,6 +291,28 @@
             <div id="housingTab" class="tab-content">
                 <div class="section">
                     <h2>🏠 Housing Expenses</h2>
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label for="housingMode">Do you own or rent?</label>
+                            <select id="housingMode" onchange="calculateAll()">
+                                <option value="own">Own (mortgage)</option>
+                                <option value="rent">Rent</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="housing-rent input-group">
+                        <div class="input-field">
+                            <label for="monthlyRent">Monthly Rent ($)</label>
+                            <input type="text" inputmode="decimal" id="monthlyRent" placeholder="1500">
+                        </div>
+                        <div class="input-field">
+                            <label for="rentersInsurance">Renter's Insurance (Annual)</label>
+                            <input type="text" inputmode="decimal" id="rentersInsurance" placeholder="180">
+                        </div>
+                    </div>
+
+                    <div class="housing-own">
                     <div class="housing-tools">
                         <button class="btn btn-secondary" onclick="openMortgageCalculator()">🧮 Open Mortgage Calculator</button>
                     </div>
@@ -335,8 +359,9 @@
                             <input type="text" inputmode="decimal" id="waste" placeholder="342">
                         </div>
                     </div>
+                    </div>
                     <div class="calc-result">
-                        Mortgage Payment: $<span id="mortgagePaymentResult">0.00</span><br>
+                        <span class="housing-own">Mortgage Payment: $<span id="mortgagePaymentResult">0.00</span><br></span>
                         Total Housing Monthly: $<span id="housingResult">0.00</span>
                     </div>
                 </div>
@@ -478,6 +503,23 @@
                 </div>
             </div>
 
+            <!-- Other Expenses Tab -->
+            <div id="otherTab" class="tab-content">
+                <div class="section">
+                    <h2>📋 Other Expenses</h2>
+                    <p class="other-intro">Add anything the other tabs don't cover, like debt payments, insurance, childcare or pets. Mark each one as a need or a want for the health check.</p>
+                    <div class="other-suggestions" id="otherSuggestions"></div>
+                    <div id="otherExpensesContainer"></div>
+                    <button class="btn btn-success" onclick="addOtherExpense('', '', 'need')">+ Add Expense</button>
+                    <div class="earner-subtotal" style="margin-top: 20px;">
+                        Needs: $<span id="otherNeedsResult">0.00</span> &nbsp;·&nbsp; Wants: $<span id="otherWantsResult">0.00</span>
+                    </div>
+                    <div class="calc-result">
+                        Total Other Monthly: $<span id="otherResult">0.00</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Savings Tab -->
             <div id="savingsTab" class="tab-content">
                 <div class="section">
@@ -539,6 +581,7 @@
     <script src="/js/screens.js"></script>
     <script src="/js/income.js"></script>
     <script src="/js/education.js"></script>
+    <script src="/js/other-expenses.js"></script>
     <script src="/js/budget-editor.js"></script>
     <script src="/js/calculations.js"></script>
     <script src="/js/main.js"></script>

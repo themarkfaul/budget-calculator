@@ -115,6 +115,7 @@ function showSummary() {
         {label: 'Education', value: s.education || '$0.00'},
         {label: 'Utilities', value: s.utilities || '$0.00'},
         {label: 'Spending', value: s.spending || '$0.00'},
+        {label: 'Other', value: s.other || '$0.00'},
         {label: 'Savings', value: '$' + formatCurrency(plannedSavings(s))}
     ];
     var remaining = parseMoney(s.remainingBalance);
@@ -174,9 +175,10 @@ function evaluateBudget() {
     var data = selectedBudget.data || {};
     var essentials = calculateEssentialSpending(function (id) { return parseMoney(data[id]); });
     // Left-over money the user planned via the dashboard split counts toward wants and savings
-    var wants = spending - essentials + parseMoney(s.leftoverToSpending);
+    var wants = spending - essentials + parseMoney(s.leftoverToSpending) + parseMoney(s.otherWants);
     savings += parseMoney(s.leftoverToSavings);
-    var needs = housing + parseMoney(s.transportation) + parseMoney(s.education) + parseMoney(s.utilities) + essentials;
+    var needs = housing + parseMoney(s.transportation) + parseMoney(s.education) + parseMoney(s.utilities) +
+        essentials + parseMoney(s.otherNeeds);
     // Paycheck retirement is real savings that never reaches take-home, so add it to both sides
     var paycheckRetirement = parseMoney(s.paycheckRetirement);
     savings += paycheckRetirement;

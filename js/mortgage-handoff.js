@@ -41,6 +41,7 @@ function applyPendingMortgage() {
     if (!p) { refreshMortgageHandoff(); return; }
 
     var values = { houseValue: p.price, mortgageDownPayment: p.down, mortgageRate: p.rate, mortgageTerm: p.term };
+    document.getElementById('housingMode').value = 'own';
     if (p.insurance > 0) values.homeInsurance = p.insurance;
     // Property tax is worked out from this value and the tax rates, so start it at the price if blank
     if (!val('propertyValue')) values.propertyValue = p.price;

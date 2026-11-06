@@ -114,6 +114,7 @@ function loadBudgetDataIntoCalculator(budget) {
         var input = document.getElementById(fieldId);
         if (input) setFieldValue(input, budget.data[fieldId]);
     }
+    loadOtherExpenses(budget.data.otherExpenses);
 
     calculateAll();
     formatAllInputs();
@@ -141,6 +142,8 @@ function clearCalculatorFields() {
     var nameInputs = document.querySelectorAll('.earner-name-input');
     for (var i = 0; i < nameInputs.length; i++) nameInputs[i].value = '';
 
+    clearOtherExpenses();
+    document.getElementById('housingMode').value = 'own';
     document.getElementById('leftoverSplitOn').checked = false;
     document.getElementById('leftoverSavingsPercent').value = '100';
 }
@@ -186,8 +189,12 @@ function gatherCalculatorData() {
         var id = otherInputs[i].id;
         if (EARNER_FIELD_PATTERN.test(id)) continue;
         if (id.match(/^(tuition|lunch|afterschool)_\d+$/)) continue;
+        if (id.match(/^otherAmount_\d+$/)) continue;
         if (otherInputs[i].value !== '') data[id] = otherInputs[i].value;
     }
+
+    data.otherExpenses = gatherOtherExpenses();
+    data.housingMode = document.getElementById('housingMode').value;
 
     // Left-over split (dashboard)
     if (document.getElementById('leftoverSplitOn').checked) {
@@ -206,7 +213,8 @@ function buildSummary() {
     var utilities = calculateUtilities();
     var spending = calculateSpending();
     var savings = calculateSavings();
-    var totalExpenses = housing + transportation + education + utilities + spending + savings;
+    var other = calculateOtherExpenses();
+    var totalExpenses = housing + transportation + education + utilities + spending + other.total + savings;
     var remaining = takeHome - totalExpenses;
 
     return {
@@ -216,6 +224,9 @@ function buildSummary() {
         education: '$' + formatCurrency(education),
         utilities: '$' + formatCurrency(utilities),
         spending: '$' + formatCurrency(spending),
+        other: '$' + formatCurrency(other.total),
+        otherNeeds: '$' + formatCurrency(other.needs),
+        otherWants: '$' + formatCurrency(other.wants),
         savings: '$' + formatCurrency(savings),
         leftoverInSavings: false,
         totalExpenses: '$' + formatCurrency(totalExpenses),

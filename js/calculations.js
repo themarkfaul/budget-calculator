@@ -3,6 +3,15 @@
 // ── Calculations ──
 
 function calculateHousing() {
+    // Own (mortgage) or rent; the tab shows only the matching fields
+    var mode = document.getElementById('housingMode').value;
+    document.getElementById('housingTab').dataset.mode = mode;
+    if (mode === 'rent') {
+        var rentTotal = val('monthlyRent') + val('rentersInsurance') / 12;
+        setText('housingResult', formatCurrency(rentTotal));
+        return rentTotal;
+    }
+
     var houseValue = val('houseValue');
     var mortgageRate = val('mortgageRate');
     var mortgageDown = val('mortgageDownPayment');
@@ -90,9 +99,10 @@ function calculateAll() {
     var utilities = calculateUtilities();
     var spending = calculateSpending();
     var savings = calculateSavings();
+    var other = calculateOtherExpenses();
     calculatePaycheckRetirement();
 
-    var totalExpenses = housing + transportation + education + utilities + spending + savings;
+    var totalExpenses = housing + transportation + education + utilities + spending + other.total + savings;
     var remaining = takeHome - totalExpenses;
 
     setText('dashTakeHome', '$' + formatCurrency(takeHome));
@@ -101,11 +111,12 @@ function calculateAll() {
     setText('dashEducation', '$' + formatCurrency(education));
     setText('dashUtilities', '$' + formatCurrency(utilities));
     setText('dashSpending', '$' + formatCurrency(spending));
+    setText('dashOther', '$' + formatCurrency(other.total));
     setText('dashSavings', '$' + formatCurrency(savings));
 
     renderBalance(takeHome, remaining, [
         ['Housing', housing], ['Transportation', transportation], ['Education', education],
-        ['Utilities', utilities], ['Spending', spending]
+        ['Utilities', utilities], ['Spending', spending], ['Other', other.total]
     ], savings);
 }
 

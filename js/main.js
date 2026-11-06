@@ -11,6 +11,7 @@
         inputs[i].addEventListener('input', calculateAll);
     }
     setupMoneyFormatting();
+    renderOtherSuggestions();
     document.getElementById('calculatorScreen').addEventListener('input', function () { isDirty = true; });
 
     try {

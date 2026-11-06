@@ -190,6 +190,76 @@ body {
     }
 }
 
+/* ── Housing: own vs rent ── */
+
+#housingTab[data-mode="rent"] .housing-own,
+#housingTab:not([data-mode="rent"]) .housing-rent {
+    display: none;
+}
+
+/* ── Other Expenses tab ── */
+
+.other-intro {
+    color: #6c757d;
+    margin-bottom: 15px;
+}
+
+.other-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.suggestion-chip {
+    background: white;
+    border: 1px solid #667eea;
+    color: #667eea;
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 0.85em;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.suggestion-chip:hover {
+    background: #e8f0fe;
+}
+
+.other-row {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) 100px 40px;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.remove-other-btn {
+    background: none;
+    border: 1px solid #dc3545;
+    color: #dc3545;
+    border-radius: 8px;
+    height: 44px;
+    cursor: pointer;
+}
+
+.remove-other-btn:hover {
+    background: #dc3545;
+    color: white;
+}
+
+@media (max-width: 600px) {
+    .other-row {
+        grid-template-columns: minmax(0, 1fr) 90px 40px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .other-row .other-name {
+        grid-column: 1 / -1;
+    }
+}
+
 .tools-bar {
     text-align: center;
     margin-bottom: 25px;
