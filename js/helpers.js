@@ -57,6 +57,26 @@ function setText(id, text) {
     if (el) el.textContent = text;
 }
 
+// Brief message at the bottom of the screen that fades on its own (instead of alert()).
+// type: 'success' | 'error' | 'info'. Errors stay up longer.
+function showToast(message, type) {
+    var container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        container.setAttribute('role', 'status');
+        container.setAttribute('aria-live', 'polite');
+        document.body.appendChild(container);
+    }
+    var toast = document.createElement('div');
+    toast.className = 'toast toast-' + (type || 'info');
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(function () { toast.classList.add('toast-hide'); }, type === 'error' ? 6000 : 3000);
+    setTimeout(function () { toast.remove(); }, type === 'error' ? 6500 : 3500);
+}
+
 // "$1,234.56" or "-$1,234.56"
 function formatSignedMoney(amount) {
     if (Math.abs(amount) < 0.005) return '$0.00';

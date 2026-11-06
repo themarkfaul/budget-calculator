@@ -37,10 +37,15 @@ function addIncomeEarner(name) {
                 '<div class="pay-hourly">' + earnerInput(idx, 'hoursPerWeek', 'Hours per Week', '40', 'data-plain') + '</div>' +
                 earnerInput(idx, 'retirement', 'Retirement Contribution (%)', '10', 'data-percent') +
                 earnerInput(idx, 'hsa', 'HSA via Payroll ($ annually)', '3000') +
-                earnerInput(idx, 'taxRate', 'Federal Income Tax Rate (%)', '12', 'data-percent') +
+                earnerSelect(idx, 'filingStatus', 'Federal Income Tax', [
+                    ['single', 'Estimate: single'], ['married', 'Estimate: married filing jointly'],
+                    ['hoh', 'Estimate: head of household'], ['rate', 'Enter my own rate']
+                ]) +
+                '<div class="fed-rate">' + earnerInput(idx, 'taxRate', 'Federal Income Tax Rate (%)', '12', 'data-percent') + '</div>' +
                 earnerInput(idx, 'stateIncomeTax', 'State/Local Income Tax Rate (%)', '4', 'data-percent') +
             '</div>' +
-            '<label class="checkbox-row"><input type="checkbox" id="ficaIncluded_' + idx + '"> My tax rate already includes Social Security and Medicare</label>' +
+            '<p class="fed-hint">Federal tax is estimated with this year\'s IRS brackets and the standard deduction. If two people pick "married filing jointly", they\'re taxed together on their combined income.</p>' +
+            '<label class="checkbox-row fed-rate"><input type="checkbox" id="ficaIncluded_' + idx + '"> My tax rate already includes Social Security and Medicare</label>' +
         '</div>' +
         '<div class="earner-breakdown" id="earnerBreakdown_' + idx + '"></div>' +
         '<div class="input-group">' +
@@ -63,7 +68,7 @@ function addIncomeEarner(name) {
 
 // Every per-person income field, saved as "<field>_<idx>"
 var EARNER_FIELDS = ['incomeMode', 'netPay', 'payFrequency', 'grossPay', 'retirementPerCheck',
-    'payType', 'salary', 'hourlyRate', 'hoursPerWeek', 'retirement', 'hsa', 'taxRate',
+    'payType', 'salary', 'hourlyRate', 'hoursPerWeek', 'retirement', 'hsa', 'filingStatus', 'taxRate',
     'stateIncomeTax', 'ficaIncluded', 'carAllowance'];
 var EARNER_FIELD_PATTERN = new RegExp('^(' + EARNER_FIELDS.join('|') + ')_\\d+$');
 
@@ -103,6 +108,42 @@ function updateEarnerMode(idx) {
     if (!block) return;
     block.dataset.mode = document.getElementById('incomeMode_' + idx).value;
     block.dataset.payType = document.getElementById('payType_' + idx).value;
+    block.dataset.filing = document.getElementById('filingStatus_' + idx).value;
+}
+
+// Estimate-mode gross pay and pre-tax deductions for one person
+function earnerPay(idx) {
+    var gross;
+    if (document.getElementById('payType_' + idx).value === 'hourly') {
+        var hours = val('hoursPerWeek_' + idx) || 40;
+        gross = val('hourlyRate_' + idx) * hours * 52;
+    } else {
+        gross = val('salary_' + idx);
+    }
+    var retirement = gross * (val('retirement_' + idx) / 100);
+    var hsa = val('hsa_' + idx);
+    return { gross: gross, retirement: retirement, hsa: hsa, taxable: Math.max(0, gross - retirement - hsa) };
+}
+
+// Annual federal income tax for one person. "Married filing jointly" people are taxed together
+// on their combined income (one joint return), and the tax is shared in proportion to income.
+function earnerFederalTax(idx, taxable) {
+    var status = document.getElementById('filingStatus_' + idx).value;
+    if (status === 'rate') return taxable * val('taxRate_' + idx) / 100;
+    var year = new Date().getFullYear();
+    if (status !== 'married') return federalIncomeTax(taxable, status, year);
+
+    var jointTaxable = 0;
+    var indices = getEarnerIndices();
+    for (var i = 0; i < indices.length; i++) {
+        var j = indices[i];
+        if (document.getElementById('incomeMode_' + j).value === 'estimate' &&
+            document.getElementById('filingStatus_' + j).value === 'married') {
+            jointTaxable += earnerPay(j).taxable;
+        }
+    }
+    if (jointTaxable <= 0) return 0;
+    return federalIncomeTax(jointTaxable, 'married', year) * (taxable / jointTaxable);
 }
 
 // Annual figures for one person, plus monthly take-home and paycheck retirement
@@ -123,26 +164,21 @@ function computeEarner(idx) {
         };
     }
 
-    var gross;
-    if (document.getElementById('payType_' + idx).value === 'hourly') {
-        var hours = val('hoursPerWeek_' + idx) || 40;
-        gross = val('hourlyRate_' + idx) * hours * 52;
-    } else {
-        gross = val('salary_' + idx);
-    }
-    var retirement = gross * (val('retirement_' + idx) / 100);
-    var hsa = val('hsa_' + idx);
+    var pay = earnerPay(idx);
+    var gross = pay.gross, retirement = pay.retirement, hsa = pay.hsa;
+    var ownRate = document.getElementById('filingStatus_' + idx).value === 'rate';
 
     // Payroll HSA is exempt from Social Security and Medicare; 401(k) contributions are not
     var ficaWages = Math.max(0, gross - hsa);
     var socialSecurity = 0, medicare = 0;
-    if (!document.getElementById('ficaIncluded_' + idx).checked) {
+    if (!(ownRate && document.getElementById('ficaIncluded_' + idx).checked)) {
         socialSecurity = Math.min(ficaWages, SOCIAL_SECURITY_WAGE_BASE) * SOCIAL_SECURITY_RATE;
         medicare = ficaWages * MEDICARE_RATE +
             Math.max(0, ficaWages - ADDITIONAL_MEDICARE_THRESHOLD) * ADDITIONAL_MEDICARE_RATE;
     }
-    var taxableIncome = Math.max(0, gross - retirement - hsa);
-    var incomeTax = taxableIncome * (val('taxRate_' + idx) + val('stateIncomeTax_' + idx)) / 100;
+    var federalTax = earnerFederalTax(idx, pay.taxable);
+    var stateTax = pay.taxable * val('stateIncomeTax_' + idx) / 100;
+    var incomeTax = federalTax + stateTax;
     var net = gross - retirement - hsa - socialSecurity - medicare - incomeTax;
 
     return {
@@ -151,6 +187,8 @@ function computeEarner(idx) {
         socialSecurity: socialSecurity,
         medicare: medicare,
         incomeTax: incomeTax,
+        federalTax: federalTax,
+        stateTax: stateTax,
         retirement: retirement,
         hsa: hsa,
         monthlyTakeHome: net / 12 + carAllowance,
@@ -169,7 +207,8 @@ function renderEarnerBreakdown(idx, e) {
         ['Gross pay', e.gross],
         ['Social Security', -e.socialSecurity],
         ['Medicare', -e.medicare],
-        ['Income tax', -e.incomeTax],
+        ['Federal income tax', -e.federalTax],
+        ['State/local income tax', -e.stateTax],
         ['Retirement', -e.retirement],
         ['HSA', -e.hsa]
     ];

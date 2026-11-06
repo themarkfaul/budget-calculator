@@ -17,7 +17,7 @@
 
         <div class="user-bar">
             <span class="user-email" id="userEmail"></span>
-            <button class="btn-logout" onclick="signOut()">Sign Out</button>
+            <button class="btn-logout" onclick="handleSignOut()">Sign Out</button>
         </div>
 
         <!-- Loading -->
@@ -30,6 +30,7 @@
             <div class="home-container">
                 <div class="tools-bar">
                     <a class="btn btn-secondary" href="/mortgage.html">🧮 Mortgage Calculator</a>
+                    <button class="btn btn-secondary" id="compareBtn" onclick="openCompare()" style="display:none;">⚖️ Compare Budgets</button>
                 </div>
 
                 <div class="budget-list" id="budgetList"></div>
@@ -58,13 +59,27 @@
             </div>
         </div>
 
+        <!-- Compare Budgets Screen -->
+        <div id="compareScreen" class="screen">
+            <div class="compare-body">
+                <h2 style="text-align: center; margin-bottom: 10px;">Compare Budgets</h2>
+                <p class="import-info">Pick up to three budgets. Differences are shown against the first one picked.</p>
+                <div class="compare-picker" id="comparePicker"></div>
+                <div class="compare-scroll" id="compareTable"></div>
+                <div class="screen-buttons">
+                    <button class="btn btn-secondary" onclick="goHome()">← Back to Home</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Summary Screen -->
         <div id="summaryScreen" class="screen">
             <div style="padding: 40px;">
                 <h2 id="summaryTitle" style="text-align: center; margin-bottom: 30px;">Budget Summary</h2>
                 <div class="summary-grid" id="summaryGrid"></div>
-                <div style="text-align: center; margin-top: 30px;">
+                <div class="screen-buttons">
                     <button class="btn btn-secondary" onclick="goHome()">← Back to Home</button>
+                    <button class="btn btn-primary" onclick="printBudgetReport(selectedBudget)">🖨️ Print or Save as PDF</button>
                 </div>
             </div>
         </div>
@@ -273,6 +288,8 @@
                             <div class="leftover-hint">Drag to choose how much of each month's leftover goes to savings. The split adjusts automatically when your budget changes.</div>
                         </div>
                     </div>
+
+                    <div class="money-chart" id="moneyChart" style="display:none;"></div>
                 </div>
             </div>
 
@@ -584,6 +601,10 @@
     <script src="/js/other-expenses.js"></script>
     <script src="/js/budget-editor.js"></script>
     <script src="/js/calculations.js"></script>
+    <script src="/js/money-chart.js"></script>
+    <script src="/js/compare.js"></script>
+    <script src="/js/print-report.js"></script>
     <script src="/js/main.js"></script>
+    <div id="printReport"></div>
 </body>
 </html>

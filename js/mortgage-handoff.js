@@ -8,6 +8,7 @@ function openMortgageCalculator() {
     var installed = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
     if (installed) {
         if (isDirty && !confirm('You have unsaved changes to this budget. Leave without saving?')) return;
+        skipUnsavedWarning = true;
         window.location.href = '/mortgage.html';
     } else {
         window.open('/mortgage.html', '_blank');

@@ -100,10 +100,10 @@ function handleCsvFile(file) {
         try {
             startImportReview(file.name, String(reader.result));
         } catch (e) {
-            alert(e.message);
+            showToast(e.message, 'error');
         }
     };
-    reader.onerror = function () { alert('That file could not be read.'); };
+    reader.onerror = function () { showToast("That file couldn't be read.", 'error'); };
     reader.readAsText(file);
 }
 

@@ -5,6 +5,7 @@
 // so GitHub emails the repo owner.
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 
 const LIMITS_FILE = path.join(__dirname, '..', '..', 'js', 'tax-limits.js');
 const SEARCH_URL = 'https://www.federalregister.gov/api/v1/documents.json' +
@@ -55,6 +56,15 @@ async function main() {
     const thisYear = String(new Date().getUTCFullYear());
     if (!table[thisYear]) {
         throw new Error(`No Social Security wage base for ${thisYear} yet; the app is still using an older year's limit`);
+    }
+
+    // Federal brackets aren't fetched automatically (the IRS doesn't publish them in a
+    // machine-readable form); this check is the yearly reminder to add them by hand.
+    const sandbox = {};
+    vm.runInNewContext(fs.readFileSync(LIMITS_FILE, 'utf8') + ';this.F = FEDERAL_INCOME_TAX;', sandbox);
+    if (!sandbox.F[thisYear]) {
+        throw new Error(`No federal tax brackets for ${thisYear} in js/tax-limits.js; add them from the IRS's ` +
+            `Revenue Procedure for ${thisYear} (search "Rev. Proc. ${Number(thisYear) - 1} inflation adjustments")`);
     }
 }
 

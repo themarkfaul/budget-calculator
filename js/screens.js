@@ -2,6 +2,14 @@
 
 // ── Screen Navigation ──
 
+// Sign Out button: ask about unsaved changes before signing out, not after
+function handleSignOut() {
+    var editing = document.getElementById('calculatorScreen').classList.contains('active');
+    if (editing && isDirty && !confirm('You have unsaved changes to this budget. Sign out without saving?')) return;
+    skipUnsavedWarning = true;
+    signOut();
+}
+
 function showScreen(screenId) {
     var screens = document.querySelectorAll('.screen');
     for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active');
@@ -38,6 +46,7 @@ function showCalcTab(evt, tabName) {
 function displayBudgets() {
     var container = document.getElementById('budgetList');
     hideBudgetActions();
+    document.getElementById('compareBtn').style.display = budgets.length >= 2 ? 'inline-block' : 'none';
 
     if (budgets.length === 0) {
         container.innerHTML = '<p style="text-align:center; color:#6c757d; padding:20px;">No budgets yet. Create your first one below!</p>';
@@ -98,14 +107,14 @@ async function handleDelete(event, index) {
         hideBudgetActions();
         displayBudgets();
     } catch (e) {
-        alert('Error deleting budget: ' + e.message);
+        showToast("Couldn't delete the budget: " + e.message, 'error');
     }
 }
 
 // ── Summary Screen ──
 
 function showSummary() {
-    if (!selectedBudget) { alert('Please select a budget first'); return; }
+    if (!selectedBudget) { showToast('Select a budget first.', 'info'); return; }
     setText('summaryTitle', selectedBudget.name + ' - Summary');
     var s = selectedBudget.summary || {};
     var data = [
@@ -139,62 +148,74 @@ function showSummary() {
 
 // ── Evaluation Screen ──
 
-function evaluateBudget() {
-    if (!selectedBudget) { alert('Please select a budget first'); return; }
-    setText('evaluationTitle', selectedBudget.name + ' - Financial Health Check');
-
-    var s = selectedBudget.summary || {};
+// Health check numbers for a saved budget (no screen updates), used by the Health Check
+// screen, the side-by-side comparison and the printed report.
+function computeHealthCheck(budget) {
+    var s = budget.summary || {};
+    var data = budget.data || {};
     var takeHome = parseMoney(s.takeHome);
     var housing = parseMoney(s.housing);
     var spending = parseMoney(s.spending);
     var remaining = parseMoney(s.remainingBalance);
-    var savings = plannedSavings(s);
-
-    // Balanced budget: costs plus planned savings fit within take-home pay
-    var balance = balanceStatus(remaining);
-    setText('balanceTakeHome', '$' + formatCurrency(takeHome));
-    setText('balanceCosts', '$' + formatCurrency(takeHome - remaining));
-    setText('balanceRemainingLabel', balance === 'over' ? 'Short Each Month' : 'Left Over');
-    setText('balanceRemaining', '$' + formatCurrency(Math.abs(remaining)));
-    var balanceEl = document.getElementById('balanceRuleStatus');
-    balanceEl.textContent = balance === 'over' ? '❌ OVER BUDGET' : '✅ PASS';
-    balanceEl.className = 'rule-status ' + (balance === 'over' ? 'status-fail' : 'status-pass');
-
-    var housingLimit = takeHome * 0.25;
-    var housingPercent = takeHome > 0 ? (housing / takeHome) * 100 : 0;
-    var housingPass = housing <= housingLimit;
-
-    setText('housingCosts', '$' + formatCurrency(housing));
-    setText('housingLimit', '$' + formatCurrency(housingLimit));
-    setText('housingPercent', housingPercent.toFixed(1) + '%');
-    var hStatus = document.getElementById('housingRuleStatus');
-    hStatus.textContent = housingPass ? '✅ PASS' : '❌ FAIL';
-    hStatus.className = 'rule-status ' + (housingPass ? 'status-pass' : 'status-fail');
 
     // Groceries and gasoline sit on the Spending tab but are needs; read them from the saved inputs
-    var data = selectedBudget.data || {};
     var essentials = calculateEssentialSpending(function (id) { return parseMoney(data[id]); });
-    // Left-over money the user planned via the dashboard split counts toward wants and savings
-    var wants = spending - essentials + parseMoney(s.leftoverToSpending) + parseMoney(s.otherWants);
-    savings += parseMoney(s.leftoverToSavings);
     var needs = housing + parseMoney(s.transportation) + parseMoney(s.education) + parseMoney(s.utilities) +
         essentials + parseMoney(s.otherNeeds);
+    // Left-over money the user planned via the dashboard split counts toward wants and savings
+    var wants = spending - essentials + parseMoney(s.leftoverToSpending) + parseMoney(s.otherWants);
     // Paycheck retirement is real savings that never reaches take-home, so add it to both sides
     var paycheckRetirement = parseMoney(s.paycheckRetirement);
-    savings += paycheckRetirement;
+    var savings = plannedSavings(s) + parseMoney(s.leftoverToSavings) + paycheckRetirement;
     var income = takeHome + paycheckRetirement;
-    var needsPercent = income > 0 ? (needs / income) * 100 : 0;
-    var wantsPercent = income > 0 ? (wants / income) * 100 : 0;
-    var savingsPercent = income > 0 ? (savings / income) * 100 : 0;
-    var budgetPass = needsPercent <= 50 && wantsPercent <= 30 && savingsPercent >= 20;
+    var pct = function (amount) { return income > 0 ? (amount / income) * 100 : 0; };
 
-    setText('needsAmount', '$' + formatCurrency(needs) + ' (' + needsPercent.toFixed(1) + '%)');
-    setText('wantsAmount', '$' + formatCurrency(wants) + ' (' + wantsPercent.toFixed(1) + '%)');
-    setText('savingsAmount', '$' + formatCurrency(savings) + ' (' + savingsPercent.toFixed(1) + '%)');
-    var bStatus = document.getElementById('budgetRuleStatus');
-    bStatus.textContent = budgetPass ? '✅ PASS' : '❌ NEEDS WORK';
-    bStatus.className = 'rule-status ' + (budgetPass ? 'status-pass' : 'status-fail');
+    var housingLimit = takeHome * 0.25;
+    var check = {
+        takeHome: takeHome,
+        costs: takeHome - remaining,
+        remaining: remaining,
+        balance: balanceStatus(remaining),
+        housing: housing,
+        housingLimit: housingLimit,
+        housingPercent: takeHome > 0 ? (housing / takeHome) * 100 : 0,
+        housingPass: housing <= housingLimit,
+        needs: needs, wants: wants, savings: savings,
+        needsPercent: pct(needs), wantsPercent: pct(wants), savingsPercent: pct(savings)
+    };
+    check.balancePass = check.balance !== 'over';
+    check.ruleOf503020Pass = check.needsPercent <= 50 && check.wantsPercent <= 30 && check.savingsPercent >= 20;
+    return check;
+}
+
+function evaluateBudget() {
+    if (!selectedBudget) { showToast('Select a budget first.', 'info'); return; }
+    setText('evaluationTitle', selectedBudget.name + ' - Financial Health Check');
+    var c = computeHealthCheck(selectedBudget);
+
+    // Balanced budget: costs plus planned savings fit within take-home pay
+    setText('balanceTakeHome', '$' + formatCurrency(c.takeHome));
+    setText('balanceCosts', '$' + formatCurrency(c.costs));
+    setText('balanceRemainingLabel', c.balance === 'over' ? 'Short Each Month' : 'Left Over');
+    setText('balanceRemaining', '$' + formatCurrency(Math.abs(c.remaining)));
+    setRuleStatus('balanceRuleStatus', c.balancePass, '✅ PASS', '❌ OVER BUDGET');
+
+    setText('housingCosts', '$' + formatCurrency(c.housing));
+    setText('housingLimit', '$' + formatCurrency(c.housingLimit));
+    setText('housingPercent', c.housingPercent.toFixed(1) + '%');
+    setRuleStatus('housingRuleStatus', c.housingPass, '✅ PASS', '❌ FAIL');
+
+    setText('needsAmount', '$' + formatCurrency(c.needs) + ' (' + c.needsPercent.toFixed(1) + '%)');
+    setText('wantsAmount', '$' + formatCurrency(c.wants) + ' (' + c.wantsPercent.toFixed(1) + '%)');
+    setText('savingsAmount', '$' + formatCurrency(c.savings) + ' (' + c.savingsPercent.toFixed(1) + '%)');
+    setRuleStatus('budgetRuleStatus', c.ruleOf503020Pass, '✅ PASS', '❌ NEEDS WORK');
 
     showScreen('evaluationScreen');
+}
+
+function setRuleStatus(id, pass, passText, failText) {
+    var el = document.getElementById(id);
+    el.textContent = pass ? passText : failText;
+    el.className = 'rule-status ' + (pass ? 'status-pass' : 'status-fail');
 }
 

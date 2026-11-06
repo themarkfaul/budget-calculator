@@ -3,7 +3,7 @@
 // ── Calculator ──
 
 function editBudget() {
-    if (!selectedBudget) { alert('Please select a budget first'); return; }
+    if (!selectedBudget) { showToast('Select a budget first.', 'info'); return; }
     currentEditingBudget = selectedBudget;
     isEditMode = true;
     setText('calculatorTitle', 'Editing: ' + selectedBudget.name);
@@ -79,6 +79,10 @@ function loadBudgetDataIntoCalculator(budget) {
         // tax rate; keep their take-home unchanged until the user unchecks this
         if (budget.data['incomeMode_' + savedIdx] === undefined) {
             document.getElementById('ficaIncluded_' + newIdx).checked = true;
+        }
+        // Budgets saved before federal brackets existed used a typed-in rate; keep using it
+        if (budget.data['filingStatus_' + savedIdx] === undefined) {
+            document.getElementById('filingStatus_' + newIdx).value = 'rate';
         }
         updateEarnerMode(newIdx);
     }
@@ -261,9 +265,9 @@ async function handleSave() {
         isEditMode = true;
         setText('calculatorTitle', 'Editing: ' + saved.name);
         isDirty = false;
-        alert('Budget saved!');
+        showToast('Budget saved', 'success');
     } catch (e) {
-        alert('Error saving: ' + e.message);
+        showToast("Couldn't save: " + e.message, 'error');
     }
 
     saveBtn.disabled = false;
@@ -289,9 +293,9 @@ async function handleSaveAs() {
         isEditMode = true;
         setText('calculatorTitle', 'Editing: ' + saved.name);
         isDirty = false;
-        alert('Budget saved as "' + name + '"!');
+        showToast('Saved as "' + name + '"', 'success');
     } catch (e) {
-        alert('Error saving: ' + e.message);
+        showToast("Couldn't save: " + e.message, 'error');
     }
 
     saveAsBtn.disabled = false;

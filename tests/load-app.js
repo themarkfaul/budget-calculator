@@ -11,7 +11,8 @@ const ROOT = path.join(__dirname, '..');
 const APP_SCRIPTS = [
     'js/auth.js', 'js/db.js', 'js/tax-limits.js', 'js/mortgage-rates.js', 'js/mortgage-market.js',
     'js/mortgage-handoff.js', 'js/csv-import.js', 'js/state.js', 'js/helpers.js', 'js/screens.js',
-    'js/income.js', 'js/education.js', 'js/other-expenses.js', 'js/budget-editor.js', 'js/calculations.js'
+    'js/income.js', 'js/education.js', 'js/other-expenses.js', 'js/budget-editor.js', 'js/calculations.js',
+    'js/money-chart.js', 'js/compare.js', 'js/print-report.js'
 ];
 
 // Fixed rates so tests don't change every week when the workflow updates js/mortgage-rates.js

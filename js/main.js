@@ -13,6 +13,7 @@
     setupMoneyFormatting();
     renderOtherSuggestions();
     document.getElementById('calculatorScreen').addEventListener('input', function () { isDirty = true; });
+    window.addEventListener('beforeunload', warnAboutUnsavedChanges);
 
     try {
         budgets = await loadBudgets();

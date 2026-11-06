@@ -114,10 +114,12 @@ function calculateAll() {
     setText('dashOther', '$' + formatCurrency(other.total));
     setText('dashSavings', '$' + formatCurrency(savings));
 
-    renderBalance(takeHome, remaining, [
+    var costs = [
         ['Housing', housing], ['Transportation', transportation], ['Education', education],
         ['Utilities', utilities], ['Spending', spending], ['Other', other.total]
-    ], savings);
+    ];
+    renderBalance(takeHome, remaining, costs, savings);
+    renderMoneyChart(costs.concat([['Savings', savings]]), takeHome, remaining);
 }
 
 // Remaining card and the message under the dashboard: left over, over budget, or even
