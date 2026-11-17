@@ -230,7 +230,7 @@ function renderEscrowPlan(takeHome) {
             '<td>' + formatSignedMoney(r.spending) + '</td></tr>';
     });
     document.getElementById('escrowPaychecks').innerHTML = rows.length
-        ? '<table class="escrow-table"><thead><tr><th></th><th>To escrow</th>' + (totals.savingsTransfers > 0 ? '<th>To savings</th>' : '') +
+        ? '<table class="escrow-table"><thead><tr><th></th><th>To self-escrow</th>' + (totals.savingsTransfers > 0 ? '<th>To savings</th>' : '') +
             '<th>To spending</th></tr></thead><tbody>' + ph + '</tbody></table>'
         : '<p class="escrow-empty">Add income on the Income tab to see deposits per paycheck.</p>';
 

@@ -41,6 +41,19 @@ test('federal tax from 2026 brackets matches the IRS tables', () => {
     assert.equal(w.federalIncomeTax(10000, 'single', 2026), 0);   // below the standard deduction
 });
 
+test('federal tax from 2027 brackets matches the IRS tables (Rev. Proc. 2026-35)', () => {
+    const close = (a, b) => assert.ok(Math.abs(a - b) < 0.01, a + ' vs ' + b);
+    // wages = taxable income + standard deduction; expected = the "tax is" column of each table
+    close(w.federalIncomeTax(60000 + 16600, 'single', 2027), 5987 + 0.22 * (60000 - 52025));
+    close(w.federalIncomeTax(150000 + 33200, 'married', 2027), 11974 + 0.22 * (150000 - 104050));
+    close(w.federalIncomeTax(80000 + 24925, 'hoh', 2027), 7993 + 0.22 * (80000 - 69650));
+    close(w.federalIncomeTax(300000 + 16600, 'single', 2027), 60349 + 0.35 * (300000 - 264550));
+    close(w.federalIncomeTax(900000 + 33200, 'married', 2027), 213290.5 + 0.37 * (900000 - 793650));
+    close(w.federalIncomeTax(700000 + 24925, 'hoh', 2027), 197360 + 0.37 * (700000 - 661350));
+    // Later years use the newest table until it's updated
+    close(w.federalIncomeTax(60000 + 16600, 'single', 2028), w.federalIncomeTax(60000 + 16600, 'single', 2027));
+});
+
 test('new people default to the single-filer bracket estimate', () => {
     assert.equal(w.document.getElementById('filingStatus_0').value, 'single');
     setField(w, 'salary_0', '100000');

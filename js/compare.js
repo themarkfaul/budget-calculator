@@ -16,7 +16,7 @@ var COMPARE_ROWS = [
     ['Savings', function (s) { return plannedSavings(s); }, true],
     ['Left over', function (s) { return parseMoney(s.remainingBalance); }, true],
     // Escrow figures exist only on budgets saved since the Escrow tab was added (null = unknown)
-    ['Escrow deposit', function (s) { return s.escrowDeposit === undefined ? null : parseMoney(s.escrowDeposit); }, false],
+    ['Self-escrow deposit', function (s) { return s.escrowDeposit === undefined ? null : parseMoney(s.escrowDeposit); }, false],
     ['Spending account', function (s) { return s.spendingAccount === undefined ? null : parseMoney(s.spendingAccount); }, true]
 ];
 
