@@ -127,7 +127,8 @@ function loadBudgetDataIntoCalculator(budget) {
 }
 
 function formatAllInputs() {
-    var inputs = document.querySelectorAll('#calculatorScreen input[inputmode="decimal"]:not([data-percent]):not([data-plain])');
+    var inputs = document.querySelectorAll('#calculatorScreen input[inputmode="decimal"]:not([data-percent]):not([data-plain]), ' +
+        '#escrowScreen input[inputmode="decimal"]:not([data-percent]):not([data-plain])');
     for (var i = 0; i < inputs.length; i++) {
         inputs[i].value = formatMoneyValue(inputs[i].value);
     }
@@ -143,7 +144,7 @@ function clearCalculatorFields() {
     childCount = 0;
 
     // Clear all other inputs
-    var inputs = document.querySelectorAll('#calculatorScreen input[inputmode="decimal"]');
+    var inputs = document.querySelectorAll(BUDGET_INPUTS);
     for (var i = 0; i < inputs.length; i++) inputs[i].value = '';
     var nameInputs = document.querySelectorAll('.earner-name-input');
     for (var i = 0; i < nameInputs.length; i++) nameInputs[i].value = '';
@@ -191,7 +192,7 @@ function gatherCalculatorData() {
     }
 
     // Save all other inputs
-    var otherInputs = document.querySelectorAll('#calculatorScreen input[inputmode="decimal"]');
+    var otherInputs = document.querySelectorAll(BUDGET_INPUTS);
     for (var i = 0; i < otherInputs.length; i++) {
         var id = otherInputs[i].id;
         if (EARNER_FIELD_PATTERN.test(id)) continue;
@@ -256,6 +257,7 @@ async function handleSave() {
         var budgetObj = {
             name: isEditMode && currentEditingBudget ? currentEditingBudget.name : null,
             id: isEditMode && currentEditingBudget ? currentEditingBudget.id : null,
+            updated_at: isEditMode && currentEditingBudget ? currentEditingBudget.updated_at : null,
             data: gatherCalculatorData(),
             summary: buildSummary()
         };
@@ -266,10 +268,25 @@ async function handleSave() {
             budgetObj.name = name;
         }
 
-        var saved = await saveBudgetToDb(budgetObj);
+        var saved;
+        try {
+            saved = await saveBudgetToDb(budgetObj);
+        } catch (e) {
+            // A shared budget can be edited by two people; don't silently wipe out the other person's save
+            if (e.code !== 'BUDGET_CONFLICT') throw e;
+            if (!confirm('Someone else saved changes to "' + budgetObj.name + '" since you opened it.\n\n' +
+                'OK: replace their changes with yours.\nCancel: keep theirs (use Save As to keep yours as a copy).')) {
+                saveBtn.disabled = false;
+                saveBtn.textContent = '💾 Save';
+                return;
+            }
+            budgetObj.overwrite = true;
+            saved = await saveBudgetToDb(budgetObj);
+        }
         currentEditingBudget = saved;
         isEditMode = true;
         setText('calculatorTitle', 'Editing: ' + saved.name);
+        setEscrowTitle(saved.name);
         isDirty = false;
         showToast('Budget saved', 'success');
     } catch (e) {
@@ -298,6 +315,7 @@ async function handleSaveAs() {
         currentEditingBudget = saved;
         isEditMode = true;
         setText('calculatorTitle', 'Editing: ' + saved.name);
+        setEscrowTitle(saved.name);
         isDirty = false;
         showToast('Saved as "' + name + '"', 'success');
     } catch (e) {

@@ -1,4 +1,4 @@
-// Escrow tab: plan a separate "bills" checking account. Fixed bills are paid from escrow;
+// Self-Escrow screen: plan a separate "bills" checking account. Fixed bills are paid from escrow;
 // the rest of take-home pay goes to a spending account (and savings, if not escrowed).
 // Choices are saved with the budget as data.escrow = { items: { key: { on, schedule, month } } }.
 
@@ -257,12 +257,28 @@ function loadEscrowSettings(saved) {
     escrowSettings = saved && saved.items ? JSON.parse(JSON.stringify(saved)) : { items: {} };
 }
 
-// Home screen "Escrow" button: open the selected budget on the Escrow tab
+// Home screen "Self-Escrow" button: open the selected budget straight to its Self-Escrow screen
 function openEscrow() {
     if (!selectedBudget) { showToast('Select a budget first.', 'info'); return; }
     editBudget();
-    var tab = document.querySelector('#calculatorScreen .tab[onclick*="escrowTab"]');
-    if (tab) tab.click();
+    showEscrowScreen();
+}
+
+// The Self-Escrow screen works on the open budget, so unsaved edits carry across both ways
+function showEscrowScreen() {
+    setEscrowTitle(currentEditingBudget ? currentEditingBudget.name : '');
+    calculateAll();
+    showScreen('escrowScreen');
+    window.scrollTo(0, 0);
+}
+
+function backToBudgetFromEscrow() {
+    showScreen('calculatorScreen');
+    window.scrollTo(0, 0);
+}
+
+function setEscrowTitle(budgetName) {
+    setText('escrowTitle', '🧾 Self-Escrow' + (budgetName ? ': ' + budgetName : ' (new budget)'));
 }
 
 document.getElementById('escrowBills').addEventListener('change', onEscrowBillsChange);

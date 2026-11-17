@@ -4,8 +4,7 @@
 
 // Sign Out button: ask about unsaved changes before signing out, not after
 function handleSignOut() {
-    var editing = document.getElementById('calculatorScreen').classList.contains('active');
-    if (editing && isDirty && !confirm('You have unsaved changes to this budget. Sign out without saving?')) return;
+    if (isEditingBudget() && isDirty && !confirm('You have unsaved changes to this budget. Sign out without saving?')) return;
     skipUnsavedWarning = true;
     signOut();
 }
@@ -65,6 +64,7 @@ async function goHome() {
         console.error('Error loading budgets:', e);
         budgets = [];
     }
+    await refreshHouseholdShares();
     displayBudgets();
     showScreen('homeScreen');
 }
@@ -95,10 +95,13 @@ function displayBudgets() {
         var b = budgets[i];
         var s = b.summary || {};
         var date = b.updated_at ? new Date(b.updated_at).toLocaleDateString() : '';
+        var shareLabel = budgetShareLabel(b);
         html += '<div class="budget-item" onclick="selectBudget(' + i + ')">';
-        html += '<button class="delete-btn" onclick="handleDelete(event, ' + i + ')" title="Delete budget">✕</button>';
+        // Only the owner can delete a budget; people it's shared with can view and edit it
+        if (isOwnBudget(b)) html += '<button class="delete-btn" onclick="handleDelete(event, ' + i + ')" title="Delete budget">✕</button>';
         html += '<div class="budget-item-header">';
-        html += '<div class="budget-name">' + escapeHtml(b.name) + '</div>';
+        html += '<div class="budget-name">' + escapeHtml(b.name) +
+            (shareLabel ? ' <span class="share-tag' + (isOwnBudget(b) ? '' : ' share-tag-from') + '">' + escapeHtml(shareLabel) + '</span>' : '') + '</div>';
         html += '<div class="budget-date">' + escapeHtml(date) + '</div>';
         html += '</div>';
         html += '<div class="budget-preview">';
@@ -135,6 +138,7 @@ function hideBudgetActions() {
 
 async function handleDelete(event, index) {
     event.stopPropagation();
+    if (!isOwnBudget(budgets[index])) return;
     if (!confirm('Delete "' + budgets[index].name + '"?')) return;
     try {
         await deleteBudgetFromDb(budgets[index].id);

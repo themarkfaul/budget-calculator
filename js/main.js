@@ -4,17 +4,21 @@
     var user = await requireAuth();
     if (!user) return;
 
+    currentUser = user;
     setText('userEmail', user.email);
     setSuggestionMode((user.user_metadata || {}).suggestionMode);
 
-    var inputs = document.querySelectorAll('#calculatorScreen input[inputmode="decimal"]');
+    var inputs = document.querySelectorAll(BUDGET_INPUTS);
     for (var i = 0; i < inputs.length; i++) {
         inputs[i].addEventListener('input', calculateAll);
     }
     setupMoneyFormatting();
     setupSuggestions();
+    setupSuggestions(document.getElementById('escrowScreen'));
     renderOtherSuggestions();
-    document.getElementById('calculatorScreen').addEventListener('input', function () { isDirty = true; });
+    ['calculatorScreen', 'escrowScreen'].forEach(function (id) {
+        document.getElementById(id).addEventListener('input', function () { isDirty = true; });
+    });
     window.addEventListener('beforeunload', warnAboutUnsavedChanges);
 
     try {
@@ -23,6 +27,7 @@
         console.error('Error loading budgets:', e);
         budgets = [];
     }
+    await refreshHouseholdShares();
 
     displayBudgets();
     showScreen('homeScreen');

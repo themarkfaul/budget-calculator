@@ -9,7 +9,7 @@ var SUGGESTION_MODES = ['tap', 'leave', 'prefill'];
 var suggestionMode = 'tap';
 
 // Tabs whose fields are personal enough that a new budget shouldn't be pre-filled with examples
-var NO_PREFILL_CONTAINERS = ['incomeTab', 'educationTab', 'escrowTab'];
+var NO_PREFILL_CONTAINERS = ['incomeTab', 'educationTab', 'escrowScreen'];
 
 function setSuggestionMode(mode) {
     suggestionMode = SUGGESTION_MODES.indexOf(mode) >= 0 ? mode : 'tap';
