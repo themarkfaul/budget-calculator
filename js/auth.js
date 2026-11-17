@@ -31,6 +31,24 @@ async function signOut() {
     window.location.href = '/';
 }
 
+// Permanently deletes the signed-in user's account and all their budgets.
+// Re-checks the password first, so someone holding an unlocked phone can't do it.
+// The delete itself runs in the database function delete_account() (see supabase-schema.sql),
+// because the browser isn't allowed to remove sign-in accounts directly.
+async function deleteAccount(password) {
+    var user = await getUser();
+    if (!user) throw new Error('You are signed out. Sign in again and retry.');
+
+    var check = await supabase.auth.signInWithPassword({ email: user.email, password: password });
+    if (check.error) throw new Error('That password is incorrect.');
+
+    var result = await supabase.rpc('delete_account');
+    if (result.error) throw result.error;
+
+    // The account is gone, so the server may reject sign-out; clearing the local session is enough.
+    try { await supabase.auth.signOut({ scope: 'local' }); } catch (e) { /* already invalid */ }
+}
+
 async function getUser() {
     var result = await supabase.auth.getUser();
     return result.data.user;

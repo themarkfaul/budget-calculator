@@ -84,6 +84,11 @@
     <script>
         // If already signed in, go straight to app
         (async function () {
+            if (new URLSearchParams(window.location.search).get('deleted') === '1') {
+                showMessage('Your account and all of your budgets have been deleted.', false);
+                history.replaceState(null, '', '/');
+                return;
+            }
             var user = await getUser();
             if (user) window.location.href = '/app.html';
         })();

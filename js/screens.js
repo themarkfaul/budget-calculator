@@ -10,6 +10,43 @@ function handleSignOut() {
     signOut();
 }
 
+// ── Delete Account ──
+
+function openDeleteAccount() {
+    document.getElementById('deleteAccountPassword').value = '';
+    document.getElementById('deleteAccountError').textContent = '';
+    var btn = document.getElementById('deleteAccountBtn');
+    btn.disabled = false;
+    btn.textContent = 'Delete Account';
+    document.getElementById('deleteAccountDialog').showModal();
+    document.getElementById('deleteAccountPassword').focus();
+}
+
+function closeDeleteAccount() {
+    document.getElementById('deleteAccountDialog').close();
+}
+
+async function handleDeleteAccount(evt) {
+    evt.preventDefault();   // keep the dialog open until the delete finishes
+    var password = document.getElementById('deleteAccountPassword').value;
+    var errorEl = document.getElementById('deleteAccountError');
+    var btn = document.getElementById('deleteAccountBtn');
+    if (!password) { errorEl.textContent = 'Enter your password to confirm.'; return; }
+
+    errorEl.textContent = '';
+    btn.disabled = true;
+    btn.textContent = 'Deleting...';
+    try {
+        await deleteAccount(password);
+        skipUnsavedWarning = true;
+        window.location.href = '/?deleted=1';
+    } catch (e) {
+        errorEl.textContent = "Couldn't delete your account: " + e.message;
+        btn.disabled = false;
+        btn.textContent = 'Delete Account';
+    }
+}
+
 function showScreen(screenId) {
     var screens = document.querySelectorAll('.screen');
     for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active');

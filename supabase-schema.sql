@@ -36,3 +36,24 @@ create policy "Users can delete their own budgets"
 
 -- 7. Index for fast lookups by user
 create index budgets_user_id_idx on public.budgets(user_id);
+
+-- 8. Account deletion (required by the App Store and Google Play).
+--    Lets a signed-in user delete their own sign-in account and budgets, and nothing else.
+--    Runs with elevated rights (security definer) because the browser can't touch auth.users.
+create or replace function public.delete_account()
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+    if auth.uid() is null then
+        raise exception 'Not signed in';
+    end if;
+    delete from public.budgets where user_id = auth.uid();
+    delete from auth.users where id = auth.uid();
+end;
+$$;
+
+revoke execute on function public.delete_account() from public, anon;
+grant execute on function public.delete_account() to authenticated;

@@ -17,8 +17,25 @@
 
         <div class="user-bar">
             <span class="user-email" id="userEmail"></span>
+            <button class="btn-link-muted" onclick="openDeleteAccount()">Delete Account</button>
             <button class="btn-logout" onclick="handleSignOut()">Sign Out</button>
         </div>
+
+        <!-- Delete Account (required by the App Store and Google Play for apps with sign-up) -->
+        <dialog id="deleteAccountDialog" class="confirm-dialog" aria-labelledby="deleteAccountTitle">
+            <form method="dialog" onsubmit="handleDeleteAccount(event)">
+                <h2 id="deleteAccountTitle">Delete your account?</h2>
+                <p>This permanently deletes your account and <strong>all of your saved budgets</strong>. It can't be undone.</p>
+                <p class="dialog-hint">Tip: use Print / Save as PDF on any budget you want to keep first.</p>
+                <label for="deleteAccountPassword">Enter your password to confirm</label>
+                <input type="password" id="deleteAccountPassword" autocomplete="current-password" required>
+                <div class="dialog-error" id="deleteAccountError" role="alert"></div>
+                <div class="dialog-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeDeleteAccount()">Cancel</button>
+                    <button type="submit" class="btn btn-danger" id="deleteAccountBtn">Delete Account</button>
+                </div>
+            </form>
+        </dialog>
 
         <!-- Loading -->
         <div id="loadingScreen" class="screen active">
