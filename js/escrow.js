@@ -1,8 +1,25 @@
 // Self-Escrow screen: plan a separate "bills" checking account. Fixed bills are paid from escrow;
 // the rest of take-home pay goes to a spending account (and savings, if not escrowed).
-// Choices are saved with the budget as data.escrow = { items: { key: { on, schedule, month } } }.
+// Choices are saved with the budget as data.escrow = { items: { key: { on, schedule, month, route } }, savingsAccountName }.
+// Savings items have a route: 'direct' (paycheck direct deposit to a savings account, the default),
+// 'escrow' (paid from the self-escrow account) or 'spending' (moved over from the spending account).
 
 var escrowSettings = { items: {} };
+
+var SAVINGS_IDS = ['emergencyFund', 'retirement401k', 'iraContribution', 'investmentAccount', 'collegeFund', 'cashSavings'];
+var SAVINGS_ROUTES = [['direct', 'Paycheck direct deposit'], ['escrow', 'Self-escrow account'], ['spending', 'Spending account']];
+
+// How a savings item is paid, from the user's saved choice (older budgets only saved on/off)
+function savingsRoute(key) {
+    var saved = escrowSettings.items[key] || {};
+    if (saved.route) return saved.route;
+    return saved.on === true ? 'escrow' : 'direct';
+}
+
+// What the paycheck's direct-deposit savings account is called (e.g. "Morgan Stanley")
+function savingsAccountName() {
+    return (escrowSettings.savingsAccountName || '').trim();
+}
 
 var MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -23,7 +40,7 @@ function escrowBillList() {
         if (!(monthly > 0)) return;
         opts = opts || {};
         bills.push({ key: key, group: group, name: name, monthly: monthly, lump: !!opts.lump,
-            escrow: opts.escrow !== false, schedule: opts.schedule || 'monthly', month: opts.month || 1, savings: !!opts.savings });
+            escrow: opts.escrow !== false, schedule: opts.schedule || 'monthly', month: opts.month || 1, savings: !!opts.savings, direct: false });
     }
 
     if (document.getElementById('housingMode').value === 'rent') {
@@ -63,7 +80,7 @@ function escrowBillList() {
     ['groceries', 'gasoline', 'eatingOut', 'entertainment', 'shopping', 'hobbies', 'tools', 'miscSpending'].forEach(function (id) {
         add(id, 'Spending', fieldLabel(id), val(id), { escrow: false });
     });
-    ['emergencyFund', 'retirement401k', 'iraContribution', 'investmentAccount', 'collegeFund', 'cashSavings'].forEach(function (id) {
+    SAVINGS_IDS.forEach(function (id) {
         add(id, 'Savings', fieldLabel(id), val(id), { escrow: false, savings: true });
     });
 
@@ -74,6 +91,11 @@ function escrowBillList() {
             if (typeof saved.on === 'boolean') b.escrow = saved.on;
             if (b.lump && saved.schedule) b.schedule = saved.schedule;
             if (b.lump && saved.month) b.month = saved.month;
+        }
+        if (b.savings) {
+            b.route = savingsRoute(b.key);
+            b.escrow = b.route === 'escrow';
+            b.direct = b.route === 'direct';
         }
         if (!b.lump) b.schedule = 'monthly';
     });
@@ -118,6 +140,7 @@ function computeEscrowPlan(bills, startMonth, extraCushion) {
 function onEscrowChange(key, field, value) {
     var item = escrowSettings.items[key] || (escrowSettings.items[key] = {});
     item[field] = field === 'on' ? value : field === 'month' ? parseInt(value, 10) : value;
+    if (field === 'route') item.on = value === 'escrow';
     isDirty = true;
     calculateAll();
 }
@@ -133,10 +156,24 @@ function escrowAttr(text) {
     return escapeHtml(text).replace(/"/g, '&quot;');
 }
 
+function savingsRouteOptions(selected) {
+    return SAVINGS_ROUTES.map(function (r) {
+        var label = r[0] === 'direct' && savingsAccountName() ? 'Paycheck direct deposit (' + savingsAccountName() + ')' : r[1];
+        return '<option value="' + r[0] + '"' + (r[0] === selected ? ' selected' : '') + '>' + escapeHtml(label) + '</option>';
+    }).join('');
+}
+
 function escrowRowHtml(b) {
     var key = escrowAttr(b.key);
-    var html = '<div class="escrow-row' + (b.escrow ? ' escrow-row-on' : '') + '">' +
-        '<label class="escrow-check"><input type="checkbox" data-key="' + key + '" data-field="on"' + (b.escrow ? ' checked' : '') + '> ' +
+    var html = '<div class="escrow-row' + (b.escrow ? ' escrow-row-on' : '') + (b.direct ? ' escrow-row-direct' : '') + '">';
+    if (b.savings) {
+        // Savings: choose where the money comes from instead of a simple on/off
+        html += '<span class="escrow-check">' + escapeHtml(b.name) + '</span><span class="escrow-amount">$' + formatCurrency(b.monthly) + '/mo</span>' +
+            '<span class="escrow-schedule"><select data-key="' + key + '" data-field="route" aria-label="How ' + escrowAttr(b.name) + ' is paid">' +
+            savingsRouteOptions(b.route) + '</select></span>';
+        return html + '</div>';
+    }
+    html += '<label class="escrow-check"><input type="checkbox" data-key="' + key + '" data-field="on"' + (b.escrow ? ' checked' : '') + '> ' +
         escapeHtml(b.name) + '</label><span class="escrow-amount">$' + formatCurrency(b.monthly) + '/mo</span>';
     if (b.lump) {
         html += '<span class="escrow-schedule"><select data-key="' + key + '" data-field="schedule" aria-label="How often ' + escrowAttr(b.name) + ' is paid">';
@@ -172,7 +209,8 @@ function escrowPaycheckRows(escrowMonthly, savingsMonthly) {
         var perCheck = function (monthly) { return monthly * share * 12 / e.perYear; };
         var paycheck = e.takeHome * 12 / e.perYear;
         var escrow = perCheck(escrowMonthly), savings = perCheck(savingsMonthly);
-        return { name: e.name, perYear: e.perYear, paycheck: paycheck, escrow: escrow, savings: savings, spending: paycheck - escrow - savings };
+        return { name: e.name, perYear: e.perYear, takeHome: e.takeHome, share: share, paycheck: paycheck,
+            escrow: escrow, savings: savings, spending: paycheck - escrow - savings };
     });
 }
 
@@ -184,7 +222,7 @@ function escrowTotals(takeHome) {
     var escrow = 0, savings = 0;
     bills.forEach(function (b) {
         if (b.escrow) escrow += b.monthly;
-        else if (b.savings) savings += b.monthly;
+        else if (b.direct) savings += b.monthly;
     });
     return { bills: bills, escrow: escrow, savingsTransfers: savings, spendingAccount: takeHome - escrow - savings };
 }
@@ -200,6 +238,33 @@ function renderEscrowPlan(takeHome) {
     setText('escrowCushion', '$' + formatCurrency(plan.cushion));
     setText('escrowSavings', '$' + formatCurrency(totals.savingsTransfers));
     setText('escrowSpending', formatSignedMoney(totals.spendingAccount));
+    var accountName = savingsAccountName();
+    setText('escrowSavingsTitle', accountName ? 'Direct to ' + accountName : 'Direct to Savings');
+    syncSavingsRouteSelects();
+
+    var escrowItems = bills.filter(function (b) { return b.escrow; });
+    var directItems = bills.filter(function (b) { return b.direct; });
+    setExplain('escrowDeposit', escrowItems.length
+        ? ['Bills paid from your self-escrow, as monthly amounts:'].concat(itemLines(escrowItems), ['Total: ' + money(plan.deposit) + ' a month'])
+        : ['Check bills below to pay them from your self-escrow.']);
+    setExplain('escrowSavings', directItems.length
+        ? ['Savings set to "Paycheck direct deposit":'].concat(itemLines(directItems), ['Total: ' + money(totals.savingsTransfers) + ' a month'])
+        : ['No savings are set to paycheck direct deposit. Choose "Paid by" on the Savings tab or below.']);
+    setExplain('escrowSpending', [
+        'Take-home pay: ' + money(takeHome),
+        '− Self-escrow deposit: ' + money(plan.deposit),
+        '− Direct to savings: ' + money(totals.savingsTransfers),
+        '= ' + formatSignedMoney(totals.spendingAccount) + ' a month to your spending account'
+    ]);
+    var lowest = plan.lowestMonth;
+    setExplain('escrowCushion', plan.deposit > 0 ? [
+        'Money to have in the account when you start, so bills never bounce.',
+        'Without it, the balance would bottom out at ' + formatSignedMoney(lowest.balanceAfterBills - plan.cushion) +
+            ' after ' + MONTH_NAMES[lowest.month - 1] + "'s bills.",
+        'Covering that: ' + money(plan.cushion - extraCushion),
+        '+ Extra safety margin: ' + money(extraCushion),
+        '= ' + money(plan.cushion)
+    ] : ['Check bills below to see the cushion you need.']);
     document.getElementById('escrowSpendingCard').className = 'summary-item' + (totals.spendingAccount < 0 ? ' balance-over' : '');
 
     // Bill list, grouped
@@ -215,7 +280,7 @@ function renderEscrowPlan(takeHome) {
         '<p class="escrow-empty">Add bills on the other tabs and they\'ll show up here.</p>';
 
     // What the spending account covers
-    var spendingItems = bills.filter(function (b) { return !b.escrow && !b.savings; });
+    var spendingItems = bills.filter(function (b) { return !b.escrow && !b.direct; });
     var spendingBills = spendingItems.reduce(function (sum, b) { return sum + b.monthly; }, 0);
     setText('escrowSpendingBills', '$' + formatCurrency(spendingBills));
     setText('escrowSpendingFree', formatSignedMoney(totals.spendingAccount - spendingBills));
@@ -224,23 +289,45 @@ function renderEscrowPlan(takeHome) {
     var rows = escrowPaycheckRows(plan.deposit, totals.savingsTransfers);
     var ph = '';
     rows.forEach(function (r) {
+        var pct = Math.round(r.share * 1000) / 10 + '%';
+        var perCheckLine = function (monthly, what) {
+            return [what + ': ' + money(monthly) + ' a month',
+                rows.length > 1 ? '× ' + pct + " (" + r.name + "'s share of household take-home)" : null,
+                '× 12 months ÷ ' + r.perYear + ' paychecks a year'].filter(Boolean);
+        };
+        var paycheckWhy = [r.name + "'s take-home: " + money(r.takeHome) + ' a month', '× 12 ÷ ' + r.perYear + ' paychecks = ' + money(r.paycheck)];
+        var escrowWhy = perCheckLine(plan.deposit, 'Self-escrow deposit').concat(['= ' + money(r.escrow) + ' per paycheck']);
+        var savingsWhy = ['Direct-deposit savings:'].concat(itemLines(directItems),
+            perCheckLine(totals.savingsTransfers, 'Total'), ['= ' + money(r.savings) + ' per paycheck']);
+        var spendingWhy = ['Paycheck: ' + money(r.paycheck), '− To self-escrow: ' + money(r.escrow),
+            '− To savings: ' + money(r.savings), '= ' + formatSignedMoney(r.spending)];
         ph += '<tr><th scope="row">' + escapeHtml(r.name) + '<div class="escrow-sub">' + (PAY_FREQUENCY_NAMES[r.perYear] || r.perYear + '× a year') +
-            ' · $' + formatCurrency(r.paycheck) + ' paycheck</div></th><td>$' + formatCurrency(r.escrow) + '</td>' +
-            (totals.savingsTransfers > 0 ? '<td>$' + formatCurrency(r.savings) + '</td>' : '') +
-            '<td>' + formatSignedMoney(r.spending) + '</td></tr>';
+            ' · <span' + explainAttr(paycheckWhy) + '>$' + formatCurrency(r.paycheck) + ' paycheck</span></div></th>' +
+            '<td><span' + explainAttr(escrowWhy) + '>$' + formatCurrency(r.escrow) + '</span></td>' +
+            (totals.savingsTransfers > 0 ? '<td><span' + explainAttr(savingsWhy) + '>$' + formatCurrency(r.savings) + '</span></td>' : '') +
+            '<td><span' + explainAttr(spendingWhy) + '>' + formatSignedMoney(r.spending) + '</span></td></tr>';
     });
     document.getElementById('escrowPaychecks').innerHTML = rows.length
-        ? '<table class="escrow-table"><thead><tr><th></th><th>To self-escrow</th>' + (totals.savingsTransfers > 0 ? '<th>To savings</th>' : '') +
+        ? '<table class="escrow-table"><thead><tr><th></th><th>To self-escrow</th>' + (totals.savingsTransfers > 0 ? '<th>To ' + escapeHtml(accountName || 'savings') + '</th>' : '') +
             '<th>To spending</th></tr></thead><tbody>' + ph + '</tbody></table>'
         : '<p class="escrow-empty">Add income on the Income tab to see deposits per paycheck.</p>';
 
     // 12-month forecast
     var fh = '';
-    plan.months.forEach(function (m) {
+    plan.months.forEach(function (m, i) {
         var low = m === plan.lowestMonth && plan.deposit > 0;
-        fh += '<tr' + (low ? ' class="escrow-low"' : '') + '><th scope="row">' + MONTH_NAMES[m.month - 1] + '</th><td>$' +
-            formatCurrency(m.bills) + '</td><td>$' + formatCurrency(m.balanceAfterBills) + (low ? ' <span class="escrow-low-tag">lowest</span>' : '') +
-            '</td><td>$' + formatCurrency(m.deposit) + '</td><td>$' + formatCurrency(m.balanceEnd) + '</td></tr>';
+        var due = escrowItems.filter(function (b) { return billDueIn(b, m.month) > 0; })
+            .map(function (b) { return b.name + ': ' + money(billDueIn(b, m.month)); });
+        var billsWhy = due.length ? due.concat(['Total: ' + money(m.bills)]) : ['No bills due'];
+        var startBalance = i === 0 ? plan.cushion : plan.months[i - 1].balanceEnd;
+        var balanceWhy = [(i === 0 ? 'Starting cushion: ' : 'Last month\'s ending balance: ') + money(startBalance),
+            '− Bills paid: ' + money(m.bills), '= ' + money(m.balanceAfterBills)];
+        var endWhy = ['Balance after bills: ' + money(m.balanceAfterBills), '+ Deposits: ' + money(m.deposit), '= ' + money(m.balanceEnd)];
+        fh += '<tr' + (low ? ' class="escrow-low"' : '') + '><th scope="row">' + MONTH_NAMES[m.month - 1] + '</th>' +
+            '<td><span' + explainAttr(billsWhy) + '>$' + formatCurrency(m.bills) + '</span></td>' +
+            '<td><span' + explainAttr(balanceWhy) + '>$' + formatCurrency(m.balanceAfterBills) + '</span>' + (low ? ' <span class="escrow-low-tag">lowest</span>' : '') + '</td>' +
+            '<td><span' + explainAttr(['Your monthly self-escrow deposit']) + '>$' + formatCurrency(m.deposit) + '</span></td>' +
+            '<td><span' + explainAttr(endWhy) + '>$' + formatCurrency(m.balanceEnd) + '</span></td></tr>';
     });
     document.getElementById('escrowForecast').innerHTML = plan.deposit > 0
         ? '<table class="escrow-table"><thead><tr><th>Month</th><th>Bills paid</th><th>Balance after bills</th><th>Deposits</th><th>Ending balance</th></tr></thead><tbody>' + fh + '</tbody></table>'
@@ -255,6 +342,28 @@ function gatherEscrowSettings() {
 
 function loadEscrowSettings(saved) {
     escrowSettings = saved && saved.items ? JSON.parse(JSON.stringify(saved)) : { items: {} };
+    var nameInput = document.getElementById('savingsAccountName');
+    if (nameInput) nameInput.value = escrowSettings.savingsAccountName || '';
+}
+
+// Savings tab: the "Paid by" choice under each savings amount, and the direct-deposit account name
+function onSavingsRouteChange(e) {
+    var el = e.target;
+    if (el.dataset && el.dataset.routeFor) onEscrowChange(el.dataset.routeFor, 'route', el.value);
+    if (el.id === 'savingsAccountName') {
+        escrowSettings.savingsAccountName = el.value;
+        isDirty = true;
+        calculateAll();
+    }
+}
+
+function syncSavingsRouteSelects() {
+    var selects = document.querySelectorAll('select[data-route-for]');
+    for (var i = 0; i < selects.length; i++) {
+        var id = selects[i].dataset.routeFor;
+        selects[i].innerHTML = savingsRouteOptions(savingsRoute(id));
+        selects[i].closest('.savings-route').style.display = val(id) > 0 ? '' : 'none';
+    }
 }
 
 // Home screen "Self-Escrow" button: open the selected budget straight to its Self-Escrow screen
@@ -282,3 +391,7 @@ function setEscrowTitle(budgetName) {
 }
 
 document.getElementById('escrowBills').addEventListener('change', onEscrowBillsChange);
+document.getElementById('savingsTab').addEventListener('change', onSavingsRouteChange);
+document.getElementById('savingsTab').addEventListener('input', function (e) {
+    if (e.target.id === 'savingsAccountName') onSavingsRouteChange(e);
+});

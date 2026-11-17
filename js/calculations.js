@@ -122,6 +122,8 @@ function calculateAll() {
     renderBalance(takeHome, remaining, costs, savings);
     renderMoneyChart(costs.concat([['Savings', savings]]), takeHome, remaining);
     renderEscrowPlan(takeHome);
+    explainDashboard(takeHome, { housing: housing, transportation: transportation, education: education, utilities: utilities,
+        spending: spending, other: other.total, savings: savings, costs: totalExpenses - savings });
 }
 
 // Remaining card and the message under the dashboard: left over, over budget, or even

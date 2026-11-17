@@ -128,3 +128,58 @@ test('renters: rent and renter\'s insurance replace the mortgage lines', () => {
     assert.deepEqual(keys(bills.filter(b => b.group === 'Housing')), ['rent', 'rentersInsurance']);
     assert.equal(bills.find(b => b.key === 'rentersInsurance').lump, true);
 });
+
+test('savings: paycheck direct deposit by default, or paid from self-escrow or the spending account', () => {
+    household();
+    setField(w, 'investmentAccount', '270');
+    setField(w, 'collegeFund', '200');
+    const route = key => w.escrowBillList().find(b => b.key === key);
+    assert.equal(route('cashSavings').route, 'direct');
+    assert.equal(w.escrowTotals(6500).savingsTransfers, 970);
+
+    w.onEscrowChange('collegeFund', 'route', 'spending');
+    assert.equal(w.escrowTotals(6500).savingsTransfers, 770);
+    assert.equal(route('collegeFund').escrow, false);
+
+    w.onEscrowChange('investmentAccount', 'route', 'escrow');
+    const t = w.escrowTotals(6500);
+    assert.equal(t.savingsTransfers, 500);
+    assert.equal(t.escrow.toFixed(2), (2388.92 + 270).toFixed(2));
+    assert.equal(t.spendingAccount.toFixed(2), (6500 - 2388.92 - 270 - 500).toFixed(2));
+
+    // Budgets saved before routes existed: a checked savings item meant "in escrow"
+    w.loadEscrowSettings({ items: { cashSavings: { on: true } } });
+    assert.equal(route('cashSavings').route, 'escrow');
+});
+
+test('the Savings tab "Paid by" choice and account name carry into the Self-Escrow plan', () => {
+    household();
+    const select = w.document.querySelector('select[data-route-for="cashSavings"]');
+    assert.equal(select.value, 'direct');
+    select.value = 'spending';
+    select.dispatchEvent(new w.Event('change', { bubbles: true }));
+    assert.equal(w.escrowBillList().find(b => b.key === 'cashSavings').route, 'spending');
+
+    const name = w.document.getElementById('savingsAccountName');
+    name.value = 'Morgan Stanley';
+    name.dispatchEvent(new w.Event('input', { bubbles: true }));
+    w.onEscrowChange('cashSavings', 'route', 'direct');
+    assert.equal(text(w, 'escrowSavingsTitle'), 'Direct to Morgan Stanley');
+    assert.match(w.document.getElementById('escrowPaychecks').textContent, /To Morgan Stanley/);
+    assert.equal(w.gatherEscrowSettings().savingsAccountName, 'Morgan Stanley');
+});
+
+test('calculated numbers explain where they come from', () => {
+    household();
+    setField(w, 'investmentAccount', '270');
+    const explain = id => w.document.getElementById(id).getAttribute('data-explain');
+    assert.match(explain('escrowSavings'), /Investment Account: \$270\.00\nCash Savings: \$500\.00\nTotal: \$770\.00/);
+    assert.match(explain('escrowSpending'), /Take-home pay: \$6,500\.00/);
+    assert.match(explain('dashHousing'), /Mortgage payment: \$1,438\.92/);
+    assert.match(explain('dashTakeHome'), /Total: \$6,500\.00/);
+    // Paycheck "to savings" cell: items, then monthly × 12 ÷ 26 paychecks
+    const cell = Array.from(w.document.querySelectorAll('#escrowPaychecks [data-explain]'))
+        .find(el => el.textContent === '$355.38');
+    assert.ok(cell, 'savings per paycheck cell');
+    assert.match(cell.getAttribute('data-explain'), /Investment Account: \$270\.00[\s\S]*÷ 26 paychecks a year/);
+});

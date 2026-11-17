@@ -618,30 +618,43 @@
                         Retirement from paychecks (Income tab): $<span id="paycheckRetirementResult">0.00</span>/mo
                         <div class="retirement-hint">Already taken out of take-home pay. Only use "Other Retirement" below for saving outside your paycheck.</div>
                     </div>
+                    <p class="other-intro">For each amount, choose how it's paid. <strong>Paycheck direct deposit</strong> goes straight from your paycheck into a savings account before the rest reaches your spending account. This carries over to the Self-Escrow plan.</p>
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label for="savingsAccountName">Direct-deposit savings account name (optional)</label>
+                            <input type="text" id="savingsAccountName" placeholder="e.g. Morgan Stanley" autocomplete="off">
+                        </div>
+                    </div>
                     <div class="input-group">
                         <div class="input-field">
                             <label for="emergencyFund">Emergency Fund (Monthly)</label>
                             <input type="text" inputmode="decimal" id="emergencyFund" placeholder="500">
+                            <label class="savings-route" style="display:none;">Paid by <select data-route-for="emergencyFund"></select></label>
                         </div>
                         <div class="input-field">
                             <label for="retirement401k">Other Retirement (Monthly)</label>
                             <input type="text" inputmode="decimal" id="retirement401k" placeholder="0">
+                            <label class="savings-route" style="display:none;">Paid by <select data-route-for="retirement401k"></select></label>
                         </div>
                         <div class="input-field">
                             <label for="iraContribution">IRA Contribution (Monthly)</label>
                             <input type="text" inputmode="decimal" id="iraContribution" placeholder="500">
+                            <label class="savings-route" style="display:none;">Paid by <select data-route-for="iraContribution"></select></label>
                         </div>
                         <div class="input-field">
                             <label for="investmentAccount">Investment Account (Monthly)</label>
                             <input type="text" inputmode="decimal" id="investmentAccount" placeholder="300">
+                            <label class="savings-route" style="display:none;">Paid by <select data-route-for="investmentAccount"></select></label>
                         </div>
                         <div class="input-field">
                             <label for="collegeFund">College Fund (Monthly)</label>
                             <input type="text" inputmode="decimal" id="collegeFund" placeholder="200">
+                            <label class="savings-route" style="display:none;">Paid by <select data-route-for="collegeFund"></select></label>
                         </div>
                         <div class="input-field">
                             <label for="cashSavings">Cash Savings (Monthly)</label>
                             <input type="text" inputmode="decimal" id="cashSavings" placeholder="300">
+                            <label class="savings-route" style="display:none;">Paid by <select data-route-for="cashSavings"></select></label>
                         </div>
                     </div>
                     <div class="retirement-warning" id="retirementWarning" style="display:none;">
@@ -673,10 +686,12 @@
                 <div class="summary-grid escrow-cards">
                     <div class="summary-item"><h3>Self-Escrow Deposit</h3><div class="amount" id="escrowDeposit">$0.00</div><div class="escrow-card-sub">per month</div></div>
                     <div class="summary-item" id="escrowSpendingCard"><h3>Spending Account</h3><div class="amount" id="escrowSpending">$0.00</div><div class="escrow-card-sub">per month</div></div>
-                    <div class="summary-item"><h3>Savings Transfers</h3><div class="amount" id="escrowSavings">$0.00</div><div class="escrow-card-sub">per month</div></div>
+                    <div class="summary-item"><h3 id="escrowSavingsTitle">Direct to Savings</h3><div class="amount" id="escrowSavings">$0.00</div><div class="escrow-card-sub">per month, by paycheck direct deposit</div></div>
                     <div class="summary-item"><h3>Starting Cushion</h3><div class="amount" id="escrowCushion">$0.00</div><div class="escrow-card-sub">so it never runs short</div></div>
                 </div>
                 <p class="escrow-note">The spending account covers your unchecked bills ($<span id="escrowSpendingBills">0.00</span>) and leaves <strong id="escrowSpendingFree">$0.00</strong> a month free.</p>
+
+                <p class="explain-hint">Tip: hover over or tap a number with a dotted underline to see how it's worked out.</p>
 
                 <h3 class="spending-group-title">Bills</h3>
                 <div id="escrowBills"></div>
@@ -718,6 +733,7 @@
     <script src="/js/escrow.js"></script>
     <script src="/js/budget-editor.js"></script>
     <script src="/js/suggestions.js"></script>
+    <script src="/js/explain.js"></script>
     <script src="/js/calculations.js"></script>
     <script src="/js/money-chart.js"></script>
     <script src="/js/compare.js"></script>
