@@ -92,6 +92,7 @@ function calculateSavings() {
 }
 
 function calculateAll() {
+    updateMortgageRateSuggestion();
     var takeHome = calculateIncome();
     var housing = calculateHousing();
     var transportation = calculateTransportation();

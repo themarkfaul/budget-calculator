@@ -5,12 +5,14 @@
     if (!user) return;
 
     setText('userEmail', user.email);
+    setSuggestionMode((user.user_metadata || {}).suggestionMode);
 
     var inputs = document.querySelectorAll('#calculatorScreen input[inputmode="decimal"]');
     for (var i = 0; i < inputs.length; i++) {
         inputs[i].addEventListener('input', calculateAll);
     }
     setupMoneyFormatting();
+    setupSuggestions();
     renderOtherSuggestions();
     document.getElementById('calculatorScreen').addEventListener('input', function () { isDirty = true; });
     window.addEventListener('beforeunload', warnAboutUnsavedChanges);

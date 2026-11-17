@@ -49,6 +49,14 @@ async function deleteAccount(password) {
     try { await supabase.auth.signOut({ scope: 'local' }); } catch (e) { /* already invalid */ }
 }
 
+// Saves the user's app settings (like how suggested values work) with their sign-in,
+// so they follow the user to every device.
+async function saveUserSettings(settings) {
+    var result = await supabase.auth.updateUser({ data: settings });
+    if (result.error) throw result.error;
+    return result.data;
+}
+
 async function getUser() {
     var result = await supabase.auth.getUser();
     return result.data.user;

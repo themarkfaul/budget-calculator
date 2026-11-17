@@ -20,7 +20,8 @@ function parseMoney(str) {
 
 function formatMoneyValue(value) {
     var num = parseFloat(String(value).replace(/,/g, ''));
-    if (isNaN(num) || num === 0) return '';
+    if (isNaN(num)) return '';
+    if (num === 0) return '0';   // a typed 0 stays visible instead of bringing back the grey suggestion
     var parts = num.toFixed(2).split('.');
     var whole = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     if (parts[1] === '00') return whole;

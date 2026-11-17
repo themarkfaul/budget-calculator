@@ -17,6 +17,7 @@
 
         <div class="user-bar">
             <span class="user-email" id="userEmail"></span>
+            <button class="btn-link-muted btn-settings" onclick="openSettings()">⚙️ Settings</button>
             <button class="btn-link-muted" onclick="openDeleteAccount()">Delete Account</button>
             <button class="btn-logout" onclick="handleSignOut()">Sign Out</button>
         </div>
@@ -33,6 +34,37 @@
                 <div class="dialog-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeDeleteAccount()">Cancel</button>
                     <button type="submit" class="btn btn-danger" id="deleteAccountBtn">Delete Account</button>
+                </div>
+            </form>
+        </dialog>
+
+        <!-- Settings -->
+        <dialog id="settingsDialog" class="confirm-dialog settings-dialog" aria-labelledby="settingsTitle">
+            <form method="dialog" onsubmit="handleSaveSettings(event)">
+                <h2 id="settingsTitle">Settings</h2>
+                <fieldset class="settings-group">
+                    <legend>Suggested values</legend>
+                    <p class="dialog-hint">Empty fields show a suggested amount in grey. Choose how a suggestion gets used.</p>
+                    <label class="settings-option">
+                        <input type="radio" name="suggestionMode" value="tap">
+                        <span><strong>Tap or press Enter to use</strong> (recommended)<br>
+                        <small>A "Use" button appears when you click into an empty field. Leaving without typing sets it to 0.</small></span>
+                    </label>
+                    <label class="settings-option">
+                        <input type="radio" name="suggestionMode" value="leave">
+                        <span><strong>Leaving the field uses it</strong><br>
+                        <small>Enter, Tab or clicking into the next field accepts the suggestion. Type 0 for bills you don't have.</small></span>
+                    </label>
+                    <label class="settings-option">
+                        <input type="radio" name="suggestionMode" value="prefill">
+                        <span><strong>Fill in new budgets</strong><br>
+                        <small>New blank budgets start with the suggestions filled in (not income or education). Change or clear what doesn't apply.</small></span>
+                    </label>
+                </fieldset>
+                <div class="dialog-error" id="settingsError" role="alert"></div>
+                <div class="dialog-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeSettings()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="settingsSaveBtn">Save</button>
                 </div>
             </form>
         </dialog>
@@ -652,6 +684,7 @@
     <script src="/js/other-expenses.js"></script>
     <script src="/js/escrow.js"></script>
     <script src="/js/budget-editor.js"></script>
+    <script src="/js/suggestions.js"></script>
     <script src="/js/calculations.js"></script>
     <script src="/js/money-chart.js"></script>
     <script src="/js/compare.js"></script>

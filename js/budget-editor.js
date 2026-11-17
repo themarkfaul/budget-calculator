@@ -37,6 +37,7 @@ function startBlankBudget() {
     clearCalculatorFields();
     addIncomeEarner('');
     addChild('');
+    if (suggestionMode === 'prefill') prefillSuggestions();
     isDirty = false;
     showScreen('calculatorScreen');
 }

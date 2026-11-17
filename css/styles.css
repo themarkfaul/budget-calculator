@@ -1689,3 +1689,40 @@ div.fed-rate,
 
 .confirm-dialog .dialog-error { color: #dc3545; font-size: 0.9em; min-height: 1.2em; margin-top: 8px; }
 .confirm-dialog .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+
+/* ── Settings and suggested values ── */
+
+.btn-settings:hover { color: #667eea; }
+.settings-dialog h2 { color: #495057; }
+.settings-group { border: 0; padding: 0; margin: 0; }
+.settings-group legend { font-weight: 700; margin-bottom: 6px; }
+.confirm-dialog .settings-option {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-weight: normal;
+    padding: 10px;
+    margin: 6px 0;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.confirm-dialog .settings-option input { width: auto; margin-top: 3px; }
+.settings-option small { color: #6c757d; }
+.settings-option:has(input:checked) { border-color: #667eea; background: #f3f4ff; }
+
+.suggestion-chip {
+    display: inline-block;
+    align-self: flex-start;
+    width: auto;
+    margin-top: 6px;
+    padding: 4px 12px;
+    border: 1px solid #667eea;
+    border-radius: 999px;
+    background: #f3f4ff;
+    color: #4c5fd5;
+    font-size: 0.85em;
+    font-weight: 600;
+    cursor: pointer;
+}
+.suggestion-chip:hover { background: #667eea; color: #fff; }
