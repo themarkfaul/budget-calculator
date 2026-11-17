@@ -14,7 +14,10 @@ var COMPARE_ROWS = [
     ['Spending', function (s) { return parseMoney(s.spending); }, false],
     ['Other', function (s) { return parseMoney(s.other); }, false],
     ['Savings', function (s) { return plannedSavings(s); }, true],
-    ['Left over', function (s) { return parseMoney(s.remainingBalance); }, true]
+    ['Left over', function (s) { return parseMoney(s.remainingBalance); }, true],
+    // Escrow figures exist only on budgets saved since the Escrow tab was added (null = unknown)
+    ['Escrow deposit', function (s) { return s.escrowDeposit === undefined ? null : parseMoney(s.escrowDeposit); }, false],
+    ['Spending account', function (s) { return s.spendingAccount === undefined ? null : parseMoney(s.spendingAccount); }, true]
 ];
 
 function openCompare() {
@@ -80,9 +83,13 @@ function renderCompareTable() {
         var values = summaries.map(row[1]);
         html += '<tr><th scope="row">' + row[0] + '</th>';
         values.forEach(function (v, col) {
+            if (v === null) {
+                html += '<td><div class="compare-value compare-unknown" title="Open and save this budget to calculate it">—</div></td>';
+                return;
+            }
             var cls = row[0] === 'Left over' ? ' class="compare-' + balanceStatus(v) + '"' : '';
             html += '<td' + cls + '><div class="compare-value">' + formatSignedMoney(v) + '</div>' +
-                (col > 0 ? compareDiffHtml(v - values[0], row[2]) : '') + '</td>';
+                (col > 0 && values[0] !== null ? compareDiffHtml(v - values[0], row[2]) : '') + '</td>';
         });
         html += '</tr>';
     });

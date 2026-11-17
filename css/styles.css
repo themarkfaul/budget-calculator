@@ -181,11 +181,10 @@ body {
 @media (max-width: 600px) {
     .action-buttons {
         gap: 8px;
-        flex-wrap: nowrap;
     }
 
     .action-buttons .btn {
-        flex: 1;
+        flex: 1 1 40%;   /* two per row */
         padding: 12px 8px;
     }
 }
@@ -270,6 +269,155 @@ body {
     flex-wrap: wrap;
     gap: 12px;
     margin-top: 30px;
+}
+
+/* ── Escrow tab ── */
+
+.btn-escrow { background: #0f766e; color: white; }
+.btn-escrow:hover { background: #115e59; }
+
+.escrow-cards {
+    margin-bottom: 10px;
+}
+
+.escrow-card-sub {
+    font-size: 0.8em;
+    opacity: 0.85;
+    margin-top: 4px;
+}
+
+.escrow-note {
+    color: #6c757d;
+    font-size: 0.9em;
+    margin-bottom: 20px;
+}
+
+.escrow-note strong {
+    color: #495057;
+}
+
+.escrow-group {
+    font-weight: 700;
+    color: #667eea;
+    margin: 16px 0 6px;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.escrow-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    padding: 9px 12px;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    background: white;
+}
+
+.escrow-row-on {
+    border-color: #0f766e;
+    background: #f0fdfa;
+}
+
+.escrow-check {
+    flex: 1;
+    min-width: 180px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.escrow-check input {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+}
+
+.escrow-amount {
+    font-weight: 600;
+    color: #495057;
+}
+
+.escrow-schedule {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding-left: 26px;
+}
+
+.escrow-schedule select {
+    padding: 6px 8px;
+    font-size: 14px;
+    border-width: 1px;
+}
+
+.escrow-due {
+    font-size: 0.85em;
+    color: #6c757d;
+}
+
+.escrow-scroll {
+    overflow-x: auto;
+    margin-bottom: 15px;
+}
+
+.escrow-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.escrow-table th,
+.escrow-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #e9ecef;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.escrow-table thead th {
+    color: #495057;
+    font-size: 0.85em;
+}
+
+.escrow-table tbody th {
+    text-align: left;
+    color: #495057;
+}
+
+.escrow-sub {
+    font-size: 0.8em;
+    font-weight: normal;
+    color: #6c757d;
+}
+
+.escrow-low td {
+    background: #fff3cd;
+}
+
+.escrow-low-tag {
+    font-size: 0.75em;
+    background: #ffc107;
+    color: #533f03;
+    border-radius: 6px;
+    padding: 1px 6px;
+    margin-left: 4px;
+}
+
+.escrow-empty {
+    color: #6c757d;
+    font-style: italic;
+}
+
+.compare-unknown {
+    color: #adb5bd;
 }
 
 /* ── Compare Budgets ── */

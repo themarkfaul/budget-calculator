@@ -119,6 +119,7 @@ function loadBudgetDataIntoCalculator(budget) {
         if (input) setFieldValue(input, budget.data[fieldId]);
     }
     loadOtherExpenses(budget.data.otherExpenses);
+    loadEscrowSettings(budget.data.escrow);
 
     calculateAll();
     formatAllInputs();
@@ -147,6 +148,7 @@ function clearCalculatorFields() {
     for (var i = 0; i < nameInputs.length; i++) nameInputs[i].value = '';
 
     clearOtherExpenses();
+    loadEscrowSettings(null);
     document.getElementById('housingMode').value = 'own';
     document.getElementById('leftoverSplitOn').checked = false;
     document.getElementById('leftoverSavingsPercent').value = '100';
@@ -198,6 +200,7 @@ function gatherCalculatorData() {
     }
 
     data.otherExpenses = gatherOtherExpenses();
+    data.escrow = gatherEscrowSettings();
     data.housingMode = document.getElementById('housingMode').value;
 
     // Left-over split (dashboard)
@@ -237,7 +240,9 @@ function buildSummary() {
         remainingBalance: formatSignedMoney(remaining),
         leftoverToSavings: '$' + formatCurrency(leftoverAllocation(remaining).toSavings),
         leftoverToSpending: '$' + formatCurrency(leftoverAllocation(remaining).toSpending),
-        paycheckRetirement: '$' + formatCurrency(calculatePaycheckRetirement())
+        paycheckRetirement: '$' + formatCurrency(calculatePaycheckRetirement()),
+        escrowDeposit: '$' + formatCurrency(escrowTotals(takeHome).escrow),
+        spendingAccount: formatSignedMoney(escrowTotals(takeHome).spendingAccount)
     };
 }
 

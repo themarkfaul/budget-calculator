@@ -38,6 +38,13 @@ function buildBudgetReport(budget) {
     }
     html += '</tbody></table>';
 
+    if (s.escrowDeposit !== undefined && parseMoney(s.escrowDeposit) > 0) {
+        html += '<h2>Escrow plan</h2><table class="report-table"><tbody>' +
+            reportRow('Escrow account deposit', parseMoney(s.escrowDeposit), takeHome) +
+            reportRow('Spending account', parseMoney(s.spendingAccount), takeHome) +
+            '</tbody></table>';
+    }
+
     var other = Array.isArray(data.otherExpenses) ? data.otherExpenses : [];
     if (other.length) {
         html += '<h2>Other expenses</h2><table class="report-table"><tbody>';

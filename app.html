@@ -39,6 +39,7 @@
                     <button class="btn btn-primary" onclick="showSummary()">📊 Summary</button>
                     <button class="btn btn-secondary" onclick="editBudget()">✏️ Edit</button>
                     <button class="btn btn-success" onclick="evaluateBudget()">📋 Evaluate</button>
+                    <button class="btn btn-escrow" onclick="openEscrow()">🧾 Escrow</button>
                 </div>
 
                 <div class="create-new-section">
@@ -253,6 +254,7 @@
                 <button class="tab" onclick="showCalcTab(event, 'spendingTab')"><span class="tab-icon">🛒</span><span class="tab-label">Spending</span></button>
                 <button class="tab" onclick="showCalcTab(event, 'otherTab')"><span class="tab-icon">📋</span><span class="tab-label">Other</span></button>
                 <button class="tab" onclick="showCalcTab(event, 'savingsTab')"><span class="tab-icon">🏦</span><span class="tab-label">Savings</span></button>
+                <button class="tab" onclick="showCalcTab(event, 'escrowTab')"><span class="tab-icon">🧾</span><span class="tab-label">Escrow</span></button>
             </div>
 
             <!-- Dashboard Tab -->
@@ -579,6 +581,38 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Escrow Tab -->
+            <div id="escrowTab" class="tab-content">
+                <div class="section">
+                    <h2>🧾 Escrow Plan</h2>
+                    <p class="other-intro">Pay your fixed bills from a separate checking account, your "escrow", and put the rest into a spending account for day-to-day money. Check the bills to pay from escrow; for bills paid once or twice a year, pick when they're due.</p>
+
+                    <div class="summary-grid escrow-cards">
+                        <div class="summary-item"><h3>Escrow Deposit</h3><div class="amount" id="escrowDeposit">$0.00</div><div class="escrow-card-sub">per month</div></div>
+                        <div class="summary-item" id="escrowSpendingCard"><h3>Spending Account</h3><div class="amount" id="escrowSpending">$0.00</div><div class="escrow-card-sub">per month</div></div>
+                        <div class="summary-item"><h3>Savings Transfers</h3><div class="amount" id="escrowSavings">$0.00</div><div class="escrow-card-sub">per month</div></div>
+                        <div class="summary-item"><h3>Starting Cushion</h3><div class="amount" id="escrowCushion">$0.00</div><div class="escrow-card-sub">so it never runs short</div></div>
+                    </div>
+                    <p class="escrow-note">The spending account covers your unchecked bills ($<span id="escrowSpendingBills">0.00</span>) and leaves <strong id="escrowSpendingFree">$0.00</strong> a month free.</p>
+
+                    <h3 class="spending-group-title">Bills</h3>
+                    <div id="escrowBills"></div>
+
+                    <h3 class="spending-group-title">Deposits per paycheck</h3>
+                    <div class="escrow-scroll" id="escrowPaychecks"></div>
+
+                    <h3 class="spending-group-title">12-month forecast</h3>
+                    <p class="escrow-note">Starting this month with the cushion above. Each month's bills are assumed to be paid before that month's deposits arrive, so the account can't run short.</p>
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label for="escrowExtraCushion">Extra Safety Margin ($, optional)</label>
+                            <input type="text" inputmode="decimal" id="escrowExtraCushion" placeholder="500">
+                        </div>
+                    </div>
+                    <div class="escrow-scroll" id="escrowForecast"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -599,6 +633,7 @@
     <script src="/js/income.js"></script>
     <script src="/js/education.js"></script>
     <script src="/js/other-expenses.js"></script>
+    <script src="/js/escrow.js"></script>
     <script src="/js/budget-editor.js"></script>
     <script src="/js/calculations.js"></script>
     <script src="/js/money-chart.js"></script>

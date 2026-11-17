@@ -17,10 +17,6 @@ function calculateHousing() {
     var mortgageDown = val('mortgageDownPayment');
     var mortgageTerm = val('mortgageTerm');
     var homeInsurance = val('homeInsurance');
-    var propertyValue = val('propertyValue');
-    var stateTaxRate = val('stateTaxRate');
-    var countyTaxRate = val('countyTaxRate');
-    var localTaxRate = val('localTaxRate');
     var waste = val('waste');
 
     var mortgagePayment = loanPayment(Math.max(0, houseValue - mortgageDown), mortgageRate, mortgageTerm);
@@ -31,12 +27,16 @@ function calculateHousing() {
     rateCheckEl.className = 'rate-check' + (check ? ' rate-check-' + check.level : '');
     rateCheckEl.textContent = check ? check.text : '';
 
-    var propertyTaxes = propertyValue * (stateTaxRate + countyTaxRate + localTaxRate) / 100;
-    var totalHousing = mortgagePayment + (homeInsurance / 12) + (propertyTaxes / 12) + (waste / 12);
+    var totalHousing = mortgagePayment + (homeInsurance / 12) + (propertyTaxAnnual() / 12) + (waste / 12);
 
     setText('mortgagePaymentResult', formatCurrency(mortgagePayment));
     setText('housingResult', formatCurrency(totalHousing));
     return totalHousing;
+}
+
+// Yearly property tax: property value times the state, county and local rates
+function propertyTaxAnnual() {
+    return val('propertyValue') * (val('stateTaxRate') + val('countyTaxRate') + val('localTaxRate')) / 100;
 }
 
 function calculateTransportation() {
@@ -120,6 +120,7 @@ function calculateAll() {
     ];
     renderBalance(takeHome, remaining, costs, savings);
     renderMoneyChart(costs.concat([['Savings', savings]]), takeHome, remaining);
+    renderEscrowPlan(takeHome);
 }
 
 // Remaining card and the message under the dashboard: left over, over budget, or even

@@ -20,12 +20,12 @@ function addIncomeEarner(name) {
                 ['estimate', 'Estimate from salary or hourly rate'],
                 ['net', 'I know my take-home pay']
             ]) +
-        '</div>' +
-        '<div class="mode-net input-group">' +
-            earnerInput(idx, 'netPay', 'Take-Home Pay per Paycheck ($)', '2200') +
             earnerSelect(idx, 'payFrequency', 'How Often Are You Paid?', [
                 ['26', 'Every two weeks'], ['52', 'Weekly'], ['24', 'Twice a month'], ['12', 'Monthly']
             ]) +
+        '</div>' +
+        '<div class="mode-net input-group">' +
+            earnerInput(idx, 'netPay', 'Take-Home Pay per Paycheck ($)', '2200') +
             earnerInput(idx, 'grossPay', 'Gross Pay per Paycheck ($, optional)', '3000') +
             earnerInput(idx, 'retirementPerCheck', 'Retirement per Paycheck ($, optional)', '300') +
         '</div>' +
