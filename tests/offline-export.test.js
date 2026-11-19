@@ -65,3 +65,19 @@ test('data export holds only my own budgets, with settings and sharing', () => {
     assert.deepEqual(out.budgets[0].data, { tv: '60' });
     assert.equal(w.dataExportFileName(new w.Date(2026, 10, 7)), 'my-budget-ai-data-2026-11-07.json');
 });
+
+test('a downloaded backup can be read back for restoring', () => {
+    w.currentUser = ME;
+    const file = JSON.stringify(w.buildDataExport([list[0]]));
+    const backup = w.parseDataBackup(file);
+    assert.deepEqual(plain(backup.budgets), [{ name: 'Ours', data: { tv: '60' }, summary: { takeHome: '$1.00' } }]);
+    // Other files are refused with a plain message
+    assert.throws(() => w.parseDataBackup('not json'), /isn't a My Budget AI backup/);
+    assert.throws(() => w.parseDataBackup('{"budgets":[]}'), /isn't a My Budget AI backup/);
+    assert.throws(() => w.parseDataBackup('{"app":"My Budget AI","budgets":[{"name":"x","data":"bad"}]}'), /no budgets/);
+});
+
+test('restored budgets never take an existing name', () => {
+    const names = w.restoredNames([{ name: 'Ours' }, { name: 'New' }, { name: 'Ours' }], ['Ours', 'ours (restored)']);
+    assert.deepEqual(plain(names), ['Ours (restored 2)', 'New', 'Ours (restored 3)']);
+});

@@ -68,14 +68,14 @@ test('leave mode: Tab or clicking away accepts the suggestion', () => {
     const rate = field('carRate');
     rate.focus();
     rate.blur();
-    assert.equal(rate.value, '6.875');
+    assert.equal(rate.value, '7');
 });
 
 test('prefill mode: new blank budgets start with suggestions, except income and education', () => {
     w.setSuggestionMode('prefill');
     newBudget(w);
     assert.equal(field('tv').value, '60');
-    assert.equal(field('houseValue').value, '250,000');
+    assert.equal(field('houseValue').value, '350,000');
     assert.equal(field('netPay_' + w.getEarnerIndices()[0]).value, '');
     assert.equal(w.document.querySelector('#educationTab input[id^="tuition_"]').value, '');
     // Other modes leave new budgets empty
@@ -92,8 +92,10 @@ test('unknown or missing setting falls back to the default', () => {
 });
 
 test('mortgage rate suggestion is the current market average for the loan term', () => {
-    // Test rates: 30-year 7.28, 15-year 6.6; the empty term uses its own suggestion (15)
+    // Test rates: 30-year 7.28, 15-year 6.6; the empty term uses its own suggestion (30)
     w.calculateAll();
+    assert.equal(field('mortgageRate').placeholder, '7.28');
+    setField(w, 'mortgageTerm', '15');
     assert.equal(field('mortgageRate').placeholder, '6.6');
     setField(w, 'mortgageTerm', '30');
     assert.equal(field('mortgageRate').placeholder, '7.28');

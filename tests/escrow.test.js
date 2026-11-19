@@ -163,12 +163,12 @@ test('the Savings tab "Paid by" choice and account name carry into the Self-Escr
     assert.equal(w.escrowBillList().find(b => b.key === 'cashSavings').route, 'spending');
 
     const name = w.document.getElementById('savingsAccountName');
-    name.value = 'Morgan Stanley';
+    name.value = 'Vanguard';
     name.dispatchEvent(new w.Event('input', { bubbles: true }));
     w.onEscrowChange('cashSavings', 'route', 'direct');
-    assert.equal(text(w, 'escrowSavingsTitle'), 'Direct to Morgan Stanley');
-    assert.match(w.document.getElementById('escrowPaychecks').textContent, /To Morgan Stanley/);
-    assert.equal(w.gatherEscrowSettings().savingsAccountName, 'Morgan Stanley');
+    assert.equal(text(w, 'escrowSavingsTitle'), 'Direct to Vanguard');
+    assert.match(w.document.getElementById('escrowPaychecks').textContent, /To Vanguard/);
+    assert.equal(w.gatherEscrowSettings().savingsAccountName, 'Vanguard');
 });
 
 test('calculated numbers explain where they come from', () => {

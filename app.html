@@ -84,8 +84,12 @@
                 </fieldset>
                 <fieldset class="settings-group">
                     <legend>Your data</legend>
-                    <p class="dialog-hint">Download all of your budgets as one file, as a backup or to keep before deleting your account.</p>
-                    <button type="button" class="btn btn-secondary" onclick="downloadMyData()">⬇️ Download my data</button>
+                    <p class="dialog-hint">Download all of your budgets as one file, as a backup or to keep before deleting your account. Restoring a backup adds its budgets back without changing the ones you have.</p>
+                    <div class="settings-data-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="downloadMyData()">⬇️ Download my data</button>
+                        <button type="button" class="btn btn-secondary" onclick="chooseBackupFile()">⬆️ Restore from a backup</button>
+                    </div>
+                    <input type="file" id="restoreFileInput" accept=".json,application/json" hidden onchange="restoreFromBackup(this.files[0])">
                     <p class="dialog-hint settings-links"><a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a></p>
                 </fieldset>
                 <div class="dialog-error" id="settingsError" role="alert"></div>
@@ -427,7 +431,7 @@
                     <div class="input-group">
                         <div class="input-field housing-mortgage">
                             <label for="houseValue">House Value ($)</label>
-                            <input type="text" inputmode="decimal" id="houseValue" placeholder="250000">
+                            <input type="text" inputmode="decimal" id="houseValue" placeholder="350000">
                         </div>
                         <div class="input-field housing-mortgage">
                             <label for="mortgageRate">Mortgage Interest Rate (%)</label>
@@ -436,36 +440,36 @@
                         </div>
                         <div class="input-field housing-mortgage">
                             <label for="mortgageDownPayment">Down Payment ($)</label>
-                            <input type="text" inputmode="decimal" id="mortgageDownPayment" placeholder="100000">
+                            <input type="text" inputmode="decimal" id="mortgageDownPayment" placeholder="70000">
                         </div>
                         <div class="input-field housing-mortgage">
                             <label for="mortgageTerm">Mortgage Term (Years)</label>
-                            <input type="text" inputmode="decimal" id="mortgageTerm" placeholder="15">
+                            <input type="text" inputmode="decimal" id="mortgageTerm" placeholder="30">
                         </div>
                         <p class="other-intro housing-paid-note">No mortgage payment: your housing cost is property tax, homeowners insurance and waste pickup.</p>
                         <div class="input-field">
                             <label for="homeInsurance">Home Insurance (Annual)</label>
-                            <input type="text" inputmode="decimal" id="homeInsurance" placeholder="2084">
+                            <input type="text" inputmode="decimal" id="homeInsurance" placeholder="2000">
                         </div>
                         <div class="input-field">
                             <label for="propertyValue">Property Value for Tax ($)</label>
-                            <input type="text" inputmode="decimal" id="propertyValue" placeholder="250000">
+                            <input type="text" inputmode="decimal" id="propertyValue" placeholder="350000">
                         </div>
                         <div class="input-field">
                             <label for="stateTaxRate">State Tax Rate (%)</label>
-                            <input type="text" inputmode="decimal" id="stateTaxRate" placeholder="1.039" data-percent>
+                            <input type="text" inputmode="decimal" id="stateTaxRate" placeholder="0" data-percent>
                         </div>
                         <div class="input-field">
                             <label for="countyTaxRate">County Tax Rate (%)</label>
-                            <input type="text" inputmode="decimal" id="countyTaxRate" placeholder="0.125" data-percent>
+                            <input type="text" inputmode="decimal" id="countyTaxRate" placeholder="0.7" data-percent>
                         </div>
                         <div class="input-field">
                             <label for="localTaxRate">Local/City Tax Rate (%)</label>
-                            <input type="text" inputmode="decimal" id="localTaxRate" placeholder="0.226" data-percent>
+                            <input type="text" inputmode="decimal" id="localTaxRate" placeholder="0.3" data-percent>
                         </div>
                         <div class="input-field">
                             <label for="waste">Waste Management (Annual)</label>
-                            <input type="text" inputmode="decimal" id="waste" placeholder="342">
+                            <input type="text" inputmode="decimal" id="waste" placeholder="300">
                         </div>
                     </div>
                     </div>
@@ -483,15 +487,15 @@
                     <div class="input-group">
                         <div class="input-field">
                             <label for="carPrice">Vehicle Price ($)</label>
-                            <input type="text" inputmode="decimal" id="carPrice" placeholder="27000">
+                            <input type="text" inputmode="decimal" id="carPrice" placeholder="30000">
                         </div>
                         <div class="input-field">
                             <label for="carRate">Interest Rate (%)</label>
-                            <input type="text" inputmode="decimal" id="carRate" placeholder="6.875" data-percent>
+                            <input type="text" inputmode="decimal" id="carRate" placeholder="7" data-percent>
                         </div>
                         <div class="input-field">
                             <label for="downPayment">Down Payment + Trade ($)</label>
-                            <input type="text" inputmode="decimal" id="downPayment" placeholder="15000">
+                            <input type="text" inputmode="decimal" id="downPayment" placeholder="5000">
                         </div>
                         <div class="input-field">
                             <label for="loanTerm">Loan Term (Years)</label>
@@ -499,11 +503,11 @@
                         </div>
                         <div class="input-field">
                             <label for="carInsuranceAnnual">Vehicle Insurance (Annual)</label>
-                            <input type="text" inputmode="decimal" id="carInsuranceAnnual" placeholder="1156">
+                            <input type="text" inputmode="decimal" id="carInsuranceAnnual" placeholder="1500">
                         </div>
                         <div class="input-field">
                             <label for="carTaxes">Vehicle Taxes (Annual)</label>
-                            <input type="text" inputmode="decimal" id="carTaxes" placeholder="454">
+                            <input type="text" inputmode="decimal" id="carTaxes" placeholder="300">
                         </div>
                     </div>
                     <div class="calc-result">
@@ -641,7 +645,7 @@
                     <div class="input-group">
                         <div class="input-field">
                             <label for="savingsAccountName">Direct-deposit savings account name (optional)</label>
-                            <input type="text" id="savingsAccountName" placeholder="e.g. Morgan Stanley" autocomplete="off">
+                            <input type="text" id="savingsAccountName" placeholder="e.g. My savings account" autocomplete="off">
                         </div>
                     </div>
                     <div class="other-suggestions" id="savingsSuggestions"></div>

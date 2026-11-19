@@ -15,7 +15,7 @@ function savingsRoute(key) {
     return saved.on === true ? 'escrow' : 'direct';
 }
 
-// What the paycheck's direct-deposit savings account is called (e.g. "Morgan Stanley")
+// What the paycheck's direct-deposit savings account is called (e.g. "Vanguard")
 function savingsAccountName() {
     return (escrowSettings.savingsAccountName || '').trim();
 }

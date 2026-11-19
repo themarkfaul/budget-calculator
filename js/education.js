@@ -17,9 +17,9 @@ function addChild(name) {
         '</div>' +
         '<div class="input-group">' +
             '<div class="input-field"><label for="tuition_' + idx + '">Tuition (Annual)</label>' +
-            '<input type="text" inputmode="decimal" id="tuition_' + idx + '" placeholder="9386"></div>' +
+            '<input type="text" inputmode="decimal" id="tuition_' + idx + '" placeholder="10000"></div>' +
             '<div class="input-field"><label for="lunch_' + idx + '">Lunch/Meals (Annual)</label>' +
-            '<input type="text" inputmode="decimal" id="lunch_' + idx + '" placeholder="1235"></div>' +
+            '<input type="text" inputmode="decimal" id="lunch_' + idx + '" placeholder="1000"></div>' +
             '<div class="input-field"><label for="afterschool_' + idx + '">Afterschool Program (Annual)</label>' +
             '<input type="text" inputmode="decimal" id="afterschool_' + idx + '" placeholder="0"></div>' +
         '</div>' +
