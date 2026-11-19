@@ -1,4 +1,4 @@
-// Plan Ahead: "what if" changes to a budget (buy a house, a boat, join a club, save for college,
+// Future Planning: "what if" changes to a budget (buy a house, a boat, join a club, save for college,
 // change 401(k), ...). The changes are applied to a copy of the open budget, which becomes a new
 // unsaved budget with its own Self-Escrow plan. A before/after view runs the same health checks as
 // Evaluate and suggests where to trim so the new plan works.
@@ -189,7 +189,11 @@ function setPlanField(id, value) {
 // ── Opening ──
 
 function openPlan() {
-    if (!selectedBudget) { showToast('Select a budget first.', 'info'); return; }
+    if (!selectedBudget && budgets.length === 1) selectBudget(0);
+    if (!selectedBudget) {
+        showToast(budgets.length ? 'Tap the budget to plan from below, then Future Planning.' : 'Create and save a budget first, then plan from it.', 'info');
+        return;
+    }
     editBudget();
     showPlanScreen();
 }
@@ -201,7 +205,7 @@ function showPlanScreen() {
         planChanges = [];
         planBuilt = false;
     }
-    setText('planTitle', '🔮 Plan Ahead' + (planBase.name ? ': ' + planBase.name : ''));
+    setText('planTitle', '🔮 Future Planning' + (planBase.name ? ': ' + planBase.name : ''));
     renderPlanChoices();
     renderPlanChanges();
     document.getElementById('planResult').style.display = planBuilt ? '' : 'none';
