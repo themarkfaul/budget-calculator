@@ -129,7 +129,7 @@ test('saving and reopening a budget restores everything', () => {
     const dashboardBefore = text(w, 'dashRemaining');
 
     newBudget(w);
-    assert.equal(w.document.querySelectorAll('.other-row').length, 0);
+    assert.equal(w.document.querySelectorAll('#otherExpensesContainer .other-row').length, 0);
     w.loadBudgetDataIntoCalculator({ data: saved });
 
     // Reopening formats money with commas ("1500" → "1,500"), so compare without them
@@ -145,4 +145,90 @@ test('summaries saved by older versions are read correctly', () => {
     assert.equal(w.plannedSavings({ savings: '$500.00', remainingBalance: '$3,966.67', leftoverInSavings: false }), 500);
     assert.equal(w.parseMoney('$-866.50'), -866.5);
     assert.equal(w.formatSignedMoney(-866.5), '-$866.50');
+});
+
+test('owning a home outright: no mortgage, only tax, insurance and waste', () => {
+    newBudget(w);
+    setField(w, 'houseValue', '300000');
+    setField(w, 'mortgageRate', '6');
+    setField(w, 'mortgageTerm', '30');
+    setField(w, 'homeInsurance', '1200');
+    setField(w, 'propertyValue', '300000');
+    setField(w, 'stateTaxRate', '1');
+    setField(w, 'housingMode', 'paid');
+    assert.equal(w.calculateHousing(), 100 + 250);
+    assert.equal(w.escrowBillList().some(b => b.key === 'mortgage'), false);
+    const data = w.gatherCalculatorData();
+    assert.equal(data.housingMode, 'paid');
+    newBudget(w);
+    w.loadBudgetDataIntoCalculator({ data });
+    assert.equal(w.document.getElementById('housingMode').value, 'paid');
+    assert.equal(w.calculateHousing(), 350);
+});
+
+test('other income adds to take-home and is saved with the budget', () => {
+    newBudget(w);
+    const idx = w.getEarnerIndices()[0];
+    setField(w, 'incomeMode_' + idx, 'net');
+    setField(w, 'netPay_' + idx, '2000');
+    setField(w, 'payFrequency_' + idx, '24');          // $4,000 a month
+    w.addOtherIncome('Rental income', '1,200');
+    w.addOtherIncome('Side job', '300');
+    assert.equal(w.calculateIncome(), 5500);
+    assert.equal(w.buildSummary().takeHome, '$5,500.00');
+    assert.match(w.document.getElementById('dashTakeHome').getAttribute('data-explain'), /Rental income: \$1,200\.00/);
+    // Not on a paycheck, so it goes to the spending account, not the per-paycheck split
+    assert.equal(w.escrowPaycheckRows(0, 0)[0].paycheck, 2000);
+
+    const data = w.gatherCalculatorData();
+    assert.deepEqual(plain(data.otherIncome), [{ name: 'Rental income', amount: '1,200' }, { name: 'Side job', amount: '300' }]);
+    assert.equal(data.otherIncomeAmount_0, undefined);
+    newBudget(w);
+    assert.equal(w.calculateIncome(), 0);
+    w.loadBudgetDataIntoCalculator({ data });
+    assert.equal(w.calculateIncome(), 5500);
+});
+
+test('savings: starts with Cash Savings; other kinds are added with buttons', () => {
+    newBudget(w);
+    const names = () => plain(w.savingsItems().map(i => i.name));
+    assert.deepEqual(names(), ['Cash Savings']);
+    const chips = () => Array.from(w.document.querySelectorAll('#savingsSuggestions .suggestion-chip'), b => b.textContent);
+    assert.ok(chips().includes('+ Emergency Fund'));
+    assert.ok(!chips().includes('+ Cash Savings'));
+
+    w.addSuggestedSavings('emergencyFund');
+    assert.ok(!chips().includes('+ Emergency Fund'));   // each kind once
+    setField(w, 'emergencyFund', '400');
+    setField(w, 'cashSavings', '100');
+    const custom = w.addSavingsItem(undefined, 'Boat', '50');
+    w.calculateAll();
+    assert.equal(w.calculateSavings(), 550);
+    assert.deepEqual(names(), ['Cash Savings', 'Emergency Fund', 'Boat']);
+
+    // Saved and reopened, including the custom line and its key (Self-Escrow choices use it)
+    w.onEscrowChange(custom, 'route', 'spending');
+    const data = w.gatherCalculatorData();
+    assert.equal(data.emergencyFund, undefined);
+    newBudget(w);
+    w.loadBudgetDataIntoCalculator({ data });
+    assert.deepEqual(names(), ['Cash Savings', 'Emergency Fund', 'Boat']);
+    assert.equal(w.calculateSavings(), 550);
+    assert.equal(w.escrowBillList().find(b => b.name === 'Boat').route, 'spending');
+
+    w.removeSavingsItem('emergencyFund');
+    assert.equal(w.calculateSavings(), 150);
+    assert.ok(chips().includes('+ Emergency Fund'));
+});
+
+test('budgets saved with the old fixed savings fields load into the list', () => {
+    newBudget(w);
+    w.loadBudgetDataIntoCalculator({ data: { cashSavings: '300', investmentAccount: '270', collegeFund: '200',
+        escrow: { items: { collegeFund: { route: 'spending' } } } } });
+    assert.deepEqual(plain(w.savingsItems().map(i => [i.name, i.monthly])),
+        [['Cash Savings', 300], ['Investment Account', 270], ['College Fund', 200]]);
+    assert.equal(w.escrowBillList().find(b => b.key === 'collegeFund').route, 'spending');
+    // An old budget with no savings still shows the Cash Savings line
+    w.loadBudgetDataIntoCalculator({ data: { groceries: '600' } });
+    assert.deepEqual(plain(w.savingsItems().map(i => i.name)), ['Cash Savings']);
 });

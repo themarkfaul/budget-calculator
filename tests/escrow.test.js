@@ -131,7 +131,9 @@ test('renters: rent and renter\'s insurance replace the mortgage lines', () => {
 
 test('savings: paycheck direct deposit by default, or paid from self-escrow or the spending account', () => {
     household();
+    w.addSavingsItem('investmentAccount');
     setField(w, 'investmentAccount', '270');
+    w.addSavingsItem('collegeFund');
     setField(w, 'collegeFund', '200');
     const route = key => w.escrowBillList().find(b => b.key === key);
     assert.equal(route('cashSavings').route, 'direct');
@@ -171,9 +173,10 @@ test('the Savings tab "Paid by" choice and account name carry into the Self-Escr
 
 test('calculated numbers explain where they come from', () => {
     household();
+    w.addSavingsItem('investmentAccount');
     setField(w, 'investmentAccount', '270');
     const explain = id => w.document.getElementById(id).getAttribute('data-explain');
-    assert.match(explain('escrowSavings'), /Investment Account: \$270\.00\nCash Savings: \$500\.00\nTotal: \$770\.00/);
+    assert.match(explain('escrowSavings'), /Cash Savings: \$500\.00\nInvestment Account: \$270\.00\nTotal: \$770\.00/);
     assert.match(explain('escrowSpending'), /Take-home pay: \$6,500\.00/);
     assert.match(explain('dashHousing'), /Mortgage payment: \$1,438\.92/);
     assert.match(explain('dashTakeHome'), /Total: \$6,500\.00/);
@@ -182,4 +185,34 @@ test('calculated numbers explain where they come from', () => {
         .find(el => el.textContent === '$355.38');
     assert.ok(cell, 'savings per paycheck cell');
     assert.match(cell.getAttribute('data-explain'), /Investment Account: \$270\.00[\s\S]*÷ 26 paychecks a year/);
+});
+
+test('check-up: shortage spread over 12 deposits, surplus when over, like a servicer analysis', () => {
+    const bills = [
+        { escrow: true, monthly: 100, schedule: 'monthly', month: 1 },
+        { escrow: true, monthly: 250, schedule: 'yearly', month: 3 }   // $3,000 due in March
+    ];
+    // Starting in January with $500: Jan −100 +350 = 750, Feb 650+350 = 1000, Mar 1000−100−3000 = −2,100 lowest
+    const short = w.escrowCheckup(bills, 1, 500, 350, 0);
+    assert.equal(short.lowestMonth, 3);
+    assert.equal(short.shortage, 2100);
+    assert.equal(short.newDeposit, 350 + 175);
+    // A safety margin raises what's needed
+    assert.equal(w.escrowCheckup(bills, 1, 500, 350, 200).shortage, 2300);
+    // Plenty in the account: surplus is how far the lowest point sits above the margin
+    const over = w.escrowCheckup(bills, 1, 3000, 350, 0);
+    assert.equal(over.shortage, 0);
+    assert.equal(over.surplus, 400);
+});
+
+test('check-up shows on the Self-Escrow screen once today\'s balance is entered', () => {
+    household();
+    const box = () => w.document.getElementById('escrowCheckup').textContent;
+    assert.match(box(), /Enter today's balance/);
+    setField(w, 'escrowCurrentBalance', '0');
+    assert.match(box(), /Short by/);
+    setField(w, 'escrowCurrentDeposit', '2000');
+    assert.match(box(), /Your bills now need \$2,388\.92 a month\. You deposit \$2,000\.00, so raise it by \$388\.92/);
+    setField(w, 'escrowCurrentBalance', '20000');
+    assert.match(box(), /Over by/);
 });

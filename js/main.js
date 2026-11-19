@@ -16,18 +16,18 @@
     setupSuggestions();
     setupSuggestions(document.getElementById('escrowScreen'));
     renderOtherSuggestions();
+    renderOtherIncomeSuggestions();
     ['calculatorScreen', 'escrowScreen'].forEach(function (id) {
         document.getElementById(id).addEventListener('input', function () { isDirty = true; });
     });
     window.addEventListener('beforeunload', warnAboutUnsavedChanges);
 
     try {
-        budgets = await loadBudgets();
+        budgets = await loadBudgetsOrCache();
     } catch (e) {
         console.error('Error loading budgets:', e);
         budgets = [];
     }
-    await refreshHouseholdShares();
 
     displayBudgets();
     showScreen('homeScreen');

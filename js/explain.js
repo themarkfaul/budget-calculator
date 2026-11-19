@@ -46,6 +46,7 @@ function explainDashboard(takeHome, totals) {
         var name = document.getElementById('earnerName_' + idx).value.trim() || 'Person ' + (i + 1);
         return name + ': ' + money(computeEarner(idx).monthlyTakeHome);
     });
+    earners = earners.concat(itemLines(otherIncomeLines()));
     setExplain('dashTakeHome', earners.length
         ? earners.concat(['Total: ' + money(takeHome) + ' a month (pay after taxes and paycheck deductions)'])
         : ['Add income on the Income tab.']);

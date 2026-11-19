@@ -6,7 +6,6 @@
 
 var escrowSettings = { items: {} };
 
-var SAVINGS_IDS = ['emergencyFund', 'retirement401k', 'iraContribution', 'investmentAccount', 'collegeFund', 'cashSavings'];
 var SAVINGS_ROUTES = [['direct', 'Paycheck direct deposit'], ['escrow', 'Self-escrow account'], ['spending', 'Spending account']];
 
 // How a savings item is paid, from the user's saved choice (older budgets only saved on/off)
@@ -47,7 +46,7 @@ function escrowBillList() {
         add('rent', 'Housing', 'Rent', val('monthlyRent'));
         add('rentersInsurance', 'Housing', "Renter's insurance", val('rentersInsurance') / 12, { lump: true, schedule: 'yearly', month: 1 });
     } else {
-        add('mortgage', 'Housing', 'Mortgage payment', loanPayment(Math.max(0, val('houseValue') - val('mortgageDownPayment')), val('mortgageRate'), val('mortgageTerm')));
+        if (document.getElementById('housingMode').value !== 'paid') add('mortgage', 'Housing', 'Mortgage payment', loanPayment(Math.max(0, val('houseValue') - val('mortgageDownPayment')), val('mortgageRate'), val('mortgageTerm')));
         add('propertyTax', 'Housing', 'Property taxes', propertyTaxAnnual() / 12, { lump: true, schedule: 'yearly', month: 11 });
         add('homeInsurance', 'Housing', 'Homeowners insurance', val('homeInsurance') / 12, { lump: true, schedule: 'yearly', month: 1 });
         add('waste', 'Housing', 'Waste management', val('waste') / 12, { lump: true, schedule: 'yearly', month: 1 });
@@ -80,8 +79,8 @@ function escrowBillList() {
     ['groceries', 'gasoline', 'eatingOut', 'entertainment', 'shopping', 'hobbies', 'tools', 'miscSpending'].forEach(function (id) {
         add(id, 'Spending', fieldLabel(id), val(id), { escrow: false });
     });
-    SAVINGS_IDS.forEach(function (id) {
-        add(id, 'Savings', fieldLabel(id), val(id), { escrow: false, savings: true });
+    savingsItems().forEach(function (item) {
+        add(item.key, 'Savings', item.name, item.monthly, { escrow: false, savings: true });
     });
 
     // Apply the user's saved choices
@@ -250,8 +249,9 @@ function renderEscrowPlan(takeHome) {
     setExplain('escrowSavings', directItems.length
         ? ['Savings set to "Paycheck direct deposit":'].concat(itemLines(directItems), ['Total: ' + money(totals.savingsTransfers) + ' a month'])
         : ['No savings are set to paycheck direct deposit. Choose "Paid by" on the Savings tab or below.']);
+    var otherIncome = otherIncomeLines().reduce(function (sum, l) { return sum + l.monthly; }, 0);
     setExplain('escrowSpending', [
-        'Take-home pay: ' + money(takeHome),
+        'Take-home pay: ' + money(takeHome) + (otherIncome > 0 ? ' (including ' + money(otherIncome) + ' of other income)' : ''),
         '− Self-escrow deposit: ' + money(plan.deposit),
         '− Direct to savings: ' + money(totals.savingsTransfers),
         '= ' + formatSignedMoney(totals.spendingAccount) + ' a month to your spending account'
@@ -333,6 +333,8 @@ function renderEscrowPlan(takeHome) {
         ? '<table class="escrow-table"><thead><tr><th>Month</th><th>Bills paid</th><th>Balance after bills</th><th>Deposits</th><th>Ending balance</th></tr></thead><tbody>' + fh + '</tbody></table>'
         : '<p class="escrow-empty">Check at least one bill above to see the forecast.</p>';
 
+    renderEscrowCheckup(bills, plan, startMonth, extraCushion);
+
     return { escrow: plan.deposit, cushion: plan.cushion, savingsTransfers: totals.savingsTransfers, spendingAccount: totals.spendingAccount };
 }
 
@@ -361,8 +363,9 @@ function syncSavingsRouteSelects() {
     var selects = document.querySelectorAll('select[data-route-for]');
     for (var i = 0; i < selects.length; i++) {
         var id = selects[i].dataset.routeFor;
+        // Rows on the Savings tab always show their choice; keep the current one while it's open
+        if (selects[i] === document.activeElement) continue;
         selects[i].innerHTML = savingsRouteOptions(savingsRoute(id));
-        selects[i].closest('.savings-route').style.display = val(id) > 0 ? '' : 'none';
     }
 }
 
@@ -395,3 +398,67 @@ document.getElementById('savingsTab').addEventListener('change', onSavingsRouteC
 document.getElementById('savingsTab').addEventListener('input', function (e) {
     if (e.target.id === 'savingsAccountName') onSavingsRouteChange(e);
 });
+
+// ── Check-up (like a mortgage servicer's yearly escrow analysis) ──
+// Starting from today's real balance, run the next 12 months of bills with the planned deposit.
+// The balance should never drop below the safety margin; any shortage is spread over 12 deposits,
+// and anything above the margin at the lowest point is a surplus the user can take out.
+function escrowCheckup(bills, startMonth, balance, deposit, margin) {
+    var escrowBills = bills.filter(function (b) { return b.escrow; });
+    var running = balance, lowest = Infinity, lowestMonth = startMonth;
+    for (var i = 0; i < 12; i++) {
+        var month = ((startMonth - 1 + i) % 12) + 1;
+        running -= escrowBills.reduce(function (sum, b) { return sum + billDueIn(b, month); }, 0);
+        if (running < lowest) { lowest = running; lowestMonth = month; }
+        running += deposit;
+    }
+    var diff = Math.round((lowest - margin) * 100) / 100;
+    return {
+        lowest: lowest,
+        lowestMonth: lowestMonth,
+        shortage: diff < 0 ? -diff : 0,
+        surplus: diff > 0 ? diff : 0,
+        newDeposit: deposit + (diff < 0 ? -diff / 12 : 0)
+    };
+}
+
+function renderEscrowCheckup(bills, plan, startMonth, margin) {
+    var box = document.getElementById('escrowCheckup');
+    var balanceInput = document.getElementById('escrowCurrentBalance');
+    if (!box || !balanceInput) return;
+    if (balanceInput.value.trim() === '' || plan.deposit <= 0) {
+        box.innerHTML = plan.deposit > 0 ? '<p class="escrow-empty">Enter today\'s balance to run the check-up.</p>' : '';
+        return;
+    }
+    var balance = val('escrowCurrentBalance');
+    var current = val('escrowCurrentDeposit');
+    var c = escrowCheckup(bills, startMonth, balance, plan.deposit, margin);
+    var month = MONTH_NAMES[c.lowestMonth - 1];
+
+    var html = '';
+    if (current > 0 && Math.abs(current - plan.deposit) >= 0.01) {
+        var change = plan.deposit - current;
+        html += '<div class="checkup-line"><strong>Your bills now need ' + money(plan.deposit) + ' a month.</strong> You deposit ' + money(current) +
+            ', so ' + (change > 0 ? 'raise it by ' : 'you can lower it by ') + money(Math.abs(change)) + '.</div>';
+    }
+    var why = explainAttr([
+        'Balance today: ' + money(balance),
+        'Then each month: pay the bills due, then deposit ' + money(plan.deposit),
+        'Lowest point: ' + formatSignedMoney(c.lowest) + ' after ' + month + "'s bills",
+        'Safety margin to keep: ' + money(margin)
+    ]);
+    if (c.shortage > 0) {
+        html += '<div class="checkup-result checkup-short"><strong>⚠️ Short by <span' + why + '>' + money(c.shortage) + '</span></strong>' +
+            '<p>At ' + money(plan.deposit) + ' a month, the account would fall to ' + formatSignedMoney(c.lowest) + ' after ' + month + "'s bills" +
+            (margin > 0 ? ', below your ' + money(margin) + ' safety margin' : '') + '.</p>' +
+            '<p>Fix it either way:</p><ul><li>Deposit <strong>' + money(c.shortage) + '</strong> once now, or</li>' +
+            '<li>Deposit <strong>' + money(c.newDeposit) + '</strong> a month for the next 12 months (' + money(c.shortage / 12) + ' more), then go back to ' + money(plan.deposit) + '.</li></ul></div>';
+    } else if (c.surplus >= 1) {
+        html += '<div class="checkup-result checkup-over"><strong>✅ Over by <span' + why + '>' + money(c.surplus) + '</span></strong>' +
+            '<p>Even at its lowest (after ' + month + "'s bills) the account stays " + money(c.surplus) + ' above ' + (margin > 0 ? 'your safety margin' : 'zero') +
+            '. You can move that to your spending or savings account, or leave it as extra cushion.</p></div>';
+    } else {
+        html += '<div class="checkup-result checkup-over"><strong>✅ <span' + why + '>On track</span></strong><p>Your balance covers the next 12 months of bills at ' + money(plan.deposit) + ' a month.</p></div>';
+    }
+    box.innerHTML = html;
+}

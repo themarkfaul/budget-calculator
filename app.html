@@ -27,7 +27,7 @@
             <form method="dialog" onsubmit="handleDeleteAccount(event)">
                 <h2 id="deleteAccountTitle">Delete your account?</h2>
                 <p>This permanently deletes your account and <strong>all of your saved budgets</strong>. It can't be undone.</p>
-                <p class="dialog-hint">Tip: use Print / Save as PDF on any budget you want to keep first.</p>
+                <p class="dialog-hint">Tip: <a href="#" onclick="downloadMyData(); return false;">download your data</a> first, or use Print / Save as PDF on any budget you want to keep.</p>
                 <label for="deleteAccountPassword">Enter your password to confirm</label>
                 <input type="password" id="deleteAccountPassword" autocomplete="current-password" required>
                 <div class="dialog-error" id="deleteAccountError" role="alert"></div>
@@ -82,6 +82,12 @@
                         <small>New blank budgets start with the suggestions filled in (not income or education). Change or clear what doesn't apply.</small></span>
                     </label>
                 </fieldset>
+                <fieldset class="settings-group">
+                    <legend>Your data</legend>
+                    <p class="dialog-hint">Download all of your budgets as one file, as a backup or to keep before deleting your account.</p>
+                    <button type="button" class="btn btn-secondary" onclick="downloadMyData()">⬇️ Download my data</button>
+                    <p class="dialog-hint settings-links"><a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a></p>
+                </fieldset>
                 <div class="dialog-error" id="settingsError" role="alert"></div>
                 <div class="dialog-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeSettings()">Cancel</button>
@@ -98,6 +104,7 @@
         <!-- Home Screen -->
         <div id="homeScreen" class="screen">
             <div class="home-container">
+                <div class="offline-banner" id="offlineBanner" role="status" style="display:none;"></div>
                 <div class="tools-bar">
                     <a class="btn btn-secondary" href="/mortgage.html">🧮 Mortgage Calculator</a>
                     <button class="btn btn-secondary" onclick="openShare()">👥 Share with Spouse</button>
@@ -372,6 +379,16 @@
                 <div style="text-align:center; margin: 20px 0;">
                     <button class="btn btn-success" onclick="addIncomeEarner()">+ Add Person</button>
                 </div>
+                <div class="section">
+                    <h2>💵 Other Income</h2>
+                    <p class="other-intro">Money that doesn't come from a paycheck, like rental income, a side job, Social Security, a pension or child support. Enter what you actually receive each month, after any taxes.</p>
+                    <div class="other-suggestions" id="otherIncomeSuggestions"></div>
+                    <div id="otherIncomeContainer"></div>
+                    <div style="text-align:center; margin-top: 10px;">
+                        <button class="btn btn-success" onclick="addOtherIncome('', '')">+ Add Other Income</button>
+                    </div>
+                    <div class="calc-result">Other Income Monthly: $<span id="otherIncomeResult">0.00</span></div>
+                </div>
                 <div class="calc-result">
                     Combined Monthly Take Home: $<span id="incomeResult">0.00</span>
                 </div>
@@ -385,7 +402,8 @@
                         <div class="input-field">
                             <label for="housingMode">Do you own or rent?</label>
                             <select id="housingMode" onchange="calculateAll()">
-                                <option value="own">Own (mortgage)</option>
+                                <option value="own">Own, with a mortgage</option>
+                                <option value="paid">Own outright, no mortgage</option>
                                 <option value="rent">Rent</option>
                             </select>
                         </div>
@@ -403,27 +421,28 @@
                     </div>
 
                     <div class="housing-own">
-                    <div class="housing-tools">
+                    <div class="housing-tools housing-mortgage">
                         <button class="btn btn-secondary" onclick="openMortgageCalculator()">🧮 Open Mortgage Calculator</button>
                     </div>
                     <div class="input-group">
-                        <div class="input-field">
+                        <div class="input-field housing-mortgage">
                             <label for="houseValue">House Value ($)</label>
                             <input type="text" inputmode="decimal" id="houseValue" placeholder="250000">
                         </div>
-                        <div class="input-field">
+                        <div class="input-field housing-mortgage">
                             <label for="mortgageRate">Mortgage Interest Rate (%)</label>
                             <input type="text" inputmode="decimal" id="mortgageRate" placeholder="5.92" data-percent>
                             <div class="rate-check" id="housingRateCheck"></div>
                         </div>
-                        <div class="input-field">
+                        <div class="input-field housing-mortgage">
                             <label for="mortgageDownPayment">Down Payment ($)</label>
                             <input type="text" inputmode="decimal" id="mortgageDownPayment" placeholder="100000">
                         </div>
-                        <div class="input-field">
+                        <div class="input-field housing-mortgage">
                             <label for="mortgageTerm">Mortgage Term (Years)</label>
                             <input type="text" inputmode="decimal" id="mortgageTerm" placeholder="15">
                         </div>
+                        <p class="other-intro housing-paid-note">No mortgage payment: your housing cost is property tax, homeowners insurance and waste pickup.</p>
                         <div class="input-field">
                             <label for="homeInsurance">Home Insurance (Annual)</label>
                             <input type="text" inputmode="decimal" id="homeInsurance" placeholder="2084">
@@ -451,7 +470,7 @@
                     </div>
                     </div>
                     <div class="calc-result">
-                        <span class="housing-own">Mortgage Payment: $<span id="mortgagePaymentResult">0.00</span><br></span>
+                        <span class="housing-own housing-mortgage">Mortgage Payment: $<span id="mortgagePaymentResult">0.00</span><br></span>
                         Total Housing Monthly: $<span id="housingResult">0.00</span>
                     </div>
                 </div>
@@ -616,49 +635,22 @@
                     <h2>🏦 Monthly Savings</h2>
                     <div class="earner-subtotal" style="margin: 0 0 20px;">
                         Retirement from paychecks (Income tab): $<span id="paycheckRetirementResult">0.00</span>/mo
-                        <div class="retirement-hint">Already taken out of take-home pay. Only use "Other Retirement" below for saving outside your paycheck.</div>
+                        <div class="retirement-hint">Already taken out of take-home pay. Only add "Retirement (outside your paycheck)" below for saving you do yourself.</div>
                     </div>
-                    <p class="other-intro">For each amount, choose how it's paid. <strong>Paycheck direct deposit</strong> goes straight from your paycheck into a savings account before the rest reaches your spending account. This carries over to the Self-Escrow plan.</p>
+                    <p class="other-intro">Add what you save for each month with the buttons below. For each amount, choose how it's paid. <strong>Paycheck direct deposit</strong> goes straight from your paycheck into a savings account before the rest reaches your spending account. This carries over to the Self-Escrow plan.</p>
                     <div class="input-group">
                         <div class="input-field">
                             <label for="savingsAccountName">Direct-deposit savings account name (optional)</label>
                             <input type="text" id="savingsAccountName" placeholder="e.g. Morgan Stanley" autocomplete="off">
                         </div>
                     </div>
-                    <div class="input-group">
-                        <div class="input-field">
-                            <label for="emergencyFund">Emergency Fund (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="emergencyFund" placeholder="500">
-                            <label class="savings-route" style="display:none;">Paid by <select data-route-for="emergencyFund"></select></label>
-                        </div>
-                        <div class="input-field">
-                            <label for="retirement401k">Other Retirement (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="retirement401k" placeholder="0">
-                            <label class="savings-route" style="display:none;">Paid by <select data-route-for="retirement401k"></select></label>
-                        </div>
-                        <div class="input-field">
-                            <label for="iraContribution">IRA Contribution (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="iraContribution" placeholder="500">
-                            <label class="savings-route" style="display:none;">Paid by <select data-route-for="iraContribution"></select></label>
-                        </div>
-                        <div class="input-field">
-                            <label for="investmentAccount">Investment Account (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="investmentAccount" placeholder="300">
-                            <label class="savings-route" style="display:none;">Paid by <select data-route-for="investmentAccount"></select></label>
-                        </div>
-                        <div class="input-field">
-                            <label for="collegeFund">College Fund (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="collegeFund" placeholder="200">
-                            <label class="savings-route" style="display:none;">Paid by <select data-route-for="collegeFund"></select></label>
-                        </div>
-                        <div class="input-field">
-                            <label for="cashSavings">Cash Savings (Monthly)</label>
-                            <input type="text" inputmode="decimal" id="cashSavings" placeholder="300">
-                            <label class="savings-route" style="display:none;">Paid by <select data-route-for="cashSavings"></select></label>
-                        </div>
+                    <div class="other-suggestions" id="savingsSuggestions"></div>
+                    <div id="savingsList"></div>
+                    <div style="text-align:center; margin-top: 10px;">
+                        <button class="btn btn-success" onclick="addCustomSavings()">+ Add Savings</button>
                     </div>
                     <div class="retirement-warning" id="retirementWarning" style="display:none;">
-                        ⚠️ Retirement is entered on both the Income tab and here. Only use "Other Retirement" for saving outside your paycheck, or it gets counted twice.
+                        ⚠️ Retirement is entered on both the Income tab and here. Only use "Retirement (outside your paycheck)" for saving you do yourself, or it gets counted twice.
                     </div>
                     <div class="calc-result">
                         Total Monthly Savings: $<span id="savingsResult">0.00</span>
@@ -708,6 +700,20 @@
                     </div>
                 </div>
                 <div class="escrow-scroll" id="escrowForecast"></div>
+
+                <h3 class="spending-group-title">Check-up</h3>
+                <p class="escrow-note">The same yearly check a mortgage company does on its escrow accounts. When a bill changes (say a new property tax or insurance amount), update it in the budget, then enter what's in your self-escrow account today. The app runs the next 12 months of bills and tells you whether you're short or over, and what to deposit.</p>
+                <div class="input-group">
+                    <div class="input-field">
+                        <label for="escrowCurrentBalance">Self-Escrow Balance Today ($)</label>
+                        <input type="text" inputmode="decimal" id="escrowCurrentBalance">
+                    </div>
+                    <div class="input-field">
+                        <label for="escrowCurrentDeposit">What You Deposit Now Each Month ($, optional)</label>
+                        <input type="text" inputmode="decimal" id="escrowCurrentDeposit">
+                    </div>
+                </div>
+                <div id="escrowCheckup"></div>
             </div>
             </div>
         </div>
@@ -719,6 +725,7 @@
     <script src="/js/auth.js"></script>
     <script src="/js/db.js"></script>
     <script src="/js/tax-limits.js"></script>
+    <script src="/js/state-tax.js"></script>
     <script src="/js/mortgage-rates.js"></script>
     <script src="/js/mortgage-market.js"></script>
     <script src="/js/mortgage-handoff.js"></script>
@@ -730,6 +737,8 @@
     <script src="/js/income.js"></script>
     <script src="/js/education.js"></script>
     <script src="/js/other-expenses.js"></script>
+    <script src="/js/other-income.js"></script>
+    <script src="/js/savings.js"></script>
     <script src="/js/escrow.js"></script>
     <script src="/js/budget-editor.js"></script>
     <script src="/js/suggestions.js"></script>
@@ -739,6 +748,9 @@
     <script src="/js/compare.js"></script>
     <script src="/js/print-report.js"></script>
     <script src="/js/sharing.js"></script>
+    <script src="/js/export.js"></script>
+    <script src="/js/offline.js"></script>
+    <script src="/js/register-sw.js"></script>
     <script src="/js/main.js"></script>
     <div id="printReport"></div>
 </body>

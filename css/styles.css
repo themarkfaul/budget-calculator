@@ -662,6 +662,8 @@ td.compare-over .compare-value { color: #dc3545; }
 
 /* ── Housing: own vs rent ── */
 
+#housingTab[data-mode="paid"] .housing-mortgage,
+#housingTab:not([data-mode="paid"]) .housing-paid-note,
 #housingTab[data-mode="rent"] .housing-own,
 #housingTab:not([data-mode="rent"]) .housing-rent {
     display: none;
@@ -1792,3 +1794,82 @@ div.fed-rate,
 .savings-route { display: block; margin-top: 6px; font-size: 0.85em; color: #6c757d; font-weight: normal; }
 .savings-route select { margin-left: 6px; padding: 4px 6px; border-radius: 6px; border: 1px solid #ced4da; font-size: 1em; }
 .escrow-row-direct { border-left: 4px solid #28a745; }
+
+/* ── Self-escrow check-up ── */
+
+.checkup-line { margin: 8px 0; color: #495057; }
+.checkup-result { margin-top: 10px; padding: 14px 16px; border-radius: 10px; border-left: 5px solid; }
+.checkup-result p { margin: 6px 0; }
+.checkup-result ul { margin: 6px 0 0 18px; padding: 0; }
+.checkup-short { background: #fff4e5; border-color: #f0ad4e; }
+.checkup-over { background: #e9f7ef; border-color: #28a745; }
+
+/* ── Privacy policy and footers ── */
+
+.policy { padding: 30px 40px 40px; line-height: 1.6; color: #343a40; }
+.policy h1 { margin: 0 0 4px; color: #495057; }
+.policy h2 { margin: 28px 0 8px; font-size: 1.2em; color: #495057; }
+.policy ul { padding-left: 22px; }
+.policy li { margin-bottom: 6px; }
+.policy-date { color: #6c757d; margin-top: 0; }
+.policy-back { margin-top: 30px; }
+.policy a, .page-footer a, .settings-links a { color: #667eea; font-weight: 600; }
+.page-footer { text-align: center; padding: 0 20px 20px; font-size: 0.85em; }
+.settings-links { margin-top: 10px; }
+@media (max-width: 600px) { .policy { padding: 20px 16px 30px; } }
+
+/* ── Offline ── */
+
+.offline-banner {
+    margin-bottom: 15px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #fff4e5;
+    border: 1px solid #f0ad4e;
+    color: #6b4b00;
+    font-size: 0.9em;
+    text-align: center;
+}
+
+.state-hint { color: #6c757d; font-size: 0.85em; margin: 4px 0 10px; }
+
+/* ── Phone layout: nothing wider than the screen ── */
+
+/* Fields shrink to fit instead of growing to their longest dropdown choice */
+.input-group { grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr)); }
+.input-field input, .input-field select { min-width: 0; max-width: 100%; }
+.earner-header { flex-wrap: wrap; }
+.earner-name-input { min-width: 0; }
+
+@media (max-width: 768px) {
+    .input-group { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 600px) {
+    /* Less padding stacked up from the page, tab and section boxes */
+    body { padding: 8px; }
+    .container { margin: 0; }
+    .tab-content { padding: 14px 10px; }
+    .section, .earner-block { padding: 16px 12px; }
+}
+
+.housing-paid-note { grid-column: 1 / -1; margin: 0; }
+
+/* Other income rows have no need/want column */
+.other-row.other-income-row { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) 40px; }
+@media (max-width: 600px) {
+    .other-row.other-income-row { grid-template-columns: minmax(0, 1fr) 40px; }
+}
+
+/* ── Savings list ── */
+
+.other-row.savings-row { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1.7fr) 40px; }
+.savings-row .savings-route { margin: 0; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.savings-row .savings-route select { margin-left: 0; flex: 1; min-width: 0; padding: 8px 6px; }
+@media (max-width: 600px) {
+    .other-row.savings-row { grid-template-columns: minmax(0, 1fr) 40px; }
+    .savings-row .savings-name { grid-column: 1 / -1; }
+    .savings-row .other-amount { grid-column: 1; grid-row: 2; }
+    .savings-row .remove-other-btn { grid-column: 2; grid-row: 2; }
+    .savings-row .savings-route { grid-column: 1 / -1; grid-row: 3; }
+}

@@ -59,12 +59,11 @@ async function goHome() {
     selectedBudgetIndex = -1;
     hideBudgetActions();
     try {
-        budgets = await loadBudgets();
+        budgets = await loadBudgetsOrCache();
     } catch (e) {
         console.error('Error loading budgets:', e);
         budgets = [];
     }
-    await refreshHouseholdShares();
     displayBudgets();
     showScreen('homeScreen');
 }

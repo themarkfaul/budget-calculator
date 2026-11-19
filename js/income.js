@@ -42,8 +42,10 @@ function addIncomeEarner(name) {
                     ['hoh', 'Estimate: head of household'], ['rate', 'Enter my own rate']
                 ]) +
                 '<div class="fed-rate">' + earnerInput(idx, 'taxRate', 'Federal Income Tax Rate (%)', '12', 'data-percent') + '</div>' +
+                earnerSelect(idx, 'state', 'State Income Tax', stateOptions()) +
                 earnerInput(idx, 'stateIncomeTax', 'State/Local Income Tax Rate (%)', '4', 'data-percent') +
             '</div>' +
+            '<p class="state-hint" id="stateHint_' + idx + '"></p>' +
             '<p class="fed-hint">Federal tax is estimated with this year\'s IRS brackets and the standard deduction. If two people pick "married filing jointly", they\'re taxed together on their combined income.</p>' +
             '<label class="checkbox-row fed-rate"><input type="checkbox" id="ficaIncluded_' + idx + '"> My tax rate already includes Social Security and Medicare</label>' +
         '</div>' +
@@ -54,6 +56,10 @@ function addIncomeEarner(name) {
         '<div class="earner-subtotal">Monthly Take Home: $<span id="earnerResult_' + idx + '">0.00</span></div>';
     container.appendChild(block);
     document.getElementById('earnerName_' + idx).value = name || '';
+
+    var others = getEarnerIndices().filter(function (j) { return j !== idx; });
+    if (others.length) document.getElementById('state_' + idx).value = document.getElementById('state_' + others[0]).value;
+    updateEarnerMode(idx);
 
     var onChange = function () { updateEarnerMode(idx); calculateAll(); };
     block.addEventListener('input', onChange);
@@ -69,7 +75,7 @@ function addIncomeEarner(name) {
 // Every per-person income field, saved as "<field>_<idx>"
 var EARNER_FIELDS = ['incomeMode', 'netPay', 'payFrequency', 'grossPay', 'retirementPerCheck',
     'payType', 'salary', 'hourlyRate', 'hoursPerWeek', 'retirement', 'hsa', 'filingStatus', 'taxRate',
-    'stateIncomeTax', 'ficaIncluded', 'carAllowance'];
+    'state', 'stateIncomeTax', 'ficaIncluded', 'carAllowance'];
 var EARNER_FIELD_PATTERN = new RegExp('^(' + EARNER_FIELDS.join('|') + ')_\\d+$');
 
 // Yearly limit lives in js/tax-limits.js, which a GitHub workflow keeps current
@@ -109,6 +115,18 @@ function updateEarnerMode(idx) {
     block.dataset.mode = document.getElementById('incomeMode_' + idx).value;
     block.dataset.payType = document.getElementById('payType_' + idx).value;
     block.dataset.filing = document.getElementById('filingStatus_' + idx).value;
+
+    // With a state picked, the rate box is only for city/county (local) income tax
+    var code = document.getElementById('state_' + idx).value;
+    var rateInput = document.getElementById('stateIncomeTax_' + idx);
+    var rateLabel = block.querySelector('label[for="stateIncomeTax_' + idx + '"]');
+    rateLabel.textContent = code ? 'Local Income Tax Rate (%, city/county, optional)' : 'State/Local Income Tax Rate (%)';
+    rateInput.placeholder = code ? '0' : '4';
+    var hint = document.getElementById('stateHint_' + idx);
+    hint.textContent = code
+        ? 'State tax is estimated with ' + STATE_INCOME_TAX[code].name + "'s " + STATE_TAX_YEAR + ' brackets and standard deduction' +
+            (STATE_INCOME_TAX[code].type === 'none' ? ' (no state income tax on wages)' : '') + '. Credits aren\'t included.'
+        : 'Pick your state to estimate state tax with its real brackets, or enter one combined rate.';
 }
 
 // Estimate-mode gross pay and pre-tax deductions for one person
@@ -146,6 +164,24 @@ function earnerFederalTax(idx, taxable) {
     return federalIncomeTax(jointTaxable, 'married', year) * (taxable / jointTaxable);
 }
 
+// Annual state income tax for one person under their state's rules (0 if they typed their own rate).
+// Married-filing-jointly people in the same state are taxed together, like the federal estimate.
+function earnerStateTax(idx, taxable) {
+    var code = document.getElementById('state_' + idx).value;
+    if (!code) return 0;
+    var status = document.getElementById('filingStatus_' + idx).value;
+    if (status !== 'married') return stateIncomeTax(taxable, code, status);
+    var joint = 0;
+    getEarnerIndices().forEach(function (j) {
+        if (document.getElementById('incomeMode_' + j).value === 'estimate' &&
+            document.getElementById('filingStatus_' + j).value === 'married' &&
+            document.getElementById('state_' + j).value === code) {
+            joint += earnerPay(j).taxable;
+        }
+    });
+    return joint > 0 ? stateIncomeTax(joint, code, 'married') * (taxable / joint) : 0;
+}
+
 // Annual figures for one person, plus monthly take-home and paycheck retirement
 function computeEarner(idx) {
     var mode = document.getElementById('incomeMode_' + idx).value;
@@ -177,7 +213,11 @@ function computeEarner(idx) {
             Math.max(0, ficaWages - ADDITIONAL_MEDICARE_THRESHOLD) * ADDITIONAL_MEDICARE_RATE;
     }
     var federalTax = earnerFederalTax(idx, pay.taxable);
-    var stateTax = pay.taxable * val('stateIncomeTax_' + idx) / 100;
+    var stateCode = document.getElementById('state_' + idx).value;
+    var stateRulesTax = earnerStateTax(idx, pay.taxable);
+    // The typed rate is the whole state+local rate, or just the local rate when a state is picked
+    var localTax = pay.taxable * val('stateIncomeTax_' + idx) / 100;
+    var stateTax = stateRulesTax + localTax;
     var incomeTax = federalTax + stateTax;
     var net = gross - retirement - hsa - socialSecurity - medicare - incomeTax;
 
@@ -189,6 +229,9 @@ function computeEarner(idx) {
         incomeTax: incomeTax,
         federalTax: federalTax,
         stateTax: stateTax,
+        stateCode: stateCode,
+        stateRulesTax: stateRulesTax,
+        localTax: localTax,
         retirement: retirement,
         hsa: hsa,
         monthlyTakeHome: net / 12 + carAllowance,
@@ -208,7 +251,8 @@ function renderEarnerBreakdown(idx, e) {
         ['Social Security', -e.socialSecurity],
         ['Medicare', -e.medicare],
         ['Federal income tax', -e.federalTax],
-        ['State/local income tax', -e.stateTax],
+        e.stateCode ? [STATE_INCOME_TAX[e.stateCode].name + ' income tax', -e.stateRulesTax, STATE_INCOME_TAX[e.stateCode].notes] : ['State/local income tax', -e.stateTax],
+        e.stateCode ? ['Local income tax', -e.localTax] : ['', 0],
         ['Retirement', -e.retirement],
         ['HSA', -e.hsa]
     ];
@@ -216,7 +260,7 @@ function renderEarnerBreakdown(idx, e) {
     for (var i = 0; i < rows.length; i++) {
         if (i > 0 && rows[i][1] === 0) continue;
         var amount = rows[i][1] / 12;
-        html += '<div class="breakdown-row"><span>' + rows[i][0] + '</span><span>' +
+        html += '<div class="breakdown-row"><span' + (rows[i][2] ? explainAttr([rows[i][2]]) : '') + '>' + rows[i][0] + '</span><span>' +
             (amount < 0 ? '−$' : '$') + formatCurrency(Math.abs(amount)) + '</span></div>';
     }
     el.innerHTML = html;
@@ -261,6 +305,7 @@ function calculateIncome() {
         totalTakeHome += earner.monthlyTakeHome;
     }
 
+    totalTakeHome += calculateOtherIncome();
     setText('incomeResult', formatCurrency(totalTakeHome));
     return totalTakeHome;
 }

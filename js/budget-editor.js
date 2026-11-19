@@ -120,6 +120,8 @@ function loadBudgetDataIntoCalculator(budget) {
         if (input) setFieldValue(input, budget.data[fieldId]);
     }
     loadOtherExpenses(budget.data.otherExpenses);
+    loadOtherIncome(budget.data.otherIncome);
+    loadSavingsItems(budget.data);
     loadEscrowSettings(budget.data.escrow);
 
     calculateAll();
@@ -150,6 +152,9 @@ function clearCalculatorFields() {
     for (var i = 0; i < nameInputs.length; i++) nameInputs[i].value = '';
 
     clearOtherExpenses();
+    clearOtherIncome();
+    clearSavingsItems();
+    addSavingsItem('cashSavings');   // new budgets start with Cash Savings
     loadEscrowSettings(null);
     document.getElementById('housingMode').value = 'own';
     document.getElementById('leftoverSplitOn').checked = false;
@@ -197,11 +202,14 @@ function gatherCalculatorData() {
         var id = otherInputs[i].id;
         if (EARNER_FIELD_PATTERN.test(id)) continue;
         if (id.match(/^(tuition|lunch|afterschool)_\d+$/)) continue;
-        if (id.match(/^otherAmount_\d+$/)) continue;
+        if (id.match(/^(otherAmount|otherIncomeAmount)_\d+$/)) continue;
+        if (otherInputs[i].closest('.savings-row')) continue;   // saved in data.savingsItems
         if (otherInputs[i].value !== '') data[id] = otherInputs[i].value;
     }
 
     data.otherExpenses = gatherOtherExpenses();
+    data.otherIncome = gatherOtherIncome();
+    data.savingsItems = gatherSavingsItems();
     data.escrow = gatherEscrowSettings();
     data.housingMode = document.getElementById('housingMode').value;
 
@@ -290,7 +298,9 @@ async function handleSave() {
         isDirty = false;
         showToast('Budget saved', 'success');
     } catch (e) {
-        showToast("Couldn't save: " + e.message, 'error');
+        showToast(isNetworkError(e)
+            ? "You're offline, so this couldn't be saved. Your changes are still here; save again when you're back online."
+            : "Couldn't save: " + e.message, 'error');
     }
 
     saveBtn.disabled = false;
@@ -319,7 +329,9 @@ async function handleSaveAs() {
         isDirty = false;
         showToast('Saved as "' + name + '"', 'success');
     } catch (e) {
-        showToast("Couldn't save: " + e.message, 'error');
+        showToast(isNetworkError(e)
+            ? "You're offline, so this couldn't be saved. Your changes are still here; save again when you're back online."
+            : "Couldn't save: " + e.message, 'error');
     }
 
     saveAsBtn.disabled = false;

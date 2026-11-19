@@ -26,6 +26,7 @@ async function updatePassword(newPassword) {
 }
 
 async function signOut() {
+    if (typeof clearBudgetCaches === 'function') clearBudgetCaches();
     var result = await supabase.auth.signOut();
     if (result.error) throw result.error;
     window.location.href = '/';
@@ -45,6 +46,7 @@ async function deleteAccount(password) {
     var result = await supabase.rpc('delete_account');
     if (result.error) throw result.error;
 
+    if (typeof clearBudgetCaches === 'function') clearBudgetCaches();
     // The account is gone, so the server may reject sign-out; clearing the local session is enough.
     try { await supabase.auth.signOut({ scope: 'local' }); } catch (e) { /* already invalid */ }
 }
@@ -62,8 +64,29 @@ async function getUser() {
     return result.data.user;
 }
 
+// With no connection the server can't confirm the sign-in, so use the one saved on this device
+async function offlineUser() {
+    if (navigator.onLine) return null;
+    try {
+        var session = (await supabase.auth.getSession()).data.session;
+        if (session && session.user) return session.user;
+    } catch (e) { /* fall through to the stored copy */ }
+    try {
+        for (var i = 0; i < localStorage.length; i++) {
+            var key = localStorage.key(i);
+            if (/^sb-.*-auth-token$/.test(key)) {
+                var stored = JSON.parse(localStorage.getItem(key));
+                if (stored && stored.user) return stored.user;
+            }
+        }
+    } catch (e) { /* storage unavailable */ }
+    return null;
+}
+
 async function requireAuth() {
-    var user = await getUser();
+    var user = null;
+    try { user = await getUser(); } catch (e) { /* offline */ }
+    if (!user) user = await offlineUser();
     if (!user) {
         window.location.href = '/';
         return null;

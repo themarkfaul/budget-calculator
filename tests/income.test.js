@@ -128,6 +128,7 @@ test('retirement entered on both tabs shows a warning', () => {
     setField(w, 'salary_0', '100000');
     setField(w, 'retirement_0', '10');
     assert.equal(w.document.getElementById('retirementWarning').style.display, 'none');
+    w.addSavingsItem('retirement401k');
     setField(w, 'retirement401k', '500');
     assert.equal(w.document.getElementById('retirementWarning').style.display, 'block');
 });
@@ -142,3 +143,51 @@ test('two earners add together', () => {
     setField(w, 'payFrequency_' + idx, '12');
     assert.equal(money(text(w, 'incomeResult')), 3000);
 });
+
+test('state income tax uses the state\'s own rules', () => {
+    const close = (a, b) => assert.ok(Math.abs(a - b) < 0.01, a + ' vs ' + b);
+    // Kentucky: flat 3.5% after a $3,360 standard deduction
+    close(w.stateIncomeTax(60000, 'KY', 'single'), (60000 - 3360) * 0.035);
+    // California: graduated, after a $5,900 standard deduction
+    close(w.stateIncomeTax(50000, 'CA', 'single'),
+        0.01 * 11456 + 0.02 * (27157 - 11456) + 0.04 * (42861 - 27157) + 0.06 * (44100 - 42861));
+    assert.equal(w.stateIncomeTax(90000, 'TX', 'single'), 0);
+    assert.equal(Object.keys(w.STATE_INCOME_TAX).length, 51);
+});
+
+test('picking a state replaces the typed rate, which then becomes local tax only', () => {
+    newBudget(w);
+    const idx = w.getEarnerIndices()[0];
+    setField(w, 'salary_' + idx, '60000');
+    setField(w, 'filingStatus_' + idx, 'single');
+    setField(w, 'stateIncomeTax_' + idx, '2.25');
+    // No state picked: 2.25% is the whole state/local rate (older budgets keep working this way)
+    close2(w.computeEarner(idx).stateTax, 60000 * 0.0225);
+
+    setField(w, 'state_' + idx, 'KY');
+    w.updateEarnerMode(idx);
+    const e = w.computeEarner(idx);
+    close2(e.stateRulesTax, (60000 - 3360) * 0.035);
+    close2(e.localTax, 60000 * 0.0225);
+    close2(e.stateTax, e.stateRulesTax + e.localTax);
+    assert.match(w.document.querySelector('label[for="stateIncomeTax_' + idx + '"]').textContent, /Local Income Tax/);
+    assert.match(w.document.getElementById('earnerBreakdown_' + idx).textContent, /Kentucky income tax/);
+});
+
+test('married couples in the same state are taxed together on the state return too', () => {
+    newBudget(w);
+    const a = w.getEarnerIndices()[0];
+    setField(w, 'salary_' + a, '80000');
+    setField(w, 'filingStatus_' + a, 'married');
+    setField(w, 'state_' + a, 'CA');
+    w.addIncomeEarner('Spouse');
+    const b = w.getEarnerIndices()[1];
+    assert.equal(w.document.getElementById('state_' + b).value, 'CA');   // copies the first person's state
+    setField(w, 'salary_' + b, '40000');
+    setField(w, 'filingStatus_' + b, 'married');
+    const joint = w.stateIncomeTax(120000, 'CA', 'married');
+    close2(w.computeEarner(a).stateRulesTax + w.computeEarner(b).stateRulesTax, joint);
+    close2(w.computeEarner(a).stateRulesTax, joint * 2 / 3);
+});
+
+function close2(a, b) { assert.ok(Math.abs(a - b) < 0.01, a + ' vs ' + b); }

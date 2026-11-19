@@ -19,11 +19,13 @@ function calculateHousing() {
     var homeInsurance = val('homeInsurance');
     var waste = val('waste');
 
-    var mortgagePayment = loanPayment(Math.max(0, houseValue - mortgageDown), mortgageRate, mortgageTerm);
+    // Owned outright: no mortgage payment (any old mortgage numbers are kept but ignored)
+    var paidOff = mode === 'paid';
+    var mortgagePayment = paidOff ? 0 : loanPayment(Math.max(0, houseValue - mortgageDown), mortgageRate, mortgageTerm);
 
     // Compare the entered rate with Freddie Mac's current average for this term (30-year if blank)
     var rateCheckEl = document.getElementById('housingRateCheck');
-    var check = checkRateAgainstMarket(mortgageRate, mortgageTerm || 30);
+    var check = paidOff ? null : checkRateAgainstMarket(mortgageRate, mortgageTerm || 30);
     rateCheckEl.className = 'rate-check' + (check ? ' rate-check-' + check.level : '');
     rateCheckEl.textContent = check ? check.text : '';
 
@@ -84,9 +86,7 @@ function calculateEssentialSpending(getValue) {
 }
 
 function calculateSavings() {
-    var ids = ['emergencyFund', 'retirement401k', 'iraContribution', 'investmentAccount', 'collegeFund', 'cashSavings'];
-    var total = 0;
-    for (var i = 0; i < ids.length; i++) total += val(ids[i]);
+    var total = savingsItems().reduce(function (sum, item) { return sum + item.monthly; }, 0);
     setText('savingsResult', formatCurrency(total));
     return total;
 }
