@@ -1925,3 +1925,13 @@ div.fed-rate,
 .plan-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 10px 0 30px; }
 .compare-table-wrap { overflow-x: auto; }
 .plan-change-head .remove-other-btn { flex: none; width: 36px; height: 36px; padding: 0; }
+
+/* Phone: the home screen's tool buttons as a 2×2 grid */
+@media (max-width: 600px) {
+    .tools-bar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+    .tools-bar .btn { margin: 0; width: 100%; padding: 10px 8px; font-size: 0.9em; line-height: 1.25;
+        display: flex; align-items: center; gap: 6px; white-space: normal; }
+    /* Icon on the left; the words centered in the space beside it */
+    .tools-bar .tool-icon { flex: none; }
+    .tools-bar .tool-label { flex: 1; text-align: center; }
+}
