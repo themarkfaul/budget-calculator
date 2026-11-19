@@ -1876,3 +1876,33 @@ div.fed-rate,
 
 /* ── Restore backup ── */
 .settings-data-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ── Actual vs. Planned ── */
+
+.btn-actual { background: #7c3aed; color: white; }
+.btn-actual:hover { background: #6d28d9; }
+.actual-banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    background: #fff7ed; border: 1px solid #fdba74; color: #7c2d12; border-radius: 10px; padding: 12px 16px; margin: 0 0 16px; }
+.actual-month-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.actual-month-bar label { font-weight: 600; }
+.actual-month-bar select { flex: 1; min-width: 0; max-width: 320px; }
+.actual-table-wrap { overflow-x: auto; }
+.actual-table { width: 100%; border-collapse: collapse; font-size: 0.95em; }
+.actual-table th, .actual-table td { padding: 8px 10px; text-align: right; border-bottom: 1px solid #e5e7eb; }
+.actual-table th:first-child, .actual-table td:first-child { text-align: left; }
+.actual-table th { background: #f3f4f6; font-weight: 600; }
+.actual-table .actual-group td { background: #f9fafb; font-weight: 700; color: #4b5563; text-align: left; }
+.actual-table .actual-total td { font-weight: 700; border-top: 2px solid #9ca3af; }
+.actual-diff { white-space: nowrap; }
+.actual-over { color: #b91c1c; font-weight: 600; }
+.actual-under { color: #15803d; }
+.actual-alert { background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; padding: 16px 18px; margin-bottom: 16px; }
+.actual-alert-title { font-weight: 700; color: #7c2d12; margin-bottom: 8px; }
+.actual-alert p { margin: 6px 0; color: #4b5563; }
+.actual-alert details summary { cursor: pointer; color: #4f46e5; font-weight: 600; margin: 6px 0; }
+.actual-alert-buttons { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+.actual-alert-note { color: #6b7280; font-size: 0.9em; }
+@media (max-width: 600px) {
+    .actual-table { font-size: 0.85em; }
+    .actual-table th, .actual-table td { padding: 6px 5px; }
+}

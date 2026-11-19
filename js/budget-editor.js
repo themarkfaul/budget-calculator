@@ -123,6 +123,7 @@ function loadBudgetDataIntoCalculator(budget) {
     loadOtherIncome(budget.data.otherIncome);
     loadSavingsItems(budget.data);
     loadEscrowSettings(budget.data.escrow);
+    loadActualData(budget.data.actual);
 
     calculateAll();
     formatAllInputs();
@@ -156,6 +157,7 @@ function clearCalculatorFields() {
     clearSavingsItems();
     addSavingsItem('cashSavings');   // new budgets start with Cash Savings
     loadEscrowSettings(null);
+    loadActualData(null);
     document.getElementById('housingMode').value = 'own';
     document.getElementById('leftoverSplitOn').checked = false;
     document.getElementById('leftoverSavingsPercent').value = '100';
@@ -211,6 +213,7 @@ function gatherCalculatorData() {
     data.otherIncome = gatherOtherIncome();
     data.savingsItems = gatherSavingsItems();
     data.escrow = gatherEscrowSettings();
+    data.actual = gatherActualData();
     data.housingMode = document.getElementById('housingMode').value;
 
     // Left-over split (dashboard)

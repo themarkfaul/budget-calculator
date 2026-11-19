@@ -122,6 +122,7 @@ function calculateAll() {
     renderBalance(takeHome, remaining, costs, savings);
     renderMoneyChart(costs.concat([['Savings', savings]]), takeHome, remaining);
     renderEscrowPlan(takeHome);
+    if (typeof renderActualBanner === 'function') renderActualBanner();
     explainDashboard(takeHome, { housing: housing, transportation: transportation, education: education, utilities: utilities,
         spending: spending, other: other.total, savings: savings, costs: totalExpenses - savings });
 }

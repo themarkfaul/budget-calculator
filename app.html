@@ -122,6 +122,7 @@
                     <button class="btn btn-secondary" onclick="editBudget()">✏️ Edit</button>
                     <button class="btn btn-success" onclick="evaluateBudget()">📋 Evaluate</button>
                     <button class="btn btn-escrow" onclick="openEscrow()">🧾 Self-Escrow</button>
+                    <button class="btn btn-actual" onclick="openActual()">📈 Actual vs. Planned</button>
                 </div>
 
                 <div class="create-new-section">
@@ -309,10 +310,16 @@
                 <div class="calculator-title" id="calculatorTitle">My Budget AI</div>
                 <div class="header-buttons">
                     <button class="btn btn-escrow" onclick="showEscrowScreen()">🧾 Self-Escrow</button>
+                    <button class="btn btn-actual" onclick="showActualScreen()">📈 Actual</button>
                     <button class="btn btn-success" id="saveBtn" onclick="handleSave()">💾 Save</button>
                     <button class="btn btn-primary" id="saveAsBtn" onclick="handleSaveAs()">📄 Save As</button>
                     <button class="btn btn-danger" onclick="closeBudget()">✖️ Close</button>
                 </div>
+            </div>
+
+            <div class="actual-banner" id="actualBanner" style="display:none;">
+                <span>⚠️ <strong id="actualBannerText"></strong> from the charges you uploaded.</span>
+                <button class="btn btn-secondary" onclick="showActualScreen()">Review</button>
             </div>
 
             <div class="handoff-banner" id="mortgageHandoff" style="display:none;">
@@ -664,6 +671,56 @@
         </div>
 
         <!-- Self-Escrow Screen (opened from a selected budget, or from inside one) -->
+        <div id="actualScreen" class="screen">
+            <div class="calculator-header">
+                <div class="calculator-title" id="actualTitle">📈 Actual vs. Planned</div>
+                <div class="header-buttons">
+                    <button class="btn btn-primary" onclick="backToBudgetFromActual()">✏️ Edit Budget</button>
+                    <button class="btn btn-success" onclick="handleSave()">💾 Save</button>
+                    <button class="btn btn-danger" onclick="closeBudget()">✖️ Close</button>
+                </div>
+            </div>
+            <div class="escrow-screen-body">
+                <div class="section">
+                    <h2>📈 Actual vs. Planned</h2>
+                    <p class="other-intro">Upload a CSV file of transactions from your bank or credit card (look for "Download" or "Export" on your bank's website). Each charge is matched to a line in your budget so you can see where you were over or under, and the app warns you when a bill goes up.</p>
+                    <p class="import-privacy">Your file is read on this device and never uploaded. Only each company's monthly total is saved with this budget, not the transactions themselves.</p>
+                    <div style="text-align:center;">
+                        <button class="btn btn-success" onclick="chooseActualFile()">📄 Upload bank or card CSV</button>
+                    </div>
+                    <input type="file" id="actualFileInput" accept=".csv,text/csv" hidden onchange="handleActualFile(this.files[0])">
+                    <p class="import-hint" style="text-align:center;">Upload one file per account or card. Uploading the same charges again won't count them twice.</p>
+                </div>
+
+                <div id="actualAlerts"></div>
+
+                <div class="section" id="actualEmpty">
+                    <p class="other-intro" style="text-align:center;">No charges uploaded for this budget yet.</p>
+                </div>
+
+                <div id="actualContent" style="display:none;">
+                    <div class="section">
+                        <div class="actual-month-bar">
+                            <label for="actualMonthSelect">Month</label>
+                            <select id="actualMonthSelect" onchange="selectActualMonth(this.value)"></select>
+                        </div>
+                        <p class="escrow-note" id="actualPartialNote" style="display:none;">Only part of this month was in the uploaded files (<span id="actualPartialDays"></span>), so actual amounts may be low.</p>
+                        <div class="actual-table-wrap" id="actualTable"></div>
+                        <p class="import-hint">Yearly and twice-a-year bills are planned in the months they're due (set on the Self-Escrow screen). Bills paid from an account you haven't uploaded show $0.00 actual. Tap an actual amount to see the charges in it.</p>
+                    </div>
+
+                    <div class="section">
+                        <h3 class="spending-group-title">How charges were sorted</h3>
+                        <p class="import-hint">Change where a company's charges count. Your choices are remembered for future uploads.</p>
+                        <div id="actualMerchants"></div>
+                        <div style="text-align:center; margin-top: 20px;">
+                            <button class="btn btn-secondary" onclick="deleteActualMonth()">🗑️ Remove this month's charges</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="escrowScreen" class="screen">
             <div class="calculator-header">
                 <div class="calculator-title" id="escrowTitle">🧾 Self-Escrow</div>
@@ -744,6 +801,7 @@
     <script src="/js/other-income.js"></script>
     <script src="/js/savings.js"></script>
     <script src="/js/escrow.js"></script>
+    <script src="/js/actual.js"></script>
     <script src="/js/budget-editor.js"></script>
     <script src="/js/suggestions.js"></script>
     <script src="/js/explain.js"></script>
