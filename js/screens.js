@@ -54,6 +54,7 @@ function showScreen(screenId) {
 }
 
 async function goHome() {
+    if (typeof resetPlan === 'function') resetPlan();
     showScreen('loadingScreen');
     selectedBudget = null;
     selectedBudgetIndex = -1;

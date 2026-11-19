@@ -6,6 +6,7 @@ function editBudget() {
     if (!selectedBudget) { showToast('Select a budget first.', 'info'); return; }
     currentEditingBudget = selectedBudget;
     isEditMode = true;
+    if (typeof resetPlan === 'function') resetPlan();
     setText('calculatorTitle', 'Editing: ' + selectedBudget.name);
     loadBudgetDataIntoCalculator(selectedBudget);
     isDirty = false;

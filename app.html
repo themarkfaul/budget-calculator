@@ -123,6 +123,7 @@
                     <button class="btn btn-success" onclick="evaluateBudget()">📋 Evaluate</button>
                     <button class="btn btn-escrow" onclick="openEscrow()">🧾 Self-Escrow</button>
                     <button class="btn btn-actual" onclick="openActual()">📈 Actual vs. Planned</button>
+                    <button class="btn btn-plan" onclick="openPlan()">🔮 Plan Ahead</button>
                 </div>
 
                 <div class="create-new-section">
@@ -311,6 +312,7 @@
                 <div class="header-buttons">
                     <button class="btn btn-escrow" onclick="showEscrowScreen()">🧾 Self-Escrow</button>
                     <button class="btn btn-actual" onclick="showActualScreen()">📈 Actual</button>
+                    <button class="btn btn-plan" onclick="showPlanScreen()">🔮 Plan</button>
                     <button class="btn btn-success" id="saveBtn" onclick="handleSave()">💾 Save</button>
                     <button class="btn btn-primary" id="saveAsBtn" onclick="handleSaveAs()">📄 Save As</button>
                     <button class="btn btn-danger" onclick="closeBudget()">✖️ Close</button>
@@ -671,6 +673,46 @@
         </div>
 
         <!-- Self-Escrow Screen (opened from a selected budget, or from inside one) -->
+        <div id="planScreen" class="screen">
+            <div class="calculator-header">
+                <div class="calculator-title" id="planTitle">🔮 Plan Ahead</div>
+                <div class="header-buttons">
+                    <button class="btn btn-primary" onclick="editPlanBudget()">✏️ Edit Budget</button>
+                    <button class="btn btn-danger" onclick="discardPlan()">↩️ Discard Plan</button>
+                </div>
+            </div>
+            <div class="escrow-screen-body">
+                <div class="section">
+                    <h2>🔮 Plan Ahead</h2>
+                    <p class="other-intro">What would you like to do? Add one or more changes, then build a new budget from them. Your current budget isn't changed: the plan becomes a new budget, with its own Self-Escrow plan, that you can save, adjust and evaluate.</p>
+                    <div class="other-suggestions" id="planChoices"></div>
+                </div>
+
+                <div id="planChanges"></div>
+
+                <div style="text-align:center; margin: 10px 0 24px;">
+                    <button class="btn btn-success" id="planBuildBtn" onclick="buildPlan()" disabled>🔮 Build my new budget</button>
+                </div>
+
+                <div id="planResult" style="display:none;">
+                    <div class="section">
+                        <h2>Your plan vs. today</h2>
+                        <p class="plan-verdict" id="planVerdict"></p>
+                        <div class="compare-table-wrap" id="planCompare"></div>
+                    </div>
+                    <div class="section">
+                        <h2>💡 Ways to make it work</h2>
+                        <div class="plan-ideas" id="planIdeas"></div>
+                    </div>
+                    <div class="plan-actions">
+                        <button class="btn btn-success" onclick="savePlan()">💾 Save as a new budget</button>
+                        <button class="btn btn-primary" onclick="editPlanBudget()">✏️ Fine-tune it</button>
+                        <button class="btn btn-escrow" onclick="showEscrowScreen()">🧾 See the new Self-Escrow</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="actualScreen" class="screen">
             <div class="calculator-header">
                 <div class="calculator-title" id="actualTitle">📈 Actual vs. Planned</div>
@@ -802,6 +844,7 @@
     <script src="/js/savings.js"></script>
     <script src="/js/escrow.js"></script>
     <script src="/js/actual.js"></script>
+    <script src="/js/plan.js"></script>
     <script src="/js/budget-editor.js"></script>
     <script src="/js/suggestions.js"></script>
     <script src="/js/explain.js"></script>

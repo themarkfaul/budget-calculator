@@ -11,7 +11,7 @@ var APP_FILES = [
     '/icons/icon.svg', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/apple-touch-icon.png', '/icons/favicon-32.png',
     '/js/config.js', '/js/supabase-client.js', '/js/auth.js', '/js/db.js', '/js/tax-limits.js', '/js/state-tax.js', '/js/mortgage-rates.js',
     '/js/mortgage-market.js', '/js/mortgage-handoff.js', '/js/mortgage-calculator.js', '/js/csv-import.js', '/js/state.js',
-    '/js/helpers.js', '/js/screens.js', '/js/income.js', '/js/education.js', '/js/other-expenses.js', '/js/other-income.js', '/js/savings.js', '/js/escrow.js', '/js/actual.js',
+    '/js/helpers.js', '/js/screens.js', '/js/income.js', '/js/education.js', '/js/other-expenses.js', '/js/other-income.js', '/js/savings.js', '/js/escrow.js', '/js/actual.js', '/js/plan.js',
     '/js/budget-editor.js', '/js/suggestions.js', '/js/explain.js', '/js/calculations.js', '/js/money-chart.js',
     '/js/compare.js', '/js/print-report.js', '/js/sharing.js', '/js/export.js', '/js/offline.js', '/js/register-sw.js', '/js/main.js',
     'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
