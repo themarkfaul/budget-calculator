@@ -90,13 +90,14 @@ function displayBudgets() {
         return;
     }
 
-    var html = '';
+    budgets = orderBudgets(budgets);   // the user's own order (js/budget-order.js)
+    var html = budgets.length >= 2 ? '<p class="budget-order-hint">Press and hold a budget to move it up or down.</p>' : '';
     for (var i = 0; i < budgets.length; i++) {
         var b = budgets[i];
         var s = b.summary || {};
         var date = b.updated_at ? new Date(b.updated_at).toLocaleDateString() : '';
         var shareLabel = budgetShareLabel(b);
-        html += '<div class="budget-item" onclick="selectBudget(' + i + ')">';
+        html += '<div class="budget-item" data-index="' + i + '" onclick="selectBudget(' + i + ')">';
         // Only the owner can delete a budget; people it's shared with can view and edit it
         if (isOwnBudget(b)) html += '<button class="delete-btn" onclick="handleDelete(event, ' + i + ')" title="Delete budget">✕</button>';
         html += '<div class="budget-item-header">';
@@ -117,7 +118,7 @@ function displayBudgets() {
 }
 
 function selectBudget(index) {
-    var items = document.querySelectorAll('.budget-item');
+    var items = document.querySelectorAll('#budgetList .budget-item');
     for (var i = 0; i < items.length; i++) items[i].classList.remove('selected');
     items[index].classList.add('selected');
     selectedBudgetIndex = index;

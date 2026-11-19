@@ -12,7 +12,7 @@ const APP_SCRIPTS = [
     'js/auth.js', 'js/db.js', 'js/tax-limits.js', 'js/state-tax.js', 'js/mortgage-rates.js', 'js/mortgage-market.js',
     'js/mortgage-handoff.js', 'js/csv-import.js', 'js/state.js', 'js/helpers.js', 'js/screens.js',
     'js/income.js', 'js/education.js', 'js/other-expenses.js', 'js/other-income.js', 'js/savings.js', 'js/escrow.js', 'js/actual.js', 'js/plan.js', 'js/budget-editor.js', 'js/suggestions.js', 'js/explain.js', 'js/calculations.js',
-    'js/money-chart.js', 'js/compare.js', 'js/print-report.js', 'js/sharing.js', 'js/export.js', 'js/offline.js'
+    'js/money-chart.js', 'js/compare.js', 'js/print-report.js', 'js/sharing.js', 'js/budget-order.js', 'js/export.js', 'js/offline.js'
 ];
 
 // Fixed rates so tests don't change every week when the workflow updates js/mortgage-rates.js

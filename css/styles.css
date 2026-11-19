@@ -1935,3 +1935,12 @@ div.fed-rate,
     .tools-bar .tool-icon { flex: none; }
     .tools-bar .tool-label { flex: 1; text-align: center; }
 }
+
+/* ── Reordering budgets (press and hold, then drag) ── */
+
+.budget-order-hint { text-align: center; color: #6b7280; font-size: 0.85em; margin: 0 0 10px; }
+.budget-list .budget-item { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.budget-list-dragging { touch-action: none; }
+.budget-list-dragging .budget-item { transition: none; }
+.budget-item.budget-dragging { position: relative; z-index: 5; transform-origin: center; cursor: grabbing;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25); border-color: #667eea; opacity: 0.97; }

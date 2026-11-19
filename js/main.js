@@ -7,6 +7,7 @@
     currentUser = user;
     setText('userEmail', user.email);
     setSuggestionMode((user.user_metadata || {}).suggestionMode);
+    setBudgetOrder((user.user_metadata || {}).budgetOrder);
 
     var inputs = document.querySelectorAll(BUDGET_INPUTS);
     for (var i = 0; i < inputs.length; i++) {
