@@ -13,7 +13,7 @@ var APP_FILES = [
     '/js/mortgage-market.js', '/js/mortgage-handoff.js', '/js/mortgage-calculator.js', '/js/csv-import.js', '/js/state.js',
     '/js/helpers.js', '/js/screens.js', '/js/income.js', '/js/education.js', '/js/other-expenses.js', '/js/other-income.js', '/js/savings.js', '/js/escrow.js', '/js/actual.js', '/js/plan.js',
     '/js/budget-editor.js', '/js/suggestions.js', '/js/explain.js', '/js/calculations.js', '/js/money-chart.js',
-    '/js/compare.js', '/js/print-report.js', '/js/sharing.js', '/js/budget-order.js', '/js/export.js', '/js/offline.js', '/js/register-sw.js', '/js/main.js',
+    '/js/compare.js', '/js/print-report.js', '/js/sharing.js', '/js/invite.js', '/js/budget-order.js', '/js/export.js', '/js/offline.js', '/js/register-sw.js', '/js/main.js',
     'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
 ];
 

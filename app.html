@@ -42,7 +42,7 @@
         <dialog id="shareDialog" class="confirm-dialog settings-dialog" aria-labelledby="shareTitle">
             <form method="dialog" onsubmit="handleAddShare(event)">
                 <h2 id="shareTitle">👥 Share with your spouse</h2>
-                <p class="dialog-hint">People you add can see and edit <strong>all</strong> of your budgets from their own login, including new ones. They can't delete your budgets. They need a My Budget AI account with the email you enter here.</p>
+                <p class="dialog-hint">People you add can see and edit <strong>all</strong> of your budgets from their own login, including new ones. They can't delete your budgets. They need a My Budget AI account with the email you enter here; use <strong>Send invite</strong> to let them know.</p>
                 <h3 class="share-heading">Sharing your budgets with</h3>
                 <div id="shareList"></div>
                 <label for="shareEmail">Add their email</label>
@@ -55,6 +55,25 @@
                 <div class="dialog-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeShare()">Done</button>
                     <button type="submit" class="btn btn-primary" id="shareAddBtn">Share</button>
+                </div>
+            </form>
+        </dialog>
+
+        <!-- Invite -->
+        <dialog id="inviteDialog" class="confirm-dialog settings-dialog" aria-labelledby="inviteTitle">
+            <form method="dialog" onsubmit="event.preventDefault()">
+                <h2 id="inviteTitle">📨 Invite a friend</h2>
+                <p class="dialog-hint">The invite is sent from your own email or phone. Change the message if you like.</p>
+                <label for="inviteText">Message</label>
+                <textarea id="inviteText" rows="5"></textarea>
+                <div class="dialog-error" id="inviteError" role="alert"></div>
+                <div class="invite-buttons">
+                    <button type="button" class="btn btn-primary" onclick="inviteByEmail()">✉️ Email</button>
+                    <button type="button" class="btn btn-primary" onclick="inviteByText()">💬 Text</button>
+                    <button type="button" class="btn btn-secondary" onclick="copyInvite()">📋 Copy</button>
+                </div>
+                <div class="dialog-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeInvite()">Done</button>
                 </div>
             </form>
         </dialog>
@@ -130,6 +149,11 @@
                     <h3>Create New Budget</h3>
                     <p>Start fresh with a new budget plan</p>
                     <button class="btn btn-success" onclick="createNewBudget()" style="margin-top:10px;">+ Create New Budget</button>
+                </div>
+
+                <div class="invite-section">
+                    <p>Know someone who'd find this useful?</p>
+                    <button class="btn btn-secondary" onclick="sendInvite('friend')">📨 Invite a Friend</button>
                 </div>
 
                 <div class="handoff-banner" id="mortgageHandoffHome" style="display:none;">
@@ -853,6 +877,7 @@
     <script src="/js/compare.js"></script>
     <script src="/js/print-report.js"></script>
     <script src="/js/sharing.js"></script>
+    <script src="/js/invite.js"></script>
     <script src="/js/budget-order.js"></script>
     <script src="/js/export.js"></script>
     <script src="/js/offline.js"></script>

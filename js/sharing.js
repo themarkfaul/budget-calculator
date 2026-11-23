@@ -67,8 +67,9 @@ function renderShareLists() {
     var mine = sharesFromMe();
     var html = '';
     for (var i = 0; i < mine.length; i++) {
-        html += '<li><span>' + escapeHtml(mine[i].shared_with_email) + '</span>' +
-            '<button type="button" class="btn-link-muted" data-share-remove="' + escapeHtml(mine[i].shared_with_email) + '">Stop sharing</button></li>';
+        html += '<li><span>' + escapeHtml(mine[i].shared_with_email) + '</span><span class="share-actions">' +
+            '<button type="button" class="btn-link-muted" data-share-invite="' + escapeHtml(mine[i].shared_with_email) + '">Send invite</button>' +
+            '<button type="button" class="btn-link-muted" data-share-remove="' + escapeHtml(mine[i].shared_with_email) + '">Stop sharing</button></span></li>';
     }
     document.getElementById('shareList').innerHTML = html
         ? '<ul class="share-list">' + html + '</ul>'
@@ -104,7 +105,7 @@ async function handleAddShare(evt) {
         document.getElementById('shareEmail').value = '';
         renderShareLists();
         displayBudgets();
-        showToast('Shared with ' + email + '. They\'ll see your budgets when they sign in with that email.', 'success');
+        showToast('Shared with ' + email + '. Tap "Send invite" to let them know.', 'success');
     } catch (e) {
         errorEl.textContent = "Couldn't share: " + e.message;
     }
@@ -141,6 +142,8 @@ async function leaveShare(ownerId) {
 document.getElementById('shareDialog').addEventListener('click', function (e) {
     var remove = e.target.getAttribute('data-share-remove');
     var leave = e.target.getAttribute('data-share-leave');
-    if (remove) stopSharingWith(remove);
+    var invite = e.target.getAttribute('data-share-invite');
+    if (invite) { closeShare(); sendInvite('spouse', invite); }
+    else if (remove) stopSharingWith(remove);
     else if (leave) leaveShare(leave);
 });

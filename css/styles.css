@@ -1944,3 +1944,12 @@ div.fed-rate,
 .budget-list-dragging .budget-item { transition: none; }
 .budget-item.budget-dragging { position: relative; z-index: 5; transform-origin: center; cursor: grabbing;
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25); border-color: #667eea; opacity: 0.97; }
+
+/* ── Invites ── */
+
+.invite-section { text-align: center; margin: 24px 0 8px; color: #6b7280; }
+.invite-section p { margin: 0 0 8px; }
+#inviteText { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; font: inherit; resize: vertical; }
+.invite-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
+.invite-buttons .btn { flex: 1; min-width: 90px; }
+.share-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
